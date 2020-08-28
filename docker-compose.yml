@@ -1,0 +1,64 @@
+# based on https://github.com/heckenmann/dse-docker-compose/blob/master/docker-compose.yml
+version: '3.8'
+
+services:
+  play-server:
+    build:
+      context: ./play-app/.
+    hostname: i-graph-play-server
+    container_name: i-graph-play-server
+    environment:
+      - "DSE_SEEDS=dse"
+        # cap_add:
+        #   - IPC_LOCK
+        # ulimits:
+        #   memlock: -1
+
+  dse:
+    image: datastax/dse-server:6.8.3-ubi7-1
+    hostname: dse
+    container_name: i-graph-dse
+    environment:
+      - "DS_LICENSE=accept"
+      - "SEEDS=dse,dse-01"
+    command: [
+      "-k",
+      "-s",
+      "-g"
+    ]
+    cap_add:
+      - IPC_LOCK
+    ulimits:
+      memlock: -1
+
+  #dse-01:
+  #  image: datastax/dse-server:6.8.3-ubi7-1
+  #  environment:
+  #    - "DS_LICENSE=accept"
+  #    - "SEEDS=dse,dse-01"
+  #  command: [
+  #    "-k",
+  #    "-s",
+  #    "-g"
+  #  ]
+  #  cap_add:
+  #  - IPC_LOCK
+  #  ulimits:
+  #    memlock: -1
+
+  #dse-opscenter:
+  #  image: datastax/dse-opscenter:6.8.3-ubi7-1
+  #  environment:
+  #    - "DS_LICENSE=accept"
+  #  ports:
+  #    - "8888:8888"
+      
+  dse-studio:
+    image: datastax/dse-studio:6.8.3-ubi7-1
+    container_name: i-graph-dse-studio
+    environment:
+      - "DS_LICENSE=accept"
+    depends_on:
+      - dse
+    ports:
+      - "9091:9091"

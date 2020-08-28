@@ -1,0 +1,6 @@
+# untested
+build:
+  docker:
+    web: Dockerfile
+run: 
+  web: /app/entrypoint.sh

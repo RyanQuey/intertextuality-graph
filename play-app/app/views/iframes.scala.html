@@ -1,0 +1,73 @@
+@*************************************
+ * iframes showing charts.                       
+ * using main layout (`@main()`)                                   
+ *************************************@
+@(
+  environmentDatasets: Set[Map[String, String]],
+  sdgDatasets: Set[Map[String, String]], 
+  urbanizationDatasets: Set[Map[String, String]], 
+)
+
+@chartFor(dataset : Map[String, String]) = {
+  <div class="iframe-wrapper chart-wrapper">
+    <iframe
+      src="https://ourworldindata.org/grapher/@{dataset("slug")}?tab=chart&country=KHM~VNM~MEX~USA~SDN"
+      loading="lazy" style="width: 100%; height: 600px; border: 0px none;">
+    </iframe>
+  </div>
+}
+@mapFor(dataset : Map[String, String]) = {
+  <!-- maps show all countries in region (Asia) -->
+  <div class="iframe-wrapper map-wrapper">
+    <iframe
+      src="https://ourworldindata.org/grapher/@{dataset("slug")}?tab=map&region=Asia&year=2019"
+      loading="lazy" style="width: 100%; height: 600px; border: 0px none;">
+    </iframe>
+  </div>
+}
+
+
+@main("Cambodia in Charts") {
+@defining(play.core.PlayVersion.current) { version =>
+
+<section id="content">
+  <div class="wrapper doc">
+    <article>
+      <h2>Environment Datasets</h2>
+			<div class="iframes-container">
+				@for(dataset <- environmentDatasets) {
+					<div class="iframe-set-container">
+            @chartFor(dataset) 
+            @mapFor(dataset)
+					</div>
+				}
+			</div>
+
+      <h2>Urbanization Datasets</h2>
+			<div class="iframes-container">
+				@for(dataset <- urbanizationDatasets) {
+					<div class="iframe-set-container">
+            @chartFor(dataset) 
+            @mapFor(dataset)
+					</div>
+				}
+			</div>
+
+      <h2>SDG Datasets</h2>
+			<div class="iframes-container one-per-set">
+				@for(dataset <- sdgDatasets) {
+					<div class="iframe-set-container">
+            @chartFor(dataset) 
+						@if(false) {@mapFor(dataset)}
+					</div>
+				}
+			</div>
+
+    </article>
+    <aside>
+      @commonSidebar()
+    </aside>
+  </div>
+</section>
+}
+}

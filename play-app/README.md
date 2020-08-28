@@ -28,8 +28,13 @@ This example Play project was created from a seed template. It includes all Play
 
 To build and run the project:
 
-- Run `scripts/run-dev-server.sh`
+
+cd ..
+`docker-compose up -d`
 - After the message `Server started, ...` displays, enter the following URL in a browser: <http://localhost:9000>
+
+## Run Migrations
+
 
 ## Deploying in Heroku
 ```
@@ -47,3 +52,9 @@ docker run -it --entrypoint /bin/bash cambodia-in-charts
 # play console - https://www.playframework.com/documentation/2.8.x/PlayConsole
 sbt # or try sbt console
 ```
+# Development
+## Add Dependencies
+https://www.playframework.com/documentation/2.8.x/sbtDependencies#Managed-dependencies
+
+## Add DB Migration
+add it do play-app/db/migrations

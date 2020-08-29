@@ -1,0 +1,3 @@
+[submodule "data-utils-for-java"]
+	path = data-utils-for-java
+	url = https://github.com/RyanQuey/data-utils-for-java.git

@@ -6,12 +6,10 @@ CREATE TABLE IF NOT EXISTS intertextuality_graph.book_series (
   tyndale_abbreviation TEXT,
   testament TEXT, 
   book_count LIST<TEXT>, 
-  book_ids LIST<TEXT>, 
-  user_id TEXT, 
+  book_ids LIST<UUID>, 
+  user_id UUID, 
   date_written DATE, 
   updated_at TIMESTAMP, 
   comments TEXT,
-  PRIMARY KEY ((term), external_api, search_type)) 
-
-  WITH CLUSTERING ORDER BY(external_api ASC, search_type ASC)
+  PRIMARY KEY ((name), id) 
 );

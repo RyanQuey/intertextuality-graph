@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS intertextuality_graph.texts (
+  date_written DATE, 
+  author TEXT,
+  id UUID, 
+  canonical BOOLEAN, 
+  canonical_text TEXT,
+  starting_book_id UUID,
+  starting_chapter_id UUID,
+  starting_verse_id UUID,
+  ending_book_id UUID,
+  ending_chapter_id UUID,
+  ending_verse_id UUID,
+  split_passages LIST<TEXT>,
+  testament TEXT, 
+  greek_translation TEXT, 
+  english_translation TEXT, 
+  user_id UUID, 
+  comments TEXT,
+  updated_at TIMESTAMP, 
+  PRIMARY KEY ((starting_book_id), starting_chapter_id, starting_verse_id, id)
+);

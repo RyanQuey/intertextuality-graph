@@ -29,5 +29,6 @@ export PROJECT_ROOT_PATH=$parent_path/../..
 # fire everything up in one docker-compose statement
 # Note that if it is in one docker-compose statement like this, it allows the separate services to talk to one another even though they have separate docker-compose yml files
 
+# TODO add conditional if jar exists already. Or even better, track changes in git and find out if need to rebuild jar...that's getting a little bit crazy though
 $parent_path/_build-data-utils-jar.sh
 docker-compose up -d 

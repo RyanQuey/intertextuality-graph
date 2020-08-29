@@ -33,8 +33,6 @@ cd ..
 `docker-compose up -d`
 - After the message `Server started, ...` displays, enter the following URL in a browser: <http://localhost:9000>
 
-## Run Migrations
-
 
 ## Deploying in Heroku
 ```
@@ -58,3 +56,14 @@ https://www.playframework.com/documentation/2.8.x/sbtDependencies#Managed-depend
 
 ## Add DB Migration
 add it do play-app/db/migrations
+
+## Run Migrations
+```
+../scripts/run_migrations.sh
+```
+setup.sh will run this for you once as well.
+
+### Make a change to migration runner then run again?
+```
+../scripts/startup/_build-data-utils-jar.sh && ../run_migrations.sh
+```

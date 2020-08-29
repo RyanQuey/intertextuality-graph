@@ -1,5 +1,6 @@
 #!/bin/bash -eux
 
+# script to run once when setting up a new development environment
 if [ "$BASH" != "/bin/bash" ]; then
   echo "Please do ./$0"
   exit 1
@@ -7,6 +8,7 @@ fi
 
 #########################################
 # instructions: 
+# start with bash NOT sh. Currently only works in bash
 #########################################
 
 # for more advanced try/catch stuff, see here https://stackoverflow.com/a/25180186/6952495
@@ -29,8 +31,9 @@ export PLAY_APP_DIR="$PROJECT_ROOT_PATH/play-app"
 # Note that if it is in one docker-compose statement like this, it allows the separate services to talk to one another even though they have separate docker-compose yml files
 
 
+###########################
+# Run migrations
+##########################
 # TODO add conditional if jar exists already. Or even better, track changes in git and find out if need to rebuild jar...that's getting a little bit crazy though
 $parent_path/_build-data-utils-jar.sh
-
-
-docker-compose up -d --build
+$parent_path/../run_migrations.sh

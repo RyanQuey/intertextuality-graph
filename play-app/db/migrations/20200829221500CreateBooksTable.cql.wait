@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS intertextuality_graph.books (
+  term TEXT, 
+  search_type TEXT, 
+  external_api TEXT, 
+  result_json TEXT, 
+  updated_at TIMESTAMP, 
+  PRIMARY KEY ((term), external_api, search_type)) 
+
+  WITH CLUSTERING ORDER BY(external_api ASC, search_type ASC)
+);

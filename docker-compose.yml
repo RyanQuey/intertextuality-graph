@@ -33,7 +33,7 @@ services:
     ulimits:
       memlock: -1
     ports:
-      - "9092:9092"
+      - "9042:9042"
 
   #dse-01:
   #  image: datastax/dse-server:6.8.3-ubi7-1

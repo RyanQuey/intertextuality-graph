@@ -28,4 +28,6 @@ export PROJECT_ROOT_PATH=$parent_path/../..
 
 # fire everything up in one docker-compose statement
 # Note that if it is in one docker-compose statement like this, it allows the separate services to talk to one another even though they have separate docker-compose yml files
+
+$parent_path/_build-data-utils-jar.sh
 docker-compose up -d 

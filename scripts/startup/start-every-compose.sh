@@ -18,9 +18,8 @@ fi
 # just make sure not to run the main jar file until Cassandra is ready
 # TODO suppress logs in this console
 
-# always base everything relative to this file to make it simple
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-export PROJECT_ROOT_PATH=$parent_path/../..
+. $parent_path/../config/env-vars.sh
 
 #################################################
 # START THE DOCKER CONTAINERS with docker-compose
@@ -30,5 +29,5 @@ export PROJECT_ROOT_PATH=$parent_path/../..
 # Note that if it is in one docker-compose statement like this, it allows the separate services to talk to one another even though they have separate docker-compose yml files
 
 # TODO add conditional if jar exists already. Or even better, track changes in git and find out if need to rebuild jar...that's getting a little bit crazy though
-$parent_path/_build-data-utils-jar.sh
+$INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/startup/_build-data-utils-jar.sh
 docker-compose up -d 

@@ -1,3 +1,5 @@
+# NOTE out of date, since we are not using Spark yet
+
 # NOTE does not package your jar though. If made changes to java/scala code, make sure to run this instead: 
 #
 # bash setup-and-submit-script.sh

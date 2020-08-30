@@ -2,6 +2,8 @@
 
 
 # always base everything relative to this file to make it simple
+# NOTE this won't work if you hack your `cd` command, like I normally do, e.g., having it call `ll` after running `cd`
+
 env_vars_parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 export INTERTEXTUALITY_GRAPH_PROJECT_DIR=$env_vars_parent_path/../..
 echo $INTERTEXTUALITY_GRAPH_PROJECT_DIR

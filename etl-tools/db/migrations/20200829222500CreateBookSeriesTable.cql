@@ -4,11 +4,12 @@ CREATE TABLE IF NOT EXISTS intertextuality_graph.book_series (
   canonical BOOLEAN, 
   author TEXT,
   tyndale_abbreviation TEXT,
+  osis_abbreviation TEXT,
   testament TEXT, 
   book_count LIST<TEXT>, 
   book_ids LIST<UUID>, 
   user_id UUID, 
-  date_written DATE, 
+  year_written DATE, 
   updated_at TIMESTAMP, 
   comments TEXT,
   PRIMARY KEY ((name), id) 

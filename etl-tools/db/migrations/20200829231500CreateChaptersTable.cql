@@ -1,15 +1,15 @@
 CREATE TABLE IF NOT EXISTS intertextuality_graph.chapters (
   number INT,
-  date_written DATE, 
+  year_written DATE, 
   author TEXT,
-  id UUID, 
+  scrollmapper_id TEXT, 
   canonical BOOLEAN, 
-  book_id UUID, 
-  book_series_id UUID, 
+  book TEXT, 
+  book_series_id TEXT, 
   verse_count INT,
   testament TEXT, 
   user_id UUID, 
   comments TEXT,
   updated_at TIMESTAMP, 
-  PRIMARY KEY ((number), id)
+  PRIMARY KEY ((book), number)
 );

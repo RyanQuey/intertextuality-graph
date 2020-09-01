@@ -1,15 +1,21 @@
 CREATE TABLE IF NOT EXISTS intertextuality_graph.books (
   name TEXT, 
-  date_written DATE, 
+  year_written DATE, 
+  place_written TEXT, 
   author TEXT,
+  book_order INT,
   tyndale_abbreviation TEXT,
-  id UUID, 
+  osis_abbreviation TEXT,
+  slug TEXT,
+  theographic_short_name TEXT,
+  scrollmapper_id TEXT, 
   canonical BOOLEAN, 
-  book_series_id UUID, 
+  book_series TEXT, 
   testament TEXT, 
   chapter_count INT,
+  verse_count INT,
   user_id UUID, 
   comments TEXT,
   updated_at TIMESTAMP, 
-  PRIMARY KEY ((name), id) 
+  PRIMARY KEY (name) 
 );

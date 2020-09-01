@@ -1,16 +1,16 @@
-CREATE TABLE IF NOT EXISTS intertextuality_graph.verses (
+
+class Verse
   number INT,
   year_written DATE, 
   author TEXT,
   scrollmapper_id TEXT, 
   canonical BOOLEAN, 
   canonical_text TEXT,
-  chapter INT, 
+  chapter_id TEXT, 
   book TEXT, 
   book_series TEXT, 
   testament TEXT, 
   user_id UUID, 
   comments TEXT,
   updated_at TIMESTAMP, 
-  PRIMARY KEY ((book), chapter, number)
-);
+  PRIMARY KEY (scrollmapper_id)

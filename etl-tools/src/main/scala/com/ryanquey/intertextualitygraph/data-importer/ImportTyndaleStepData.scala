@@ -3,6 +3,10 @@ import scala.collection.immutable.Map
 import com.ryanquey.intertextualitygraph.dataimporter.models._
 
 object ImportTyndaleStepData {
+  /*
+   * TODO eventually will probably extract data for each word from these, but for now just getting each verse
+   * Having this much will make it easy to eventually get other things from similar text files, or from these same tax files but extracting more data like getting the word data
+   */
   val dataFilePath : String = sys.env("INTERTEXTUALITY_GRAPH_RAW_DATA_DIR")
 
   // note that urls are currently pointing towards Tyndale's GitHub, but I forked it so can use that in the future if I need to
@@ -18,108 +22,6 @@ object ImportTyndaleStepData {
     ("OT.Leningrad.josh-esth", "https://raw.githubusercontent.com/tyndale/STEPBible-Data/master/TOTHT%20-%20Tyndale%20OT%20Hebrew%20Tagged%20text%20Jos-Est%20-%20TyndaleHouse.com%20STEPBible.org%20CC%20BY-NC.txt"),
     ("OT.Leningrad.job-songs", "https://raw.githubusercontent.com/tyndale/STEPBible-Data/master/TOTHT%20-%20Tyndale%20OT%20Hebrew%20Tagged%20text%20Job-Sng%20-%20TyndaleHouse.com%20STEPBible.org%20CC%20BY-NC.txt"),
     ("OT.Leningrad.isa-mal", "https://raw.githubusercontent.com/tyndale/STEPBible-Data/master/TOTHT%20-%20Tyndale%20OT%20Hebrew%20Tagged%20text%20Isa-Mal%20-%20TyndaleHouse.com%20STEPBible.org%20CC%20BY-NC.txt")
-  )
-
-  // https://github.com/tyndale/STEPBible-Data#data-format
-  val tyndaleOTAbbrs = Map(
-		("Gen" -> "Genesis"),
-		("Exo" -> "Exodus"),
-		("Lev" -> "Leviticus"),
-		("Num" -> "Numbers"),
-		("Deu" -> "Deuteronomy"),
-		("Jos" -> "Joshua"),
-		("Jdg" -> "Judges"),
-		("Rut" -> "Ruth"),
-		("1Sa" -> "1 Samuel"),
-		("2Sa" -> "2 Samuel"),
-		("1Ki" -> "1 Kings"),
-		("2Ki" -> ""),
-		("1Ch" -> ""),
-		("2Ch" -> ""),
-		("Ezr" -> ""),
-		("Neh" -> ""),
-		("Est" -> ""),
-		("Job" -> ""),
-		("Psa" -> ""),
-		("Pro" -> ""),
-		("Ecc" -> ""),
-		("Sng" -> ""),
-		("Isa" -> ""),
-		("Jer" -> ""),
-		("Lam" -> ""),
-		("Ezk" -> ""),
-		("Dan" -> ""),
-		("Hos" -> ""),
-		("Jol" -> ""),
-		("Amo" -> ""),
-		("Oba" -> ""),
-		("Jon" -> ""),
-		("Mic" -> ""),
-		("Nam" -> ""),
-		("Hab" -> ""),
-		("Zep" -> ""),
-		("Hag" -> ""),
-		("Zec" -> ""),
-		("Mal" -> "")
-  )
-  val tyndaleApocryphalAbbrs = Map(
-		("Tob" -> ""),
-		("Jdt" -> ""),
-		("EsG" -> ""),
-		("Wis" -> ""),
-		("Sir" -> ""),
-		("Bar" -> ""),
-		("LJe" -> ""),
-		("S3Y" -> ""),
-		("Sus" -> ""),
-		("Bel" -> ""),
-		("1Ma" -> ""),
-		("2Ma" -> ""),
-		("3Ma" -> ""),
-		("4Ma" -> ""),
-		("1Es" -> ""),
-		("2Es" -> ""),
-		("Man" -> ""),
-		("Ps2" -> ""),
-		("Oda" -> ""),
-		("PsS" -> "")
-  )
-  val alternateMSS = Map(
-		("JsA" -> ""),
-		("JdB" -> ""),
-		("TbS" -> ""),
-		("SsT" -> ""),
-		("DnT" -> ""),
-		("BlT" -> "")
-  )
-  val tyndaleNTAbbrs = Map(
-		("Mat" -> ""),
-		("Mrk" -> ""),
-		("Luk" -> ""),
-		("Jhn" -> ""),
-		("Act" -> ""),
-		("Rom" -> ""),
-		("1Co" -> ""),
-		("2Co" -> ""),
-		("Gal" -> ""),
-		("Eph" -> ""),
-		("Php" -> ""),
-		("Col" -> ""),
-		("1Th" -> ""),
-		("2Th" -> ""),
-		("1Ti" -> ""),
-		("2Ti" -> ""),
-		("Tit" -> ""),
-		("Phm" -> ""),
-		("Heb" -> ""),
-		("Jas" -> ""),
-		("1Pe" -> ""),
-		("2Pe" -> ""),
-		("1Jn" -> ""),
-		("2Jn" -> ""),
-		("3Jn" -> ""),
-		("Jud" -> ""),
-		("Rev" -> "")
   )
 
 

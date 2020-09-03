@@ -10,7 +10,7 @@ class TyndaleDataFile (key : String, url : String) {
   val filename = s"${key}.txt";
   val fullPath : Path = Paths.get(dataDirPath, filename)
   val testament = key.slice(0, 2)
-  var headers Array[String] = _;
+  var headers : Array[String] = _;
 
   def downloadIfNecessary () = {
 
@@ -46,19 +46,20 @@ class TyndaleDataFile (key : String, url : String) {
           value match {
             case "Ref in Heb" => {
               //Gen.1.7-03	
+              /*
 
 
+            "Eng ref",
               //Gen.1.7-0
+            "Pointed", 
               //HTo	
+            "Accented",  
               //H0853=אֵת
+            "Morphology",
               //=obj./H9014=־
+            "Extended Strongs"
               //=link
-    "Eng ref",
-    "Pointed", 
-    "Accented",  
-    "Morphology",
-    "Extended Strongs"
-    )
+            )
 
     // NT
     "Ref", 
@@ -71,8 +72,9 @@ class TyndaleDataFile (key : String, url : String) {
     Meaning 
     Sub-meaning 
     Variants
-              
+            */
 
+            }
           }
         }
 

@@ -1,4 +1,4 @@
-package com.ryanquey.intertextualitygraph.models.books
+package com.ryanquey.intertextualitygraph.dataimporter.models.books
 
 // needs to be java bean, so record can be compatible with Cassandra java driver
 // set all db fields in here. So BookRecord can work with it. But will inherit by Book class also, so DRY up Book class

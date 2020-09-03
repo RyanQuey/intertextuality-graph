@@ -17,4 +17,4 @@ object TheographicConstants {
     ("writers", (writers : Array[String]) => writers(0)),
     ("verseCount", "verse_count")
   )
-  
+} 

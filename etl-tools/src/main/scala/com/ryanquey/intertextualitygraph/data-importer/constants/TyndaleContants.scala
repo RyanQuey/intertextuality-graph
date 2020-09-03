@@ -104,6 +104,7 @@ object TyndaleConstants {
 		("Rev" -> "")
   )
 
-  val dataFileHeaders = Map(
+  val dataFileHeaders = Map()
+}
 
 

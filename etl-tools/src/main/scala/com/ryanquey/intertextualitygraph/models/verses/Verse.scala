@@ -1,5 +1,7 @@
+package com.ryanquey.intertextualitygraph.dataimporter.models.verse
 
-class Verse
+class Verse {
+  /*
   number INT,
   year_written DATE, 
   author TEXT,
@@ -14,3 +16,5 @@ class Verse
   comments TEXT,
   updated_at TIMESTAMP, 
   PRIMARY KEY (scrollmapper_id)
+  */
+}

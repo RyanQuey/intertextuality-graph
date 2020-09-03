@@ -12,8 +12,9 @@ object ImportTheographicData {
   // csv file name to the table 
   val dataSourceFiles = Map(
     ("books", "books-Grid view.csv"),
-    ("chapters", "chapters-Grid view.csv"),
-    ("verses", "verses-Grid view.csv"),
+    // ("books", "books-Grid view.csv"),
+    // ("chapters", "chapters-Grid view.csv"),
+    // ("verses", "verses-Grid view.csv"),
   )
 
 
@@ -22,7 +23,6 @@ object ImportTheographicData {
     for ((tablename, filename) <- dataSourceFiles) {  
       val dataFile = new TyndaleDataFile(tablename, filename);
 
-      dataFile.downloadIfNecessary()
       dataFile.parseFile()
     }
   }

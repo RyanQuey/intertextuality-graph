@@ -3,7 +3,9 @@
 ## How to start
 ### Import data from Tyndale Data set
 ```
+cd ./etl-tools
 sbt package
+
 # can't do sbt run after we add other main classes
 sbt "runMain com.ryanquey.intertextualitygraph.dataimporter.ImportTyndaleStepData"
 ```

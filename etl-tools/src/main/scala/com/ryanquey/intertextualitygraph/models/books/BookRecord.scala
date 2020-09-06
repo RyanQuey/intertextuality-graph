@@ -1,5 +1,6 @@
 package com.ryanquey.intertextualitygraph.dataimporter.models.books
 
+import scala.beans.BeanProperty;
 import com.datastax.oss.driver.api.mapper.annotations.Entity;
 import com.datastax.oss.driver.api.mapper.annotations.CqlName;
 import com.datastax.oss.driver.api.mapper.annotations.PartitionKey;
@@ -11,9 +12,9 @@ import com.ryanquey.datautils.cassandraHelpers.CassandraDb;
 
 @Entity
 @CqlName("books")
-class BookRecord extends BookBase (val book : Option[Book]) {
-  @PartitionKey(0)
-  @BeanProperty var name : String // C* TEXT 
+class BookRecord extends BookBase (book : Option[Book]) {
+  
+  @PartitionKey(0) @BeanProperty var name : String // C* TEXT 
   if (book.isDefined) DataClassesHelpers.copyMatchingFields(book, this);
 
   def getDao () : BookDao = {

@@ -12,6 +12,7 @@ lazy val intertextualityPlayApi = (project in file("."))
     libraryDependencies ++= Seq(
       guice,
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test,
+      // required for datastax java driver to work, due to compatibility issues
       // https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-scala
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.11.0",
       "com.datastax.oss" % "java-driver-core" % cassandraJavaDriverVersion,

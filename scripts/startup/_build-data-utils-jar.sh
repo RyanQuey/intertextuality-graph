@@ -7,10 +7,10 @@ fi
 
 # always base everything relative to this file to make it simple
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-data_utilities_path=$parent_path/../../data-utils-for-java
-play_api_path=$parent_path/../../play-app
+. $parent_path/../config/env-vars.sh
 
-mvn -f $data_utilities_path/pom.xml package
+mvn -f $INTERTEXTUALITY_GRAPH_DATA_UTILS_DIR/pom.xml package
 
 # depends on project version number
-cp $data_utilities_path/target/data-utils-0.4.0.jar $play_api_path/lib
+cp $INTERTEXTUALITY_GRAPH_DATA_UTILS_DIR/target/data-utils-0.4.0.jar $INTERTEXTUALITY_GRAPH_PLAY_API_DIR/lib
+cp $INTERTEXTUALITY_GRAPH_DATA_UTILS_DIR/target/data-utils-0.4.0.jar $INTERTEXTUALITY_GRAPH_ETL_TOOLS_DIR/lib

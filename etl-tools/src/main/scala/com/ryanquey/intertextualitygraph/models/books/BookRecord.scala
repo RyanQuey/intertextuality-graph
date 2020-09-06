@@ -1,4 +1,4 @@
-package com.ryanquey.intertextualitygraph.dataimporter.models.books
+package com.ryanquey.intertextualitygraph.models.books
 
 import scala.beans.BeanProperty;
 import com.datastax.oss.driver.api.mapper.annotations.Entity;
@@ -12,13 +12,13 @@ import com.ryanquey.datautils.cassandraHelpers.CassandraDb;
 
 @Entity
 @CqlName("books")
-class BookRecord extends BookBase (book : Option[Book]) {
+class BookRecord (book : Option[Book]) extends BookBase {
   
   @PartitionKey(0) @BeanProperty var name : String // C* TEXT 
   if (book.isDefined) DataClassesHelpers.copyMatchingFields(book, this);
 
   def getDao () : BookDao = {
-    CassandraDb.inventoryMapper.episodeByPodcastDao("books");
+    CassandraDb.inventoryMapper.bookDao("books");
   }
 
   // keeping empty constructor for use with Dao

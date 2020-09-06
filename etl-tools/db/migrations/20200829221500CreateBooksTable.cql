@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS intertextuality_graph.books (
   name TEXT, 
-  year_written DATE, 
+  year_written INT, 
   place_written TEXT, 
   author TEXT,
   book_order INT,

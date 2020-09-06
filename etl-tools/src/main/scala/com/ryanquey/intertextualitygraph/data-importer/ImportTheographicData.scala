@@ -1,6 +1,7 @@
 package com.ryanquey.intertextualitygraph.dataimporter
 import scala.collection.immutable.Map
-import com.ryanquey.intertextualitygraph.dataimporter.models._
+import com.ryanquey.intertextualitygraph.models._
+import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers._
 
 object ImportTheographicData {
   /*

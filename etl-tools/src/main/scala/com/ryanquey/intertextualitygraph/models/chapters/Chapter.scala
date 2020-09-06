@@ -1,2 +1,2 @@
-package com.ryanquey.intertextualitygraph.dataimporter.models.chapters
+package com.ryanquey.intertextualitygraph.models.chapters
 class Chapter {}

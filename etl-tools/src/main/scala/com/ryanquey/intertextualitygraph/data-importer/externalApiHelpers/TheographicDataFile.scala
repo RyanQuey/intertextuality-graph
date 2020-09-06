@@ -1,5 +1,6 @@
 package com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers
 import java.nio.file.{Path, Paths, Files}
+import java.io.{File, Reader, FileReader}
 import scalaj.http._
 import scala.io.Source
 import java.nio.charset.StandardCharsets
@@ -8,6 +9,10 @@ import com.ryanquey.intertextualitygraph.dataimporter.constants.TheographicConst
 import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
+// needed so I can call .asScala
+import scala.collection.JavaConverters._
+
+
 // for dynamic class instantiation
 import scala.reflect.runtime.{universe => ru}
 
@@ -27,38 +32,39 @@ class TheographicDataFile (tablename : String, filename : String) {
   }
 
   def parseFile (table : String) = {
-    val bufferedSource = Source.fromFile()
-    val fieldsMapping = () => { 
-      table match {
-        case "books" => booksFieldsMapping
-        case "chapters" => chaptersFieldsMapping
-        case "verses" => versesFieldsMapping
-      }
+    val bufferedSource = Source.fromFile(dataFilePath)
+    val fieldsMapping = table match {
+      case "books" => booksFieldsMapping
+      case "chapters" => chaptersFieldsMapping
+      case "verses" => versesFieldsMapping
     }
 
     // do some reflection to get ready to instantiate our model for this table
     // following scala docs
     val model = table match {
-      case "books" => Book
-      case "chapters" => Chapter
-      case "verses" => Verse 
+      case "books" => ru.typeOf[Book]
+      case "chapters" => ru.typeOf[Chapter]
+      case "verses" => ru.typeOf[Verse]
     }
-    val modelClass = ru.typeOf[model].typeSymbol.asClass
+    val modelClass = model.typeSymbol.asClass
     val classMirror = mirror.reflectClass(modelClass)
-    val classConstructor = ru.typeOf[model].decl(ru.termNames.CONSTRUCTOR).asMethod
+    val classConstructor = model.decl(ru.termNames.CONSTRUCTOR).asMethod
     val constructorMirror = classMirror.reflectConstructor(classConstructor)
 
-	  val csvData : File = new File(fullPath);
+	  val csvDataFile : File = new File(fullPath.toString);
+	  val csvDataReader : Reader = new FileReader(csvDataFile);
     // cannot just split by comma, since many fields have multiples (so commas separate) or commas inside fields
-		val parser : CSVParser = CSVParser.parse(csvData, CSVFormat.RFC4180);
+		val parser : CSVParser = CSVParser.parse(csvDataReader, CSVFormat.RFC4180);
 
-	 	for (csvRecord : CSVRecord <- parser) {
+	 	for (csvRecord : CSVRecord <- parser.asScala) {
 	 	  // iterate over our mapping to get what fields we want into the db columns that they map to
+
+      // first, instantiate a record of our model
       val record = constructorMirror()
       for ((csvCol, dbCol) <- fieldsMapping) {  
         // use reflection to dynamically set field
         // https://stackoverflow.com/a/1589919/6952495
-        val value = recordcsvRecord.get(csvCol)
+        val value = csvRecord.get(csvCol)
         record.setV(snakeToCamel("dbCol"), value)
       }
 

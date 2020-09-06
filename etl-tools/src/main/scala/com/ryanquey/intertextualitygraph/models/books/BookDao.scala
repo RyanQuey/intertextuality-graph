@@ -1,4 +1,4 @@
-package com.ryanquey.intertextualitygraph.dataimporter.models.books
+package com.ryanquey.intertextualitygraph.models.books
 
 import com.datastax.oss.driver.api.mapper.annotations.Dao;
 import com.datastax.oss.driver.api.mapper.annotations.Select;
@@ -8,10 +8,10 @@ import com.datastax.oss.driver.api.mapper.entity.saving.NullSavingStrategy;
 import com.datastax.oss.driver.api.mapper.annotations.DefaultNullSavingStrategy;
 import java.util.UUID;
 
-@Dao
+
 // NOTE this means that in order to erase a field, cannot set it to null
-@DefaultNullSavingStrategy(NullSavingStrategy.DO_NOT_SET)
-trait BookDao {
+
+@Dao @DefaultNullSavingStrategy(NullSavingStrategy.DO_NOT_SET) trait BookDao {
 
   /** Simple selection by full primary key. */
   @Select

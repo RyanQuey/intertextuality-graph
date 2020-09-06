@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS intertextuality_graph.texts (
-  year_written DATE, 
+  year_written INT, 
   author TEXT,
   id UUID, 
   canonical BOOLEAN, 

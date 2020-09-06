@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS intertextuality_graph.chapters (
   number INT,
-  year_written DATE, 
+  year_written INT, 
   author TEXT,
   scrollmapper_id TEXT, 
   canonical BOOLEAN, 

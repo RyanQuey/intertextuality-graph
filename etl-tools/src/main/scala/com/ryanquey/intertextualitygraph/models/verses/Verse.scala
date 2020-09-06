@@ -1,4 +1,4 @@
-package com.ryanquey.intertextualitygraph.dataimporter.models.verse
+package com.ryanquey.intertextualitygraph.models.verses
 
 class Verse {
   /*

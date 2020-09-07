@@ -9,6 +9,7 @@ fi
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 . $parent_path/../config/env-vars.sh
 
+# only need to package if sending to scala lib dir
 mvn -f $INTERTEXTUALITY_GRAPH_DATA_UTILS_DIR/pom.xml clean package
 
 # depends on project version number

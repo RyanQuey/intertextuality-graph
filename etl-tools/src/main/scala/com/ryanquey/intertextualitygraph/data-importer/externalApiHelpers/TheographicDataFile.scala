@@ -53,10 +53,11 @@ class TheographicDataFile (tablename : String, filename : String) {
 	 	  // iterate over our mapping to get what fields we want into the db columns that they map to
 
       // first, instantiate a record of our model
+      // Should work...right? "If you define a reference variable whose type is an interface, any object you assign to it must be an instance of a class that implements the interface." (https://docs.oracle.com/javase/tutorial/java/IandI/interfaceAsType.html)
       val record : Model = table match {
-        case "books" => new Book()
-        case "chapters" => new Chapter()
-        case "verses" => new Verse()
+        case "books" => new Book().asInstanceOf[Model]
+        case "chapters" => new Chapter().asInstanceOf[Model]
+        case "verses" => new Verse().asInstanceOf[Model]
       }
 
       for ((csvCol : String, dbCol : String) <- fieldsMapping) {  

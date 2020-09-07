@@ -20,8 +20,7 @@ fi
 
 # always base everything relative to this file to make it simple
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-export PROJECT_ROOT_PATH=$parent_path/../..
-export PLAY_APP_DIR="$PROJECT_ROOT_PATH/play-app"
+. $parent_path/config/env-vars.sh
 
 #################################################
 # START THE DOCKER CONTAINERS with docker-compose

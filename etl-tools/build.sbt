@@ -7,6 +7,11 @@ ThisBuild / organizationName := "ryanquey"
 name := "intertextuality-graph-etl-tools"
 version := "0.1.0"
 
+
+// allow my projects which are installed to local mvn work here. Should work after running packaging scripts in root of this git repo
+// https://stackoverflow.com/a/21628869/6952495
+resolvers += Resolver.mavenLocal
+
 // https://github.com/scalaj/scalaj-http
 libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.2"
 
@@ -28,3 +33,7 @@ libraryDependencies ++= Seq(
   "com.datastax.oss" % "java-driver-mapper-runtime" % cassandraJavaDriverVersion,
   "org.scala-lang" % "scala-reflect" % scalaVersion.value
   )
+
+// local projects
+libraryDependencies +=  "com.ryanquey.intertextuality-graph" % "models" % "0.1.0"
+

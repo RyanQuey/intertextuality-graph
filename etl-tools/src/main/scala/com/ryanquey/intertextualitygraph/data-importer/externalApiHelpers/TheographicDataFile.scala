@@ -20,15 +20,15 @@ import com.ryanquey.datautils.helpers.StringHelpers.snakeToCamel
 import com.ryanquey.datautils.models.{Model, Record}
 
 
-class TheographicDataFile (tablename : String, filename : String) {
-  val dataFilePath : String = s"${sys.env("INTERTEXTUALITY_GRAPH_RAW_DATA_DIR")}/theographic-airtable-csvs"
-  val fullPath : Path = Paths.get(dataFilePath, filename)
+class TheographicDataFile (table : String, filename : String) {
+  val dataDirPath : String = s"${sys.env("INTERTEXTUALITY_GRAPH_RAW_DATA_DIR")}/theographic-airtable-csvs"
+  val fullPath : Path = Paths.get(dataDirPath, filename)
   var headers : Array[String] = _;
-  val mirror = ru.runtimeMirror(getClass.getClassLoader)
 
 
-  def parseFile (table : String) = {
-    val bufferedSource = Source.fromFile(dataFilePath)
+  def parseFile() = {
+    println(s"parsing $filename")
+    val bufferedSource = Source.fromFile(fullPath.toString)
     val fieldsMapping : Map[String, _] = table match {
       case "books" => booksFieldsMapping : Map[String, _]
       case "chapters" => chaptersFieldsMapping : Map[String, _]
@@ -47,23 +47,27 @@ class TheographicDataFile (tablename : String, filename : String) {
 	  val csvDataFile : File = new File(fullPath.toString);
 	  val csvDataReader : Reader = new FileReader(csvDataFile);
     // cannot just split by comma, since many fields have multiples (so commas separate) or commas inside fields
-		val parser : CSVParser = CSVParser.parse(csvDataReader, CSVFormat.RFC4180);
+		val csvRecords = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(csvDataReader);
 
-	 	for (csvRecord : CSVRecord <- parser.asScala) {
+
+	 	for (csvRecord : CSVRecord <- csvRecords.asScala) {
 	 	  // iterate over our mapping to get what fields we want into the db columns that they map to
 
       // first, instantiate a record of our model
-      // Should work...right? "If you define a reference variable whose type is an interface, any object you assign to it must be an instance of a class that implements the interface." (https://docs.oracle.com/javase/tutorial/java/IandI/interfaceAsType.html)
+      // need to typecast (https://alvinalexander.com/scala/how-to-cast-objects-class-instance-in-scala-asinstanceof/) since these models implement Model interface
       val record : Model = table match {
         case "books" => new Book().asInstanceOf[Model]
         case "chapters" => new Chapter().asInstanceOf[Model]
         case "verses" => new Verse().asInstanceOf[Model]
       }
 
+      println(s"now should have a blank record: $record")
       for ((csvCol : String, dbCol : String) <- fieldsMapping) {  
         // use reflection to dynamically set field
         // https://stackoverflow.com/a/1589919/6952495
-        val value = csvRecord.getV(csvCol)
+        println(s"from csv col $csvCol to db col $dbCol")
+        val value = csvRecord.get(csvCol)
+        println(s"value to set: $value")
         record.setV(snakeToCamel(dbCol), value)
       }
 

@@ -1,6 +1,5 @@
 package com.ryanquey.intertextualitygraph.dataimporter
 import scala.collection.immutable.Map
-import com.ryanquey.intertextualitygraph.models._
 import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers._
 
 object ImportTheographicData {
@@ -22,7 +21,8 @@ object ImportTheographicData {
   def main (args: Array[String]) = {
     // get the data files
     for ((tablename, filename) <- dataSourceFiles) {  
-      val dataFile = new TyndaleDataFile(tablename, filename);
+      println(s"now importing file $filename into table $tablename")
+      val dataFile = new TheographicDataFile(tablename, filename);
 
       dataFile.parseFile()
     }

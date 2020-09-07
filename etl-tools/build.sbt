@@ -36,4 +36,5 @@ libraryDependencies ++= Seq(
 
 // local projects
 libraryDependencies +=  "com.ryanquey.intertextuality-graph" % "models" % "0.1.0"
+libraryDependencies +=  "com.ryanquey" % "data-utils" % "0.4.0"
 

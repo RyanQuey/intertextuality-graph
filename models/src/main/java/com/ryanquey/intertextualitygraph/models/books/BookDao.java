@@ -1,4 +1,4 @@
-package com.ryanquey.intertextualitygraph.models.books
+package com.ryanquey.intertextualitygraph.models.books;
 
 import com.datastax.oss.driver.api.mapper.annotations.Dao;
 import com.datastax.oss.driver.api.mapper.annotations.Select;
@@ -11,11 +11,13 @@ import java.util.UUID;
 
 // NOTE this means that in order to erase a field, cannot set it to null
 
-@Dao @DefaultNullSavingStrategy(NullSavingStrategy.DO_NOT_SET) trait BookDao {
+@Dao 
+@DefaultNullSavingStrategy(NullSavingStrategy.DO_NOT_SET) 
+public interface BookDao {
 
   /** Simple selection by full primary key. */
   @Select
-  def findOne(name : String) : BookRecord;
+  BookRecord findOne(String name);
 
   //@Select(customWhereClause = "podcast_api = ':podcastApi' AND podcast_api_id = ':podcastApiId'")
   //BookRecord findAll(String podcastApi, String podcastApiId);
@@ -47,7 +49,7 @@ import java.util.UUID;
   create(Episode video);
   */
   @Insert
-  def create(book : BookRecord);
+  void create(BookRecord book);
 
   /**
    * Update using a template: the template must have its full primary key set; beyond that, any
@@ -60,5 +62,5 @@ import java.util.UUID;
    * TODO maybe have to pass in primary_genre and feed_url also, and work those into the customWhereClause also
    */
   @Update
-  def save(book : BookRecord);
+  void save(BookRecord book);
 }

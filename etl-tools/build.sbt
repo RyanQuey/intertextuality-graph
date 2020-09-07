@@ -1,7 +1,9 @@
 // NOTE sets scalaVersion for all subprojects too
 // keeping consistent with play app version for now
-val cassandraJavaDriverVersion = "4.8.0"
+val cassandraJavaDriverVersion = "4.9.0"
 ThisBuild / scalaVersion := "2.13.1"
+ThisBuild / organization := "com.ryanquey"
+ThisBuild / organizationName := "ryanquey"
 name := "intertextuality-graph-etl-tools"
 version := "0.1.0"
 

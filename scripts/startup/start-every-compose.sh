@@ -29,5 +29,5 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 # Note that if it is in one docker-compose statement like this, it allows the separate services to talk to one another even though they have separate docker-compose yml files
 
 # TODO add conditional if jar exists already. Or even better, track changes in git and find out if need to rebuild jar...that's getting a little bit crazy though
-$INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/startup/_build-data-utils-jar.sh
+$INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/startup/_package-project.sh
 docker-compose up -d 

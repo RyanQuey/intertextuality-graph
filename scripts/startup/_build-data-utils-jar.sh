@@ -12,5 +12,8 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 mvn -f $INTERTEXTUALITY_GRAPH_DATA_UTILS_DIR/pom.xml package
 
 # depends on project version number
+# TODO just have play import from mvn repo also
 cp $INTERTEXTUALITY_GRAPH_DATA_UTILS_DIR/target/data-utils-0.4.0.jar $INTERTEXTUALITY_GRAPH_PLAY_API_DIR/lib
-cp $INTERTEXTUALITY_GRAPH_DATA_UTILS_DIR/target/data-utils-0.4.0.jar $INTERTEXTUALITY_GRAPH_ETL_TOOLS_DIR/lib
+
+# install to mvn repo
+$INTERTEXTUALITY_GRAPH_DATA_UTILS_DIR/scripts/install-data-utils-jar.sh

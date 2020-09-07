@@ -1,0 +1,124 @@
+<project>
+  <groupId>com.ryanquey.intertextuality-graph</groupId>
+  <artifactId>models</artifactId>
+  <modelVersion>4.0.0</modelVersion>
+  <name>Intertextuality Graph Models</name>
+  <packaging>jar</packaging>
+  <version>${project-package.version}</version>
+
+  <dependencies>
+		<dependency>
+			<groupId>com.ryanquey</groupId>
+			<artifactId>data-utils</artifactId>
+			<version>0.4.0</version>
+		</dependency>
+
+    <!-- Google core libraries for Java https://github.com/google/guava --> 
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>29.0-jre</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-modules-java8 -->
+		<!-- to support other data structures ( specifically for us, Instant) -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+			<version>2.11.0</version>
+    </dependency>
+
+
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency> 
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency> 
+    <!-- https://github.com/datastax/java-driver/tree/4.x/manual/core/logging#setup. 
+      when didn't use this one, would silently fail if we forgot to start our db before running package -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.28</version>
+    </dependency>
+
+    <!-- datastax/cassandra stuff -->
+		<dependency>
+			<groupId>com.datastax.oss</groupId>
+			<artifactId>java-driver-core</artifactId>
+			<version>${java-driver.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.datastax.oss</groupId>
+			<artifactId>java-driver-query-builder</artifactId>
+			<version>${java-driver.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.datastax.oss</groupId>
+			<artifactId>java-driver-mapper-runtime</artifactId>
+			<version>${java-driver.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.datastax.oss</groupId>
+			<artifactId>java-driver-mapper-processor</artifactId>
+			<version>${java-driver.version}</version>
+		</dependency>
+
+		<!-- for serializing and deserializing data to send to/receive from kafka -->
+    <dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.10</version>
+		</dependency>
+  </dependencies>
+
+	<build>
+		<plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>${mainClass}</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>1.8</source> <!-- (or higher) -->
+					<target>1.8</target> <!-- (or higher) -->
+					<annotationProcessorPaths>
+						<path>
+							<groupId>com.datastax.oss</groupId>
+							<artifactId>java-driver-mapper-processor</artifactId>
+							<version>${java-driver.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+  <properties>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+		<java-driver.version>4.9.0</java-driver.version>
+		<project-package.version>0.1.0</project-package.version>
+	</properties>
+</project>

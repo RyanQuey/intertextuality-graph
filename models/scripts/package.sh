@@ -15,5 +15,5 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 $parent_path/../../data-utils-for-java/scripts/install-data-utils-jar.sh
 
 cd $parent_path
-mvn package
+mvn clean package
 $parent_path/scripts/install-to-mvn-repo.sh

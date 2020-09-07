@@ -5,6 +5,9 @@
 # NOTE this won't work if you hack your `cd` command, like I normally do, e.g., having it call `ll` after running `cd`
 
 env_vars_parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+export DATA_UTILS_VERSION=0.5.0
+
 export INTERTEXTUALITY_GRAPH_PROJECT_DIR=$env_vars_parent_path/../..
 echo $INTERTEXTUALITY_GRAPH_PROJECT_DIR
 export INTERTEXTUALITY_GRAPH_SCRIPTS_DIR=$INTERTEXTUALITY_GRAPH_PROJECT_DIR/scripts

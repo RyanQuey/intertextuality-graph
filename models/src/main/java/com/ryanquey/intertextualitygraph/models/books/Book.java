@@ -6,6 +6,7 @@ public class Book extends BookBase implements Model {
 
   // constructors
   public Book(BookRecord bookRecord) {};
+  public Book() {};
 
   public void persist () {};
 }

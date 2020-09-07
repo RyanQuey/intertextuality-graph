@@ -11,7 +11,7 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 . $parent_path/../../scripts/config/env-vars.sh
 printf "\n\n== Packaging using sbt ==\n" && \
 
-$parent_path/compile.sh
+$parent_path/sbt/compile.sh
 cd $parent_path/..
 sbt "runMain com.ryanquey.intertextualitygraph.dataimporter.ImportTheographicData"
 

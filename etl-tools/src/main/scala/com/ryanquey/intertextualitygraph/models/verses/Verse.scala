@@ -1,6 +1,8 @@
 package com.ryanquey.intertextualitygraph.models.verses
 
-class Verse {
+import com.ryanquey.datautils.models.Model;
+
+class Verse extends Model {
   /*
   number INT,
   year_written DATE, 

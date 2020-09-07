@@ -5,7 +5,7 @@ object TheographicConstants {
   /*
    * writers > author. BUt will only take the first one
    */
-  val booksFieldsMapping = Map(
+  val booksFieldsMapping : Map[String, _] = Map(
     ("bookOrder", "book_order"),
     ("osisName", "osis_abbreviation"),
     ("slug", "slug"),
@@ -18,8 +18,8 @@ object TheographicConstants {
     ("verseCount", "verse_count")
   )
   // TODO
-  val chaptersFieldsMapping = Map(
+  val chaptersFieldsMapping : Map[String, _] = Map(
   )
-  val versesFieldsMapping = Map(
+  val versesFieldsMapping : Map[String, _] = Map(
   )
 } 

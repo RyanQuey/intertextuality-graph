@@ -16,7 +16,8 @@ import scala.collection.JavaConverters._
 // for dynamic class instantiation
 import scala.reflect.runtime.{universe => ru}
 
-import com.ryanquey.datautils.helpers.StringHelpers._
+import com.ryanquey.datautils.helpers.StringHelpers.snakeToCamel
+import com.ryanquey.datautils.models.{Model, Record}
 
 
 class TheographicDataFile (tablename : String, filename : String) {
@@ -25,31 +26,23 @@ class TheographicDataFile (tablename : String, filename : String) {
   var headers : Array[String] = _;
   val mirror = ru.runtimeMirror(getClass.getClassLoader)
 
-  // https://stackoverflow.com/a/1589919/6952495
-  implicit def reflector(ref: AnyRef) = new {
-    def getV(name: String): Any = ref.getClass.getMethods.find(_.getName == name).get.invoke(ref)
-    def setV(name: String, value: Any): Unit = ref.getClass.getMethods.find(_.getName == name + "_$eq").get.invoke(ref, value.asInstanceOf[AnyRef])
-  }
 
   def parseFile (table : String) = {
     val bufferedSource = Source.fromFile(dataFilePath)
-    val fieldsMapping = table match {
-      case "books" => booksFieldsMapping
-      case "chapters" => chaptersFieldsMapping
-      case "verses" => versesFieldsMapping
+    val fieldsMapping : Map[String, _] = table match {
+      case "books" => booksFieldsMapping : Map[String, _]
+      case "chapters" => chaptersFieldsMapping : Map[String, _]
+      case "verses" => versesFieldsMapping : Map[String, _]
     }
 
     // do some reflection to get ready to instantiate our model for this table
     // following scala docs
-    val model = table match {
-      case "books" => ru.typeOf[Book]
-      case "chapters" => ru.typeOf[Chapter]
-      case "verses" => ru.typeOf[Verse]
+    // https://stackoverflow.com/a/1589919/6952495
+    // create dynamic getters and setters on...everything (?)
+    implicit def reflector(ref: AnyRef) = new {
+      def getV(name: String): Any = ref.getClass.getMethods.find(_.getName == name).get.invoke(ref)
+      def setV(name: String, value: Any): Unit = ref.getClass.getMethods.find(_.getName == name + "_$eq").get.invoke(ref, value.asInstanceOf[AnyRef])
     }
-    val modelClass = model.typeSymbol.asClass
-    val classMirror = mirror.reflectClass(modelClass)
-    val classConstructor = model.decl(ru.termNames.CONSTRUCTOR).asMethod
-    val constructorMirror = classMirror.reflectConstructor(classConstructor)
 
 	  val csvDataFile : File = new File(fullPath.toString);
 	  val csvDataReader : Reader = new FileReader(csvDataFile);
@@ -60,12 +53,17 @@ class TheographicDataFile (tablename : String, filename : String) {
 	 	  // iterate over our mapping to get what fields we want into the db columns that they map to
 
       // first, instantiate a record of our model
-      val record = constructorMirror()
-      for ((csvCol, dbCol) <- fieldsMapping) {  
+      val record : Model = table match {
+        case "books" => new Book()
+        case "chapters" => new Chapter()
+        case "verses" => new Verse()
+      }
+
+      for ((csvCol : String, dbCol : String) <- fieldsMapping) {  
         // use reflection to dynamically set field
         // https://stackoverflow.com/a/1589919/6952495
-        val value = csvRecord.get(csvCol)
-        record.setV(snakeToCamel("dbCol"), value)
+        val value = csvRecord.getV(csvCol)
+        record.setV(snakeToCamel(dbCol), value)
       }
 
       record.persist();

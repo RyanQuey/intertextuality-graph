@@ -8,11 +8,9 @@ import com.datastax.oss.driver.api.mapper.annotations.ClusteringColumn;
 
 import com.ryanquey.datautils.helpers.DataClassesHelpers;
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb;
+import com.ryanquey.datautils.models.Record;
 
-
-@Entity
-@CqlName("books")
-class BookRecord (book : Option[Book]) extends BookBase {
+@Entity @CqlName("books") class BookRecord (book : Option[Book]) extends BookBase with Record {
   
   @PartitionKey(0) @BeanProperty var name : String // C* TEXT 
   if (book.isDefined) DataClassesHelpers.copyMatchingFields(book, this);

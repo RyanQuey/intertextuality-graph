@@ -1,2 +1,4 @@
 package com.ryanquey.intertextualitygraph.models.chapters
-class Chapter {}
+import com.ryanquey.datautils.models.Model;
+
+class Chapter extends Model {}

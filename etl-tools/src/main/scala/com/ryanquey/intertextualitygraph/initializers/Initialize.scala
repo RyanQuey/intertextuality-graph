@@ -9,7 +9,7 @@ package com.ryanquey.intertextualitygraph.initializers
 
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
-import com.ryanquey.intertextualitygraph.models.InventoryMapper
+import com.ryanquey.intertextualitygraph.models.{InventoryMapper, InventoryMapperObj}
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
 class EagerLoadModule extends AbstractModule {
@@ -31,5 +31,5 @@ class Initialize {
 
   // we like putting it on our CassandraDb class, so the inventoryMapper intance only needs to be built once and then is globally accesible by importing CassandraDb.
   // I'm sure there is a better system, but this will work for now
-  CassandraDb.inventoryMapper = inventoryMapper
+  InventoryMapperObj.inventoryMapper = inventoryMapper
 }

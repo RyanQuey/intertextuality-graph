@@ -5,6 +5,13 @@ For the first time this project is being ran on a box (in development)
 
 ./scripts/setup.sh
 
+### ETL Tools
+
+```
+cd ./etl-tools/
+sbt package
+```
+
 # Dataset used
 [Tyndale House's STEPBible Data](https://github.com/tyndale/STEPBible-Data). See their site for their license. Using especially `TOTHT - Tyndale OT Hebrew Tagged text` and `TANTT - Tyndale Amalgamated NT Tagged texts`, but might soon (or have already??) branched out to others as well.
 

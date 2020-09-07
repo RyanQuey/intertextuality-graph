@@ -15,11 +15,13 @@ version=0.1.0
 artifactId=models
 
 cd $INTERTEXTUALITY_GRAPH_MODELS_DIR && \
-mvn package && \
-mvn install:install-file \
-  -Dfile=$parent_path/../target/$artifactId-$version.jar \
-  -DgroupId=com.ryanquey.intertextuality-graph \
-  -DartifactId=models \
-  -Dversion=$version \
-  -Dpackaging=jar \
-  -DgeneratePom=true
+  # we don't need all this extra stuff, make it simple
+  mvn clean install
+# mvn package && \
+# mvn install:install-file \
+#   -Dfile=$parent_path/../target/$artifactId-$version.jar \
+#   -DgroupId=com.ryanquey.intertextuality-graph \
+#   -DartifactId=models \
+#   -Dversion=$version \
+#   -Dpackaging=jar \
+#   -DgeneratePom=true

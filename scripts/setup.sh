@@ -35,5 +35,5 @@ export PLAY_APP_DIR="$PROJECT_ROOT_PATH/play-app"
 # Run migrations
 ##########################
 # TODO add conditional if jar exists already. Or even better, track changes in git and find out if need to rebuild jar...that's getting a little bit crazy though
-$parent_path/_build-data-utils-jar.sh
-$parent_path/../run_migrations.sh
+$parent_path/startup/_build-data-utils-jar.sh
+$parent_path/run_migrations.sh

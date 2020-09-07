@@ -1,6 +1,8 @@
 // NOTE sets scalaVersion for all subprojects too
 // keeping consistent with play app version for now
 val cassandraJavaDriverVersion = "4.9.0"
+val dataUtilsVersion = sys.env.get("DATA_UTILS_VERSION")
+
 ThisBuild / scalaVersion := "2.13.1"
 ThisBuild / organization := "com.ryanquey"
 ThisBuild / organizationName := "ryanquey"
@@ -36,5 +38,6 @@ libraryDependencies ++= Seq(
 
 // local projects
 libraryDependencies +=  "com.ryanquey.intertextuality-graph" % "models" % "0.1.0"
-libraryDependencies +=  "com.ryanquey" % "data-utils" % "0.6.1"
+
+libraryDependencies +=  "com.ryanquey" % "data-utils" % dataUtilsVersion
 

@@ -15,7 +15,7 @@ arg1=${1:-""}
 # load all project environment variables
 . $parent_path/../../../scripts/config/env-vars.sh && \
 
-printf "\n\n== Packaging using sbt ==\n" && \
+printf "\n\n== Using sbt ==\n" && \
 if [ "$arg1 " != " " ]; then
   sbt ${arg1:-""} ${2:-""} ${3:-""}
 else 

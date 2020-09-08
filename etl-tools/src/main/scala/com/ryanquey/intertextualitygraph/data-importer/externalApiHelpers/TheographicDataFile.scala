@@ -6,9 +6,12 @@ import scala.io.Source
 import java.nio.charset.StandardCharsets
 import org.apache.commons.csv.{CSVParser, CSVRecord, CSVFormat}
 import com.ryanquey.intertextualitygraph.dataimporter.constants.TheographicConstants._
+import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers.Helpers._
+
 import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
+
 // needed so I can call .asScala
 import scala.collection.JavaConverters._
 
@@ -29,10 +32,10 @@ class TheographicDataFile (table : String, filename : String) {
   def parseFile() = {
     println(s"parsing $filename")
     val bufferedSource = Source.fromFile(fullPath.toString)
-    val fieldsMapping : Map[String, _] = table match {
-      case "books" => booksFieldsMapping : Map[String, _]
-      case "chapters" => chaptersFieldsMapping : Map[String, _]
-      case "verses" => versesFieldsMapping : Map[String, _]
+    val fieldsMapping : Map[String, Map[String, String]] = table match {
+      case "books" => booksFieldsMapping 
+      case "chapters" => chaptersFieldsMapping
+      case "verses" => versesFieldsMapping
     }
 
     // do some reflection to get ready to instantiate our model for this table
@@ -61,16 +64,24 @@ class TheographicDataFile (table : String, filename : String) {
       }
 
       println(s"now should have a blank record: $record")
-      for ((csvCol : String, dbCol : String) <- fieldsMapping) {  
+      for ((csvCol : String, data : Map[String, String]) <- fieldsMapping) {  
+        val dbCol : String = data.get("db_col").get
+        val modelField : String = snakeToCamel(dbCol)
+
         // use reflection to dynamically set field
         // https://stackoverflow.com/a/1589919/6952495
         println(s"from csv col $csvCol to db col $dbCol")
-        val value = csvRecord.get(csvCol)
+        val rawValue = csvRecord.get(csvCol) 
+
+        // dbCol corresponds with field in our model, so use that
+        // can be integer, or string, or anything that C* java driver takes
+        println(s"model field is $modelField")
+        val value = convertRawValue(record, modelField, rawValue)
 
         println(s"value to set: $value")
-        println(s"setting to: ${snakeToCamel(dbCol)}")
-        println(record.getClass.getMethods)
-        record.setV(snakeToCamel(dbCol), value)
+        println(s"setting to: ${snakeToCamel(dbCol)} using record.set${snakeToUpperCamel(dbCol)}")
+
+        record.setV(dbCol, value)
       }
 
       record.persist();

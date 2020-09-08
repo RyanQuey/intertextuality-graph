@@ -3,13 +3,20 @@
 ## Setup Dev Env
 For the first time this project is being ran on a box (in development)
 
+```
 ./scripts/setup.sh
+```
+
+## Start everything
+```
+./scripts/startup/start-every-compose.sh
+```
 
 ### ETL Tools
 
 ```
 cd ./etl-tools/
-sbt package
+./scripts/sbt/sbt.sh compile
 ```
 
 # Dataset used

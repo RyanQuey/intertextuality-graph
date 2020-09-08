@@ -22,7 +22,7 @@ WORKDIR /app
 # IN DEV will just do sbt run, so live reloads
 
 # now build dist for prod and unzip it (zip file name based on build.sbt), or if just in dev, compile so later updates to image are faster to build
-RUN [ $ENVIRONMENT == "production"] && \
+RUN [ $ENVIRONMENT == "production" ] && \
       sbt dist && \
       unzip /app/target/universal/${PLAY_PROJECT_NAME}-${PLAY_PROJECT_VERSION}-SNAPSHOT.zip || echo "in dev, don't do anything. package even slows things down, since if we change packages later just have to rebuild"
 

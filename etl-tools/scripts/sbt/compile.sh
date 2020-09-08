@@ -6,6 +6,7 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
 # load all project environment variables
 . $parent_path/../../../scripts/config/env-vars.sh && \
+cd $INTERTEXTUALITY_GRAPH_ETL_TOOLS_DIR
 
   printf "\n\n== Compiling using sbt ==\n" && \
   sbt compile

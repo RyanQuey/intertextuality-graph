@@ -15,6 +15,8 @@ arg1=${1:-""}
 # load all project environment variables
 . $parent_path/../../../scripts/config/env-vars.sh && \
 
+cd $INTERTEXTUALITY_GRAPH_ETL_TOOLS_DIR
+
 printf "\n\n== Using sbt ==\n" && \
 if [ "$arg1 " != " " ]; then
   sbt ${arg1:-""} ${2:-""} ${3:-""}

@@ -22,6 +22,7 @@ object Helpers {
     println(s"rawValue $rawValue")
     val value = fieldType match {
       case "String" => rawValue
+      // TODO handle if empty string
       case "Integer" => rawValue.toInt
     }
 

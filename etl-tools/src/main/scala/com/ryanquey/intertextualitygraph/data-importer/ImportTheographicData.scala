@@ -1,6 +1,7 @@
 package com.ryanquey.intertextualitygraph.dataimporter
 import scala.collection.immutable.Map
 import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers._
+import com.ryanquey.intertextualitygraph.initializers.Initialize
 
 object ImportTheographicData {
   /*
@@ -19,6 +20,7 @@ object ImportTheographicData {
 
 
   def main (args: Array[String]) = {
+    new Initialize()
     // get the data files
     for ((tablename, filename) <- dataSourceFiles) {  
       println(s"now importing file $filename into table $tablename")

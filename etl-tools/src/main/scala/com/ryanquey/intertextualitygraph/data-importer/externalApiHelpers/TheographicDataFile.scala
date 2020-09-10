@@ -97,7 +97,10 @@ class TheographicDataFile (table : String, filename : String) {
         }
       }
 
+			println(s"Persisting")
       record.persist();
+			println(s"---- Persisted!! ----")
+			println(s"---- Continuing to next ----")
     }
 
   }

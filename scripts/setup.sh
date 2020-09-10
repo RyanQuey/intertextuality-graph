@@ -39,5 +39,28 @@ git submodule update --init --recursive
 # Run migrations
 ##########################
 # TODO add conditional if jar exists already. Or even better, track changes in git and find out if need to rebuild jar...that's getting a little bit crazy though
-$parent_path/startup/_package-project.sh
+$parent_path/startup/start-every-compose.sh
+
+
+echo "waiting for Cassandra to be available..." && \
+CASSANDRA_IS_UP=false
+while [[ $CASSANDRA_IS_UP == false ]]; do
+  # keep running until last command in loop returns true
+
+  docker exec i-graph-dse nodetool status | grep -q 'UN' && CASSANDRA_IS_UP=true
+  if [[ $CASSANDRA_IS_UP == false ]]; then
+    # TODO add a timeout or handle if cassandra is down
+  	echo "Cassandra is not up yet, waiting and try again"
+  	sleep 1s
+  else 
+    echo "Cassandra is up! Continuing"
+    echo "***************************"
+  fi
+
+  # returns true if: nodetool status ran without erroring and there is substring 'UN' in the output.
+  
+  # if above returns false, will try again
+done && \
+
+# This assumes C* is up, which requires docker-compose to run
 $parent_path/run_migrations.sh

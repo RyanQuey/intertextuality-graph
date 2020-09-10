@@ -2,6 +2,7 @@
 // keeping consistent with play app version for now
 val cassandraJavaDriverVersion = "4.9.0"
 val dataUtilsVersion = sys.env.get("DATA_UTILS_VERSION")
+val modelsVersion = sys.env.get("INTERTEXTUALITY_GRAPH_MODELS_VERSION")
 
 ThisBuild / scalaVersion := "2.13.1"
 ThisBuild / organization := "com.ryanquey"
@@ -37,7 +38,8 @@ libraryDependencies ++= Seq(
   )
 
 // local projects
-libraryDependencies +=  "com.ryanquey.intertextuality-graph" % "models" % "0.1.0"
+// requires .get to force it to not be an option, but an actual String
+libraryDependencies +=  "com.ryanquey.intertextuality-graph" % "models" % modelsVersion.get
 
 libraryDependencies +=  "com.ryanquey" % "data-utils" % dataUtilsVersion.get
 

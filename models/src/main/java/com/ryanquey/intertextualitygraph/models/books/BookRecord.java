@@ -25,7 +25,9 @@ class BookRecord extends BookBase implements Record {
   // keeping empty constructor for use with Dao
   BookRecord() {};
   BookDao getDao () {
-    return InventoryMapperObj.inventoryMapper.bookDao("books");
+    return InventoryMapperObj
+      .inventoryMapper
+      .bookDao("books");
   }
 
 };

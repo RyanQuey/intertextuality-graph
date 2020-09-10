@@ -11,7 +11,7 @@ fi
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 . $parent_path/../../scripts/config/env-vars.sh
 
-version=0.1.0
+version=$INTERTEXTUALITY_GRAPH_MODELS_VERSION
 artifactId=models
 
 cd $INTERTEXTUALITY_GRAPH_MODELS_DIR && \

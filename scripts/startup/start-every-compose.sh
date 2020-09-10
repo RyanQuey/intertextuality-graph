@@ -35,7 +35,7 @@ FILE=$INTERTEXTUALITY_GRAPH_PLAY_API_DIR/lib/data-utils-$DATA_UTILS_VERSION.jar
 if [ -f $FILE ]; then
   echo "File $FILE exists."
 else
-  echo "File $FILE does not exist."
-fi
-# $INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/startup/_package-project.sh
+  echo "File $FILE does not exist. Let's package our jars."
+  $INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/startup/_package-project.sh
+fi && \
 docker-compose up -d 

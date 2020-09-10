@@ -5,6 +5,8 @@ import scala.collection.immutable.Map
 object TheographicConstants {
   /*
    * writers > author. BUt will only take the first one
+   *
+   * osisName│bookOrder│bookName│bookDiv│testament│shortName│slug│yearWritten│placeWritten│chapters│chapterCount│verseCount│writers│peopleCount│placeCount│modified
    */
   val booksFieldsMapping : Map[String, Map[String, String]] = Map(
     ("bookOrder", Map(("db_col", "book_order"))),
@@ -20,10 +22,16 @@ object TheographicConstants {
     )),
     ("verseCount", Map(("db_col", "verse_count")))
   )
-  // TODO
+  // osisRef│book│chapterNum│writer│verses│slug│peopleCount│placesCount│modified│writer count
+  // verses, just get the last one
   val chaptersFieldsMapping : Map[String, Map[String, String]] = Map(
-    ("yearWritten", Map(("db_col", "year_written")))
+    ("osisRef", Map(("db_col", "osis_ref"))),
+    ("book", Map(("db_col", "book"))), 
+    ("chapterNum", Map(("db_col", "number"))),
+    ("slug", Map(("db_col", "slug"))),
+    ("verses", Map(("db_col", "verse_count")))
   )
+
   val versesFieldsMapping : Map[String, Map[String, String]] = Map(
     ("yearWritten", Map(("db_col", "year_written")))
   )

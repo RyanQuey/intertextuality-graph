@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS intertextuality_graph.book_series (
   testament TEXT, 
   book_count LIST<TEXT>, 
   book_ids LIST<UUID>, 
-  user_id UUID, 
   year_written INT, 
   updated_at TIMESTAMP, 
   comments TEXT,

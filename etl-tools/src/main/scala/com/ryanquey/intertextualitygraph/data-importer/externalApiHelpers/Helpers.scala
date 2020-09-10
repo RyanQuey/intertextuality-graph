@@ -8,7 +8,7 @@ import com.ryanquey.intertextualitygraph.models.verses.Verse
 
 
 object Helpers {
-  def convertRawValue (record : Model, field : String, rawValue : String) = {
+  def convertRawValue (record : Model, field : String, rawValue : String) : Any = {
     val schema : Map[String, String] = record match {
       case b: Book => b.schema
       // TODO add the others
@@ -20,6 +20,10 @@ object Helpers {
 
     println(s"field type for field $field: $fieldType")
     println(s"rawValue $rawValue")
+    if (rawValue == "") {
+      return null
+    }
+
     val value = fieldType match {
       case "String" => rawValue
       // TODO handle if empty string

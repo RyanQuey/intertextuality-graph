@@ -16,7 +16,7 @@ object TheographicConstants {
     ("yearWritten", Map(("db_col", "year_written"))),
     ("chapterCount", Map(("db_col", "chapter_count"))),
     ("writers", Map(
-      ("db_col", "writers"), 
+      ("db_col", "author"), 
     )),
     ("verseCount", Map(("db_col", "verse_count")))
   )

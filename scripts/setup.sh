@@ -22,6 +22,11 @@ fi
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 . $parent_path/config/env-vars.sh
 
+# go ahead and make sure data-utils submodule is pulled
+
+cd $parent_path
+git submodule update --init --recursive
+
 #################################################
 # START THE DOCKER CONTAINERS with docker-compose
 #################################################

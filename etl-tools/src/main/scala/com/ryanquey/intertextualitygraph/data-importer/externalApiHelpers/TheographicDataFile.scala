@@ -103,6 +103,7 @@ class TheographicDataFile (table : String, filename : String) {
 			println(s"---- Continuing to next ----")
     }
 
+    // TODO I think it does not stop itself because it opened a file and did not close it (?)
   }
 
 

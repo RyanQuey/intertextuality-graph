@@ -26,7 +26,7 @@ public class Book extends BookBase implements Model {
     schema.put("testament", "String");// TEXT 
     schema.put("chapterCount", "Integer");// INT
     schema.put("verseCount", "Integer");// INT
-    schema.put("userId", "String");// UUID 
+    schema.put("userId", "UUID");// UUID 
     schema.put("comments", "String");// TEXT
     schema.put("updatedAt", "Instant");// TIMESTAMP, 
   };

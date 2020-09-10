@@ -1,5 +1,6 @@
 package com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers
 import java.util.Map
+import java.util.UUID;
 
 import com.ryanquey.datautils.models.{Model, Record}
 import com.ryanquey.intertextualitygraph.models.books.Book
@@ -20,6 +21,8 @@ object Helpers {
 
     println(s"field type for field $field: $fieldType")
     println(s"rawValue $rawValue")
+
+    // for csvs, blank string means nothing there
     if (rawValue == "") {
       return null
     }
@@ -28,6 +31,7 @@ object Helpers {
       case "String" => rawValue
       // TODO handle if empty string
       case "Integer" => rawValue.toInt
+      case "UUID" => UUID.fromString(rawValue)
     }
 
     value

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS intertextuality_graph.texts (
   english_translation TEXT, 
   comments TEXT,
   updated_at TIMESTAMP, 
-  // this will allow good default order in the db when we do basic selects. 
-  PRIMARY KEY ((starting_book_id), starting_chapter_id, starting_verse_id, id)
+  // allows for decent partitioning, and good sorting. Don't want to require chapter though, either for referencing or when adding rows, so don't make a partition key
+  // Note that edge will have to reference it
+  PRIMARY KEY (starting_book, id)
 );

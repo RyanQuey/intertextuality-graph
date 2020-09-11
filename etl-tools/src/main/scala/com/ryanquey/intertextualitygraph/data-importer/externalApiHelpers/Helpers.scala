@@ -10,7 +10,7 @@ import com.ryanquey.intertextualitygraph.models.verses.Verse
 
 object Helpers {
   // field is modelField
-  def convertRawValue (modelInstance : Model, field : String, rawValue : String) : Any = {
+  def convertRawValue (modelInstance : Model, csvField : String, field : String, rawValue : String) : Any = {
     val schema : Map[String, String] = modelInstance match {
       case b: Book => b.schema
       case c: Chapter => c.schema
@@ -34,7 +34,7 @@ object Helpers {
       case b: Book => booksFieldsConverter(rawValue, field, fieldType)
       case c: Chapter => chaptersFieldsConverter(rawValue, field, fieldType)
       case v: Verse => versesFieldsConverter(rawValue, field, fieldType)
-      case t: Text => textsFieldsConverter(rawValue, field, fieldType)
+      case t: Text => textsFieldsConverter(rawValue, csvField, field, fieldType)
     }
 
     value
@@ -123,8 +123,10 @@ object Helpers {
 
     value
   }
-  def alludingTextsFieldsConverter (rawValue : String, field : String, fieldType : String) = {
-    val value = field match {
+
+  
+  def alludingTextsFieldsConverter (rawValue : String, csvField : String, field : String, fieldType : String) = {
+    val value = csvField match {
       // they return a string, get the int at the end and use instead
       case "starting_book" => rawValue // TODO int > bookname
       case "starting_chapter" => rawValue

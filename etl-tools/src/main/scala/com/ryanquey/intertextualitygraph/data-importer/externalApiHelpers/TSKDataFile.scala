@@ -5,6 +5,7 @@ import org.apache.commons.io.input.BOMInputStream
 import scalaj.http._
 import scala.io.Source
 import util.control.Breaks._
+import scala.Array
 
 import java.nio.charset.StandardCharsets
 import org.apache.commons.csv.{CSVParser, CSVRecord, CSVFormat}
@@ -48,8 +49,16 @@ class TSKDataFile (table : String, filename : String) {
 
       // first, instantiate a record of our model
       // need to typecast (https://alvinalexander.com/scala/how-to-cast-objects-class-instance-in-scala-asinstanceof/) since these models implement Model interface
-      val sourceText = new Text()
+    
       val alludingText = new Text()
+
+      val allRefsStr : String = csvRecord.get("refs") 
+      val sourceTexts : Array[String] = allRefsStr.split(";").map((ref : String) => {
+        // examples: 
+        // ps 95:5
+        // ps.104.3;ps.104.5-9
+        new Text()
+      })
 
       println(s"now should have a blank modelInstance: $modelInstance")
       for ((csvCol : String, data : Map[String, String]) <- fieldsMapping) {  

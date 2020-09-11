@@ -10,6 +10,7 @@ const dataDir = `${process.env.INTERTEXTUALITY_GRAPH_RAW_DATA_DIR}/treasury-of-s
 
 
 // convert ref to list of refs, e.g., ps 1:3-4;2:5 > Ps.1.3-Ps.1.4,Ps.2.5
+// we'll convert to ; delimited below, when stringifying.
 // can then easily split by "," then by "-"
 const parseRef = (rawRef) => {
   return bcv.parse(rawRef).osis()
@@ -45,9 +46,6 @@ const readParseWriteFile = async () => {
   // Print records to the console
   // records.map(record => console.log(record))
   
-  // Write a file with one JSON per line for each record
-  // json = records.map(  ).join('\n')
-  
   console.log("writing to: " + `${dataDir}/tsk-cli-formatted.csv`)
 
   const columns = Object.keys(rawRecords[0])
@@ -58,6 +56,14 @@ const readParseWriteFile = async () => {
     bom: true, // Byte order mark. Keep it since original had it too
     columns,
     header: true,
+    cast: {
+      // cast objects (ie arrays ) like this
+      object: (arr) => {
+        // assuming is array for now
+        // join by ;, so doesn't conflict with csv comma delimitation
+        return {value: arr.join(";"), quote: false}
+      }
+    }
   })
 
   await fs.writeFile(`${dataDir}/tsk-cli-formatted.csv`,  

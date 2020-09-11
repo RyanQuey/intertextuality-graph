@@ -31,3 +31,14 @@ models/scripts/install-to-mvn-repo.sh
 
 - Make sure also that the version number set in the config/env-vars.sh is same as what is set in the models project's pom.xml file.
 - If all else fails, nuke the repo and restart (see main git repo README for how to nuke)
+
+# Getting the raw data
+Check out the `./scripts` dir
+
+- `format-tsk-csv.sh` will format existing tsk-cli.txt file to separate out the references for easy ingestion
+- there's another one for downloading some of the data files...I forget where
+
+# Parse references from data sources
+We have a good start with a js script that will use npm libs to convert references into osis, which is easily machine readable.
+
+`./scripts/format-tsk-csv.sh`

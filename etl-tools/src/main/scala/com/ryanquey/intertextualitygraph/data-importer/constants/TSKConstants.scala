@@ -14,9 +14,10 @@ object TSKConstants {
     ("From Verse", Map(("alluding_db_col", ""))),
   )
 
-  val tskCLIMapping : 
-  // book	chapter	verse	sort	words	refs
-  ("book", Map(
-    //("alluding_db_col", "book_order")
-  )),
+  val tskCLIMapping : Map[String, Map[String, String]] = Map(
+    // book	chapter	verse	sort	words	refs
+    ("book", Map(
+      ("book", "book_order")
+    ))
+  )
 } 

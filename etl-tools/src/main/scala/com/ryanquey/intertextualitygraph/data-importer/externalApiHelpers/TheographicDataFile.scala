@@ -84,7 +84,7 @@ class TheographicDataFile (table : String, filename : String) {
           // dbCol corresponds with field in our model, so use that
           // can be integer, or string, or anything that C* java driver takes
           println(s"model field is $modelField")
-          val value = convertRawValue(modelInstance, modelField, rawValue)
+          val value = convertRawValue(modelInstance, csvCol, modelField, rawValue)
 
           if (value == null) {
             break

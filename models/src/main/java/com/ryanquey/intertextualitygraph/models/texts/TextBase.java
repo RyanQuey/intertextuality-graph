@@ -15,12 +15,12 @@ public class TextBase {
   private UUID id;  // UUID 
   private Boolean canonical;  // BOOLEAN 
   private String canonicalText;  // TEXT
-  private String startingBook;  // UUID
-  private Integer startingChapter;  // UUID
-  private Integer startingVerse;  // UUID
-  private String endingBook;  // UUID
-  private Integer endingChapter;  // UUID
-  private Integer endingVerse;  // UUID
+  private String startingBook;  
+  private Integer startingChapter;  
+  private Integer startingVerse;  
+  private String endingBook;  
+  private Integer endingChapter; 
+  private Integer endingVerse;  
   private List<String> splitPassages;  // LIST<TEXT>
   private String testament;  // TEXT 
   private String greekTranslation;  // TEXT 

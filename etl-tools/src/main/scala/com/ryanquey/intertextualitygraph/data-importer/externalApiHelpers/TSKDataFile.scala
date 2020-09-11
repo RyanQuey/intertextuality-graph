@@ -53,10 +53,16 @@ class TSKDataFile (table : String, filename : String) {
       val alludingText = new Text()
 
       val allRefsStr : String = csvRecord.get("refs") 
-      val sourceTexts : Array[String] = allRefsStr.split(";").map((ref : String) => {
+      val sourceTexts : Array[Text] = allRefsStr.split(";").map((ref : String) => {
         // examples: 
-        // ps 95:5
-        // ps.104.3;ps.104.5-9
+        // ps.95.5
+        // ps.104.3;ps.104.5-ps.104.9
+        new Text()
+      })
+      val alludingText : Text = allRefsStr.split(";").map((ref : String) => {
+        // examples: 
+        // ps.95.5
+        // ps.104.3;ps.104.5-ps.104.9
         new Text()
       })
 

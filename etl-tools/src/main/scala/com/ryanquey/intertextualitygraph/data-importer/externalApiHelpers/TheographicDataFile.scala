@@ -31,7 +31,7 @@ class TheographicDataFile (table : String, filename : String) {
   val fullPath : Path = Paths.get(dataDirPath, filename)
   var headers : Array[String] = _;
 
-
+  // also persists to C*
   def parseFile() = {
     println(s"parsing $filename")
     val bufferedSource = Source.fromFile(fullPath.toString)
@@ -58,7 +58,49 @@ class TheographicDataFile (table : String, filename : String) {
     // cannot just split by comma, since many fields have multiples (so commas separate) or commas inside fields
 		val csvRecords = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(csvDataReader);
 
-	 	for (csvRecord : CSVRecord <- csvRecords.asScala) {
+    val modelInstances = getModelInstances()
+
+	 	for (modelInstance Model <- modelInstances) {
+			println(s"Persisting")
+      modelInstance.persist();
+			println(s"---- Persisted!! ----")
+			println(s"---- Continuing to next ----")
+    }
+
+    // TODO I think it does not stop itself because it opened a file and did not close it (?)
+  }
+
+  // not for persisting, but just for reference when parsing/importing other data
+  // how to use if only want the model instances: 
+  // val dataFile = new TheographicDataFile(tablename, filename);
+  // val books : Array[Book] = dataFile.getModelInstances()
+  def getModelInstances() : Array[Model] = {
+    println(s"parsing $filename")
+    val bufferedSource = Source.fromFile(fullPath.toString)
+    val fieldsMapping : Map[String, Map[String, String]] = table match {
+      case "books" => booksFieldsMapping 
+      case "chapters" => chaptersFieldsMapping
+      case "verses" => versesFieldsMapping
+    }
+
+    // do some reflection to get ready to instantiate our model for this table
+    // following scala docs
+    // https://stackoverflow.com/a/1589919/6952495
+    // create dynamic getters and setters on...everything (?)
+    implicit def reflector(ref: AnyRef) = new {
+      def getV(name: String): Any = ref.getClass.getMethods.find(_.getName == s"get${snakeToUpperCamel(name)}").get.invoke(ref)
+      def setV(name: String, value: Any): Unit = ref.getClass.getMethods.find(_.getName == s"set${snakeToUpperCamel(name)}").get.invoke(ref, value.asInstanceOf[AnyRef])
+    }
+
+	  val csvDataFile : FileInputStream = new FileInputStream(fullPath.toString);
+	  // need to handle first bytes which mess up first column
+	  // https://stackoverflow.com/a/61815006/6952495
+	  // http://commons.apache.org/proper/commons-csv/user-guide.html#Handling_Byte_Order_Marks
+	  val csvDataReader : Reader = new InputStreamReader(new BOMInputStream(csvDataFile), "UTF-8");
+    // cannot just split by comma, since many fields have multiples (so commas separate) or commas inside fields
+    val csvRecords = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(csvDataReader);
+    
+    val allRecords : Array[Model] = csvRecords.asScala.map((csvRecord : CSVRecord) => {
 	 	  // iterate over our mapping to get what fields we want into the db columns that they map to
 
       // first, instantiate a record of our model
@@ -97,13 +139,12 @@ class TheographicDataFile (table : String, filename : String) {
         }
       }
 
-			println(s"Persisting")
-      modelInstance.persist();
-			println(s"---- Persisted!! ----")
-			println(s"---- Continuing to next ----")
-    }
+      modelInstance
+    })
 
     // TODO I think it does not stop itself because it opened a file and did not close it (?)
   }
 
+  // return array of records for this model
+  allRecords
 }

@@ -12,7 +12,7 @@ object ImportTreasuryOfScriptureKnowledgeData {
   // csv file name to the table 
   val dataSourceFiles = Map(
     //("intertextual_connections", "open-bible-cross-references.txt"),
-    ("intertextual_connections", "tsk-cli.txt"),
+    ("intertextual_connections", "tsk-cli-formatted.csv"),
   )
 
 

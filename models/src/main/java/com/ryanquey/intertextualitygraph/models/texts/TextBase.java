@@ -12,7 +12,6 @@ import java.time.Instant;
 public class TextBase {
   private Integer yearWritten;  // INT 
   private String author;  // TEXT
-  private UUID id;  // UUID 
   private Boolean canonical;  // BOOLEAN 
   private String canonicalText;  // TEXT
   private String startingBook;  
@@ -39,12 +38,6 @@ public class TextBase {
   }
   public void setAuthor(String author) {
     this.author = author;
-  }
-  public UUID getId() {
-    return id;
-  }
-  public void setId(UUID id) {
-    this.id = id;
   }
   public Boolean getCanonical() {
     return canonical;

@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import com.ryanquey.datautils.models.Model;
 
+// TODO consider making these models in scala, since they don't interact with java driver directly
+// FOr now, just put everything in a helpers file...better to not use oop in scala to learn fp. For now
 public class Text extends TextBase implements Model {
 
   public Map<String, String> schema = new HashMap<String, String>();
@@ -16,7 +18,6 @@ public class Text extends TextBase implements Model {
   // constructors
   public Text() {
     // initialize schema 
-    schema.put("id", "String"); // UUID 
     schema.put("yearWritten", "String"); // INT 
     schema.put("author", "String"); // TEXT
     schema.put("canonical", "String"); // BOOLEAN 
@@ -33,16 +34,11 @@ public class Text extends TextBase implements Model {
     schema.put("englishTranslation", "String"); // TEXT 
     schema.put("comments", "String"); // TEXT
     schema.put("updatedAt", "Instant"); // TIMESTAMP 
-
-    if (this.id == null) {
-      this.id = UUID.randomUUID();
-    }
   };
 
   public Text(TextRecord textRecord) {
     // TODO 
   };
-
 
   public void persist () {
     System.out.println("persisting text");
@@ -53,7 +49,4 @@ public class Text extends TextBase implements Model {
     dao.save(e);
   };
 
-  /////////////////////////////////
-  // validation
-  ////////////////////////////////
 }

@@ -6,6 +6,7 @@ import com.ryanquey.datautils.models.{Model, Record}
 import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
+import com.ryanquey.intertextualitygraph.models.texts.Text
 
 
 object Helpers {
@@ -18,12 +19,9 @@ object Helpers {
       case t: Text => t.schema
     }
 
-    println(s"schema found: $schema")
+    //println(s"schema found: $schema")
     // note that this is a java map, not a scala map
     val fieldType : String = schema.get(field);
-
-    println(s"field type for field $field: $fieldType")
-    println(s"rawValue $rawValue")
 
     // for csvs, blank string means nothing there
     if (rawValue == "") {
@@ -34,7 +32,8 @@ object Helpers {
       case b: Book => booksFieldsConverter(rawValue, field, fieldType)
       case c: Chapter => chaptersFieldsConverter(rawValue, field, fieldType)
       case v: Verse => versesFieldsConverter(rawValue, field, fieldType)
-      case t: Text => textsFieldsConverter(rawValue, csvField, field, fieldType)
+      // not using for text currently
+      // case t: Text => textsFieldsConverter(rawValue, csvField, field, fieldType)
     }
 
     value
@@ -54,7 +53,6 @@ object Helpers {
       case "UUID" => UUID.fromString(rawValue)
     }
 
-    println(s"typecasting to $value")
     value
   }
 

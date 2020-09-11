@@ -21,11 +21,7 @@ class TextRecord extends TextBase implements Record {
   private String startingBook;
 
   @ClusteringColumn(0)
-  private Integer startingChapter;  
-  @ClusteringColumn(1)
-  private Integer startingVerse;  
-  @ClusteringColumn(2)
-  private UUID id;  // UUID
+  private String splitPassages;
 
   TextRecord(Text text) {
     DataClassesHelpers.copyMatchingFields(text, this);

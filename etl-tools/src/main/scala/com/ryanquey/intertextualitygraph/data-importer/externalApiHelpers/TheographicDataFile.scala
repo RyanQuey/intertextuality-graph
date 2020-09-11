@@ -60,7 +60,7 @@ class TheographicDataFile (table : String, filename : String) {
 
     val modelInstances = getModelInstances()
 
-	 	for (modelInstance Model <- modelInstances) {
+	 	for (modelInstance : Model <- modelInstances) {
 			println(s"Persisting")
       modelInstance.persist();
 			println(s"---- Persisted!! ----")
@@ -72,9 +72,9 @@ class TheographicDataFile (table : String, filename : String) {
 
   // not for persisting, but just for reference when parsing/importing other data
   // how to use if only want the model instances: 
-  // val dataFile = new TheographicDataFile(tablename, filename);
+  // val dataFile = new TheographicDataFile("books", "books-Grid view.csv");
   // val books : Array[Book] = dataFile.getModelInstances()
-  def getModelInstances() : Array[Model] = {
+  def getModelInstances() : Iterable[Model] = {
     println(s"parsing $filename")
     val bufferedSource = Source.fromFile(fullPath.toString)
     val fieldsMapping : Map[String, Map[String, String]] = table match {
@@ -100,7 +100,7 @@ class TheographicDataFile (table : String, filename : String) {
     // cannot just split by comma, since many fields have multiples (so commas separate) or commas inside fields
     val csvRecords = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(csvDataReader);
     
-    val allRecords : Array[Model] = csvRecords.asScala.map((csvRecord : CSVRecord) => {
+    val allRecords = csvRecords.asScala.map((csvRecord : CSVRecord) => {
 	 	  // iterate over our mapping to get what fields we want into the db columns that they map to
 
       // first, instantiate a record of our model
@@ -111,7 +111,6 @@ class TheographicDataFile (table : String, filename : String) {
         case "verses" => new Verse().asInstanceOf[Model]
       }
 
-      println(s"now should have a blank modelInstance: $modelInstance")
       for ((csvCol : String, data : Map[String, String]) <- fieldsMapping) {  
         // for the break to function as "continue"
         breakable {
@@ -120,20 +119,15 @@ class TheographicDataFile (table : String, filename : String) {
 
           // use reflection to dynamically set field
           // https://stackoverflow.com/a/1589919/6952495
-          println(s"from csv col $csvCol to db col $dbCol")
           val rawValue = csvRecord.get(csvCol) 
 
           // dbCol corresponds with field in our model, so use that
           // can be integer, or string, or anything that C* java driver takes
-          println(s"model field is $modelField")
           val value = convertRawValue(modelInstance, csvCol, modelField, rawValue)
 
           if (value == null) {
             break
           }
-
-          println(s"value to set: $value")
-          println(s"setting to: ${snakeToCamel(dbCol)} using modelInstance.set${snakeToUpperCamel(dbCol)}")
 
           modelInstance.setV(dbCol, value)
         }
@@ -143,8 +137,8 @@ class TheographicDataFile (table : String, filename : String) {
     })
 
     // TODO I think it does not stop itself because it opened a file and did not close it (?)
+    // return array of records for this model
+    allRecords
   }
 
-  // return array of records for this model
-  allRecords
 }

@@ -2,13 +2,16 @@
 
 ## How to start
 ### Import data from Tyndale Data set
+Old Way:
 ```
 cd ./etl-tools
-sbt package
+./scripts/sbt/sbt.sh package
 
 # can't do sbt run after we add other main classes
 sbt "runMain com.ryanquey.intertextualitygraph.dataimporter.ImportTyndaleStepData"
 ```
+
+New way: Just use the script. it sets env vars and stuff for you too.
 
 ## Setup For Development
 ### Install Scala
@@ -21,6 +24,22 @@ curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89
 sudo apt-get update
 sudo apt-get install sbt
 
+### Run autocompile
+```
+./scripts/sbt/sbt.sh ~compile
+```
+
+Then open another one with the sbt console going, and can call `run` every so often:
+```
+./scripts/sbt/sbt.sh 
+# Then in the console: 
+runMain com.ryanquey.intertextualitygraph.dataimporter.ImportTreasuryOfScriptureKnowledgeData
+
+# or if you don't know which class you want:
+run 
+
+# and it will give some options
+```
 # Debugging
 ## object models is not a member of package com.ryanquey.intertextualitygraph
 - Make sure models project is packaged and installed into mvn repo

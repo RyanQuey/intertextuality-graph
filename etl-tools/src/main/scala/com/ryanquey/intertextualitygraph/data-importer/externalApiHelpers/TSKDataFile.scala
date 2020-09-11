@@ -11,10 +11,12 @@ import java.nio.charset.StandardCharsets
 import org.apache.commons.csv.{CSVParser, CSVRecord, CSVFormat}
 import com.ryanquey.intertextualitygraph.dataimporter.constants.TSKConstants._
 import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers.Helpers._
+import com.ryanquey.intertextualitygraph.modelhelpers._
 
 import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
+import com.ryanquey.intertextualitygraph.models.texts.Text
 
 // needed so I can call .asScala
 import scala.collection.JavaConverters._
@@ -42,7 +44,7 @@ class TSKDataFile (table : String, filename : String) {
 	  // http://commons.apache.org/proper/commons-csv/user-guide.html#Handling_Byte_Order_Marks
 	  val csvDataReader : Reader = new InputStreamReader(new BOMInputStream(csvDataFile), "UTF-8");
     // cannot just split by comma, since many fields have multiples (so commas separate) or commas inside fields
-		val csvRecords = CSVFormat.RFC4180.withFirstRecordAsHeader().withDelimiter('\\t').parse(csvDataReader);
+		val csvRecords = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(csvDataReader);
 
 	 	for (csvRecord : CSVRecord <- csvRecords.asScala) {
 	 	  // iterate over our mapping to get what fields we want into the db columns that they map to
@@ -50,52 +52,42 @@ class TSKDataFile (table : String, filename : String) {
       // first, instantiate a record of our model
       // need to typecast (https://alvinalexander.com/scala/how-to-cast-objects-class-instance-in-scala-asinstanceof/) since these models implement Model interface
     
+      val allRefsStr : String = csvRecord.get("refs") 
+
+      // unfortunately this will create multiple records for something like jhn.1.1, jhn.1.3-5, even though really it should only be one edge. It's fine for now though
+      val sourceTexts : Array[Text] = allRefsStr.split(";").map((osisRange : String) => {
+        // examples: 
+        // ps.95.5
+        // ps.104.3;ps.104.5-ps.104.9
+        val srcText = new Text()
+        TextHelpers.populateFieldsfromOsis(osisRange, srcText)
+
+        srcText
+      })
+
+      // examples: 
+      // ps.95.5
+      // ps.104.3;ps.104.5-ps.104.9
       val alludingText = new Text()
 
-      val allRefsStr : String = csvRecord.get("refs") 
-      val sourceTexts : Array[Text] = allRefsStr.split(";").map((ref : String) => {
-        // examples: 
-        // ps.95.5
-        // ps.104.3;ps.104.5-ps.104.9
-        new Text()
-      })
-      val alludingText : Text = allRefsStr.split(";").map((ref : String) => {
-        // examples: 
-        // ps.95.5
-        // ps.104.3;ps.104.5-ps.104.9
-        new Text()
-      })
-
-      println(s"now should have a blank modelInstance: $modelInstance")
-      for ((csvCol : String, data : Map[String, String]) <- fieldsMapping) {  
-        // for the break to function as "continue"
-        breakable {
-          val dbCol : String = data.get("db_col").get
-          val modelField : String = snakeToCamel(dbCol)
-
-          // use reflection to dynamically set field
-          // https://stackoverflow.com/a/1589919/6952495
-          println(s"from csv col $csvCol to db col $dbCol")
-          val rawValue = csvRecord.get(csvCol) 
-
-          // dbCol corresponds with field in our model, so use that
-          // can be integer, or string, or anything that C* java driver takes
-          println(s"model field is $modelField")
-          val value = convertRawValue(modelInstance, modelField, rawValue)
-
-          if (value == null) {
-            break
-          }
-
-          println(s"value to set: $value")
-          println(s"setting to: ${snakeToCamel(dbCol)} using modelInstance.set${snakeToUpperCamel(dbCol)}")
-
-          modelInstance.setV(dbCol, value)
-        }
-      }
+      val bookNum = csvRecord.get("book").toInt
+      val atBook = BookHelpers.bookNumToName(bookNum)
+      val atChapter = csvRecord.get("chapter").toInt
+      val atVerse = csvRecord.get("verse").toInt
+      alludingText.setStartingBook(atBook)
+      alludingText.setStartingChapter(atChapter)
+      alludingText.setStartingVerse(atVerse)
+      // start and end are the same here
+      alludingText.setEndingBook(atBook)
+      alludingText.setEndingChapter(atChapter)
+      alludingText.setEndingVerse(atVerse)
 
 			println(s"Persisting")
-      modelInstance.persist();
+      alludingText.persist();
+      for (srcText <- sourceTexts) {
+        srcText.persist()
+      }
+
 			println(s"---- Persisted!! ----")
 			println(s"---- Continuing to next ----")
     }

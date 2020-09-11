@@ -1,4 +1,4 @@
-package com.ryanquey.intertextualitygraph.models.books;
+package com.ryanquey.intertextualitygraph.models.texts;
 
 import com.datastax.oss.driver.api.mapper.annotations.Dao;
 import com.datastax.oss.driver.api.mapper.annotations.Select;
@@ -14,10 +14,9 @@ import com.ryanquey.datautils.models.BaseDao;
 
 @Dao 
 @DefaultNullSavingStrategy(NullSavingStrategy.DO_NOT_SET) 
-public interface BookDao extends BaseDao<BookRecord> {
+public interface TextDao extends BaseDao<TextRecord> {
 
   /** Simple selection by full primary key. */
   @Select
-  BookRecord findOne(String name);
-
+  TextRecord findOne(String startingBook, Integer startingChapter, Integer startingVerse, UUID id);
 }

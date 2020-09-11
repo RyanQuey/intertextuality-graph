@@ -1,6 +1,7 @@
 package com.ryanquey.intertextualitygraph.dataimporter
 import scala.collection.immutable.Map
 import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers._
+import com.ryanquey.intertextualitygraph.initializers.Initialize
 
 object ImportTheographicData {
   /*
@@ -12,13 +13,13 @@ object ImportTheographicData {
   // csv file name to the table 
   val dataSourceFiles = Map(
     ("books", "books-Grid view.csv"),
-    // ("books", "books-Grid view.csv"),
-    // ("chapters", "chapters-Grid view.csv"),
-    // ("verses", "verses-Grid view.csv"),
+    ("chapters", "chapters-Grid view.csv"),
+    ("verses", "verses-completed_records.csv")
   )
 
 
   def main (args: Array[String]) = {
+    new Initialize()
     // get the data files
     for ((tablename, filename) <- dataSourceFiles) {  
       println(s"now importing file $filename into table $tablename")

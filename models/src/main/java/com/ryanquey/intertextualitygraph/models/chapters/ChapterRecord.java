@@ -1,4 +1,4 @@
-package com.ryanquey.intertextualitygraph.models.books;
+package com.ryanquey.intertextualitygraph.models.chapters;
 
 import com.datastax.oss.driver.api.mapper.annotations.Entity;
 import com.datastax.oss.driver.api.mapper.annotations.CqlName;
@@ -12,22 +12,25 @@ import com.ryanquey.intertextualitygraph.models.InventoryMapper;
 import com.ryanquey.intertextualitygraph.models.InventoryMapperObj;
 
 @Entity 
-@CqlName("books") 
-class BookRecord extends BookBase implements Record {
+@CqlName("chapters") 
+class ChapterRecord extends ChapterBase implements Record {
   
   @PartitionKey(0) 
-  private String name; // C* TEXT 
+  private String book; // C* TEXT 
 
-  BookRecord(Book book) {
-    DataClassesHelpers.copyMatchingFields(book, this);
+  @ClusteringColumn(0) 
+  private Integer number; // C* INT 
+
+  ChapterRecord(Chapter chapter) {
+    DataClassesHelpers.copyMatchingFields(chapter, this);
   }
 
   // keeping empty constructor for use with Dao
-  BookRecord() {};
-  BookDao getDao () {
+  ChapterRecord() {};
+  ChapterDao getDao () {
     return InventoryMapperObj
       .inventoryMapper
-      .bookDao("books");
+      .chapterDao("chapters");
   }
 
 };

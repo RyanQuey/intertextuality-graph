@@ -6,7 +6,8 @@
 
 env_vars_parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-export DATA_UTILS_VERSION=0.5.0
+export DATA_UTILS_VERSION=0.5.1
+export INTERTEXTUALITY_GRAPH_MODELS_VERSION=0.3.0
 
 export INTERTEXTUALITY_GRAPH_PROJECT_DIR=$env_vars_parent_path/../..
 echo $INTERTEXTUALITY_GRAPH_PROJECT_DIR

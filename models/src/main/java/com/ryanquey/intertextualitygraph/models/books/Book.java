@@ -26,7 +26,6 @@ public class Book extends BookBase implements Model {
     schema.put("testament", "String");// TEXT 
     schema.put("chapterCount", "Integer");// INT
     schema.put("verseCount", "Integer");// INT
-    schema.put("userId", "String");// UUID 
     schema.put("comments", "String");// TEXT
     schema.put("updatedAt", "Instant");// TIMESTAMP, 
   };
@@ -36,5 +35,12 @@ public class Book extends BookBase implements Model {
   };
 
 
-  public void persist () {};
+  public void persist () {
+    System.out.println("persisting book");
+    BookRecord e =  new BookRecord(this);
+
+    BookDao dao = e.getDao();
+
+    dao.save(e);
+  };
 }

@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS intertextuality_graph.books (
   testament TEXT, 
   chapter_count INT,
   verse_count INT,
-  user_id UUID, 
   comments TEXT,
   updated_at TIMESTAMP, 
   PRIMARY KEY (name) 

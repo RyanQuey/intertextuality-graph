@@ -1,6 +1,7 @@
 package com.ryanquey.intertextualitygraph.models.books;
 
 import java.util.Date;
+import java.util.UUID;
 import java.time.Instant;
 
 // needs to be java bean, so record can be compatible with Cassandra java driver
@@ -23,7 +24,6 @@ public class BookBase {
   private String testament; // TEXT 
   private Integer chapterCount; // INT
   private Integer verseCount; // INT
-  private String userId; // UUID 
   private String comments; // TEXT
   private Instant updatedAt; // TIMESTAMP, 
 
@@ -116,12 +116,6 @@ public class BookBase {
   }
   public void setVerseCount(Integer verseCount) {
     this.verseCount = verseCount;
-  }
-  public String getUserId() {
-    return userId;
-  }
-  public void setUserId(String userId) {
-    this.userId = userId;
   }
   public String getComments() {
     return comments;

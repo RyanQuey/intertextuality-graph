@@ -4,18 +4,19 @@ CREATE TABLE IF NOT EXISTS intertextuality_graph.texts (
   id UUID, 
   canonical BOOLEAN, 
   canonical_text TEXT,
-  starting_book_id UUID,
-  starting_chapter_id UUID,
-  starting_verse_id UUID,
-  ending_book_id UUID,
-  ending_chapter_id UUID,
-  ending_verse_id UUID,
+  starting_book TEXT,
+  starting_chapter INT,
+  starting_verse INT,
+  ending_book TEXT,
+  ending_chapter INT,
+  ending_verse INT,
   split_passages LIST<TEXT>,
   testament TEXT, 
   greek_translation TEXT, 
   english_translation TEXT, 
-  user_id UUID, 
   comments TEXT,
   updated_at TIMESTAMP, 
-  PRIMARY KEY ((starting_book_id), starting_chapter_id, starting_verse_id, id)
+  // allows for decent partitioning, and good sorting. Don't want to require chapter though, either for referencing or when adding rows, so don't make a partition key
+  // Note that edge will have to reference it
+  PRIMARY KEY (starting_book, id)
 );

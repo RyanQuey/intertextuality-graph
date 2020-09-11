@@ -15,6 +15,7 @@ object Helpers {
       case b: Book => b.schema
       case c: Chapter => c.schema
       case v: Verse => v.schema
+      case t: Text => t.schema
     }
 
     println(s"schema found: $schema")
@@ -33,6 +34,7 @@ object Helpers {
       case b: Book => booksFieldsConverter(rawValue, field, fieldType)
       case c: Chapter => chaptersFieldsConverter(rawValue, field, fieldType)
       case v: Verse => versesFieldsConverter(rawValue, field, fieldType)
+      case t: Text => textsFieldsConverter(rawValue, field, fieldType)
     }
 
     value
@@ -105,7 +107,37 @@ object Helpers {
     }
 
     value
-    
+  }
+
+  // currently just assuming tsk-cli format
+  def sourceTextsFieldsConverter (rawValue : String, field : String, fieldType : String) = {
+    val value = field match {
+      // they return a string, get the int at the end and use instead
+      case "starting_book" => rawValue // TODO int > bookname
+      case "starting_chapter" => rawValue
+      case "starting_verse" => rawValue
+      case "comments" => rawValue
+      
+      case _ => typecast(rawValue, fieldType)
+    }
+
+    value
+  }
+  def alludingTextsFieldsConverter (rawValue : String, field : String, fieldType : String) = {
+    val value = field match {
+      // they return a string, get the int at the end and use instead
+      case "starting_book" => rawValue // TODO int > bookname
+      case "starting_chapter" => rawValue
+      case "starting_verse" => rawValue
+      case "ending_book" => rawValue // TODO int > bookname
+      case "ending_chapter" => rawValue
+      case "ending_verse" => rawValue
+      case "comments" => rawValue
+
+      case _ => typecast(rawValue, fieldType)
+    }
+
+    value
   }
 }
 

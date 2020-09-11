@@ -20,11 +20,17 @@ cd ./etl-tools/
 ```
 
 # Dataset used
-[Tyndale House's STEPBible Data](https://github.com/tyndale/STEPBible-Data). See their site for their license. Using especially `TOTHT - Tyndale OT Hebrew Tagged text` and `TANTT - Tyndale Amalgamated NT Tagged texts`, but might soon (or have already??) branched out to others as well.
+- [Tyndale House's STEPBible Data](https://github.com/tyndale/STEPBible-Data). See their site for their license. Using especially `TOTHT - Tyndale OT Hebrew Tagged text` and `TANTT - Tyndale Amalgamated NT Tagged texts`, but might soon (or have already??) branched out to others as well.
 
-[Tyndale House, Cambridge](www.TyndaleHouse.com)
-["STEP Bible"](www.STEPBible.org)
-[Data source](tyndale.github.io/STEPBible-Data/)
+- [Tyndale House, Cambridge](www.TyndaleHouse.com)
+- ["STEP Bible"](www.STEPBible.org)
+- [Data source](tyndale.github.io/STEPBible-Data/)
+- https://github.com/robertrouse/theographic-bible-metadata
+
+### For Cross references:
+- http://www.openbible.info/labs/cross-references/
+- https://github.com/narthur/tsk-cli/blob/master/tskxref.txt
+
 
 ## Data format
 https://github.com/tyndale/STEPBible-Data#data-format

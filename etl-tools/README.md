@@ -21,3 +21,13 @@ curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89
 sudo apt-get update
 sudo apt-get install sbt
 
+# Debugging
+## object models is not a member of package com.ryanquey.intertextualitygraph
+- Make sure models project is packaged and installed into mvn repo
+
+```
+models/scripts/install-to-mvn-repo.sh
+```
+
+- Make sure also that the version number set in the config/env-vars.sh is same as what is set in the models project's pom.xml file.
+- If all else fails, nuke the repo and restart (see main git repo README for how to nuke)

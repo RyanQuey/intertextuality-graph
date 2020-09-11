@@ -13,9 +13,8 @@ object ImportTheographicData {
   // csv file name to the table 
   val dataSourceFiles = Map(
     ("books", "books-Grid view.csv"),
-    // ("books", "books-Grid view.csv"),
-    // ("chapters", "chapters-Grid view.csv"),
-    // ("verses", "verses-Grid view.csv"),
+    ("chapters", "chapters-Grid view.csv"),
+    ("verses", "verses-completed_records.csv")
   )
 
 

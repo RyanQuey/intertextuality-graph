@@ -18,6 +18,11 @@ public class Verse extends VerseBase implements Model {
     schema.put("scrollmapperId", "String"); // TEXT 
     schema.put("canonical", "Boolean"); // BOOLEAN 
     schema.put("canonicalText", "String"); // TEXT
+    schema.put("kjvText", "String"); // TEXT
+    schema.put("mtText", "String"); // TEXT
+    schema.put("sblGntText", "String"); // TEXT
+    schema.put("rahlfsLxxText", "String"); // TEXT
+    schema.put("byzGntText", "String"); // TEXT
     schema.put("chapter", "Integer"); // INT 
     schema.put("book", "String"); // TEXT 
     schema.put("bookSeries", "String"); // TEXT 

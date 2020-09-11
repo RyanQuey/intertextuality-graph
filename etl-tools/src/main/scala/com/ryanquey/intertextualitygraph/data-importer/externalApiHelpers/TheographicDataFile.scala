@@ -63,13 +63,13 @@ class TheographicDataFile (table : String, filename : String) {
 
       // first, instantiate a record of our model
       // need to typecast (https://alvinalexander.com/scala/how-to-cast-objects-class-instance-in-scala-asinstanceof/) since these models implement Model interface
-      val record : Model = table match {
+      val modelInstance : Model = table match {
         case "books" => new Book().asInstanceOf[Model]
         case "chapters" => new Chapter().asInstanceOf[Model]
         case "verses" => new Verse().asInstanceOf[Model]
       }
 
-      println(s"now should have a blank record: $record")
+      println(s"now should have a blank modelInstance: $modelInstance")
       for ((csvCol : String, data : Map[String, String]) <- fieldsMapping) {  
         // for the break to function as "continue"
         breakable {
@@ -84,27 +84,26 @@ class TheographicDataFile (table : String, filename : String) {
           // dbCol corresponds with field in our model, so use that
           // can be integer, or string, or anything that C* java driver takes
           println(s"model field is $modelField")
-          val value = convertRawValue(record, modelField, rawValue)
+          val value = convertRawValue(modelInstance, modelField, rawValue)
 
           if (value == null) {
             break
           }
 
           println(s"value to set: $value")
-          println(s"setting to: ${snakeToCamel(dbCol)} using record.set${snakeToUpperCamel(dbCol)}")
+          println(s"setting to: ${snakeToCamel(dbCol)} using modelInstance.set${snakeToUpperCamel(dbCol)}")
 
-          record.setV(dbCol, value)
+          modelInstance.setV(dbCol, value)
         }
       }
 
 			println(s"Persisting")
-      record.persist();
+      modelInstance.persist();
 			println(s"---- Persisted!! ----")
 			println(s"---- Continuing to next ----")
     }
 
     // TODO I think it does not stop itself because it opened a file and did not close it (?)
   }
-
 
 }

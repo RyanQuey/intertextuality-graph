@@ -24,7 +24,6 @@ public class BookBase {
   private String testament; // TEXT 
   private Integer chapterCount; // INT
   private Integer verseCount; // INT
-  private UUID userId; // UUID 
   private String comments; // TEXT
   private Instant updatedAt; // TIMESTAMP, 
 
@@ -117,12 +116,6 @@ public class BookBase {
   }
   public void setVerseCount(Integer verseCount) {
     this.verseCount = verseCount;
-  }
-  public UUID getUserId() {
-    return userId;
-  }
-  public void setUserId(UUID userId) {
-    this.userId = userId;
   }
   public String getComments() {
     return comments;

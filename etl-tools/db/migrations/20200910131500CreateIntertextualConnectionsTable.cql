@@ -1,19 +1,23 @@
 CREATE TABLE IF NOT EXISTS intertextuality_graph.intertextual_connections (
   // table for the edge
   id UUID,
+  // how confident we can be that this connection was meant by original author
   confidence_level FLOAT,
-  source_text_id UUID,
+
+  // how important this connection is in teh argument of original author. Hays' criteria "volume"
+  volume_level FLOAT,
+  source_text_id TIMEUUID,
   source_text_starting_book TEXT,
-  source_text_friendly TEXT,
-  alluding_text_id UUID,
+  alluding_text_id TIMEUUID,
   alluding_text_starting_book TEXT,
-  alluding_text_friendly TEXT,
+  // who created this connection
   user_id UUID,
   beale_categories LIST<TEXT>,
+  // e.g., allusion, quote, echo, etc (?). Use list of constants to validate this field
   connection_type TEXT, 
   connection_significance TEXT, 
   comments TEXT,
-  // not just different languages
+  // not just different languages. E.g., can be Theodotian vs other LXX versions
   source_version TEXT,
   source_language TEXT,
   updated_at TIMESTAMP, 

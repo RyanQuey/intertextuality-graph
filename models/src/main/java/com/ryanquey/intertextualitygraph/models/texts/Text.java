@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import com.ryanquey.datautils.models.Model;
+import com.datastax.oss.driver.api.core.uuid.Uuids;
+
 
 // TODO consider making these models in scala, since they don't interact with java driver directly
 // FOr now, just put everything in a helpers file...better to not use oop in scala to learn fp. For now
@@ -18,6 +20,7 @@ public class Text extends TextBase implements Model {
   // constructors
   public Text() {
     // initialize schema 
+    schema.put("id", "UUID"); // INT 
     schema.put("yearWritten", "String"); // INT 
     schema.put("author", "String"); // TEXT
     schema.put("canonical", "String"); // BOOLEAN 
@@ -33,7 +36,13 @@ public class Text extends TextBase implements Model {
     schema.put("greekTranslation", "String"); // TEXT 
     schema.put("englishTranslation", "String"); // TEXT 
     schema.put("comments", "String"); // TEXT
+    schema.put("createdBy", "String"); // TEXT 
+    schema.put("updatedBy", "String"); // TEXT 
     schema.put("updatedAt", "Instant"); // TIMESTAMP 
+
+    if (this.getId() == null) {
+      this.setId(Uuids.timeBased());
+    }
   };
 
   public Text(TextRecord textRecord) {
@@ -49,4 +58,20 @@ public class Text extends TextBase implements Model {
     dao.save(e);
   };
 
+  // returns null if nothing found
+  public Text findByRef () throws Exception {
+    TextRecord text =  new TextRecord(this);
+    System.out.println("persisting text " + text);
+    TextDao dao = text.getDao();
+
+    TextRecord found = dao.findByRef(text.getCreatedBy(), text.getEndingBook(), text.getEndingChapter(), text.getEndingVerse(), text.getStartingBook(), text.getStartingChapter(), text.getStartingVerse());
+
+    // often we don't care about the returned record, just want to know whether it exists or not. But good to return a record anyways, just in case
+    if (found != null) {
+      return new Text(found);
+    } else {
+      return null;
+    }
+
+  }
 }

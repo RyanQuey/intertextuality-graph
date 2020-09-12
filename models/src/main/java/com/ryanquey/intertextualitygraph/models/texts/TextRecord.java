@@ -22,7 +22,7 @@ class TextRecord extends TextBase implements Record {
   private String startingBook;
 
   @ClusteringColumn(0)
-  private List<String> splitPassages;
+  private UUID id;
 
   TextRecord(Text text)  throws Exception {
     DataClassesHelpers.copyMatchingFields(text, this);

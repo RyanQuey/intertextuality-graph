@@ -12,12 +12,14 @@ import com.ryanquey.datautils.models.ModelBase;
 // will not use this class directly, but will be parent class to other classes
 
 public class TextBase extends ModelBase {
+
+  private UUID id;  
   private String startingBook;  
-  private List<String> splitPassages;  // LIST<TEXT>
   private Integer yearWritten;  // INT 
   private String author;  // TEXT
   private Boolean canonical;  // BOOLEAN 
   private String canonicalText;  // TEXT
+  private List<String> splitPassages;  // LIST<TEXT>
   private Integer startingChapter;  
   private Integer startingVerse;  
   private String endingBook;  
@@ -27,6 +29,8 @@ public class TextBase extends ModelBase {
   private String greekTranslation;  // TEXT 
   private String englishTranslation;  // TEXT 
   private String comments;  // TEXT
+  private String createdBy;
+  private String updatedBy; 
   private Instant updatedAt; // TIMESTAMP, 
 
   public Integer getYearWritten() {
@@ -124,6 +128,24 @@ public class TextBase extends ModelBase {
   }
   public void setUpdatedAt(Instant updatedAt) {
     this.updatedAt = updatedAt;
+  }
+  public UUID getId() {
+    return id;
+  }
+  public void setId(UUID id) {
+    this.id = id;
+  }
+  public String getCreatedBy() {
+    return createdBy;
+  }
+  public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
+  }
+  public String getUpdatedBy() {
+    return updatedBy;
+  }
+  public void setUpdatedBy(String updatedBy) {
+    this.updatedBy = updatedBy;
   }
 
 

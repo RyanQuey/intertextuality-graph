@@ -19,5 +19,10 @@ public interface TextDao extends BaseDao<TextRecord> {
 
   /** Simple selection by full primary key. */
   @Select
-  TextRecord findOne(String startingBook, List<String> splitPassages);
+  TextRecord findOne(String startingBook, UUID id);
+
+    
+  // this is hideous
+  @Select(customWhereClause = "solr_query='created_by::createdBy AND ending_book::endingBook AND ending_chapter::endingChapter AND ending_verse::endingVerse AND starting_book::startingBook AND starting_chapter::startingChapter AND starting_verse::startingVerse'")
+  TextRecord findByRef(String createdBy, String endingBook, Integer endingChapter, Integer endingVerse, String startingBook, Integer startingChapter, Integer startingVerse); 
 }

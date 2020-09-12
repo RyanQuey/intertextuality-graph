@@ -88,6 +88,9 @@ class TSKDataFile (table : String, filename : String) {
       alludingText.setEndingBook(atBook)
       alludingText.setEndingChapter(atChapter)
       alludingText.setEndingVerse(atVerse)
+
+      alludingText.setCreatedBy("treasury-of-scripture-knowledge")
+      alludingText.setUpdatedBy("treasury-of-scripture-knowledge")
       
       // make sur eto set type as Java string, or you will get Scala array back which doesn't convert to list the same way
       val splitPassages = allRefsStr.split(";").toList.asJava
@@ -97,18 +100,20 @@ class TSKDataFile (table : String, filename : String) {
       
       for (srcText <- sourceTexts) {
         breakable {
-  			  println(s"Persisting sourceText ${srcText}")
+  			  println(s"Persisting sourceText ${srcText} if not exists")
   			  // if ref was a blank string, skip it
   			  if (srcText.getStartingBook() == null) {
   			    // continue
   			    break
   			  }
   			  
-          srcText.persist()
+  			  // don't want dupes, so find or create
+          TextHelpers.createByRefIfNotExists(srcText)
         }
       }
-			println(s"Persisting alludingText​${alludingText}")
-      alludingText.persist();
+      // don't want dupes, so find or create
+			println(s"Persisting alludingText ${alludingText} if not exists")
+      TextHelpers.createByRefIfNotExists(alludingText)
 
 			println(s"---- Persisted!! ----")
 			println(s"---- Continuing to next ----")

@@ -5,7 +5,9 @@ import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
 import scala.collection.JavaConverters._ 
+import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
+import com.datastax.oss.driver.api.core.cql._;
 
 // TODO make this, I think it's helpful. Can have better helpers
 // case class Reference()
@@ -52,16 +54,38 @@ object TextHelpers {
       text.setEndingVerse(endingVerse)
     }
 
+    text.setCreatedBy("treasury-of-scripture-knowledge")
+    text.setUpdatedBy("treasury-of-scripture-knowledge")
     
     // NOTE for TSK data at least, should not have any semicolon at this point, so will just be a single split passage.
     val splitPassages = osisRange.split(";").toList.asJava
-      
     text.setSplitPassages(splitPassages)
-
   }
-  
-  def connectTexts (srcText : Text, alludingText : Text) = {
-    srcText
-    // ...
+
+  // you don't want to do this all the time, but only when you don't have access to the id of a text, and want to make sure to not create duplicates (e.g., when importing data from a file, and want to be able to do so multiple times without creating duplicates)
+  // NOTE does not update...that would require doing some stuff, and I dont need updating yet
+  def createByRefIfNotExists (text : Text) = {
+    // find by ref. Use the unchangeable columns, though eventually split_passages should work too. 
+    // do in dao, even though this si too specific and too many moving parts to entrust to their limited api in the dao. Makes it easy, you get your model back
+    // using solr query, would be like so if we didn't use dao
+    val solrQuery = s"""SELECT * FROM intertextuality_graph.texts WHERE solr_query = 'created_by:${text.getCreatedBy} 
+      AND ending_book:${text.getEndingBook}
+      AND ending_chapter:${text.getEndingChapter}
+      AND ending_verse:${text.getEndingVerse}
+      AND starting_book:${text.getStartingBook}
+      AND starting_chapter:${text.getStartingChapter}
+      AND starting_verse:${text.getStartingVerse}' LIMIT 1;
+      """
+
+    // consider using bindMarker() for performance if we end up using this a lot
+    // val query = selectFrom("texts").all().whereColumn("solr_query").isEqualTo(literal(solrQuery).limit(1);
+    val rs : ResultSet = CassandraDb.execute(solrQuery)
+    val result : Row = rs.one()
+
+    val dbMatch : Boolean = text.existsByRef();
+    if (!dbMatch) {
+      // go ahead and create another
+      text.persist();
+    }
   }
 }

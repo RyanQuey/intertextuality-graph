@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import com.ryanquey.datautils.models.Model;
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.ryanquey.datautils.cassandraHelpers.CassandraDb;
+import com.datastax.oss.driver.api.core.cql.*;
 
 
 // TODO consider making these models in scala, since they don't interact with java driver directly
@@ -59,18 +61,35 @@ public class Text extends TextBase implements Model {
   };
 
   // returns null if nothing found
-  public Text findByRef () throws Exception {
-    TextRecord text =  new TextRecord(this);
-    System.out.println("persisting text " + text);
-    TextDao dao = text.getDao();
+  // NOTE TODO currently doesn't work, returns error InvalidQueryException: Undefined column name solr_query
+  public Boolean existsByRef () throws Exception {
+    System.out.println("persisting text " + this);
+    TextDao dao = new TextRecord().getDao();
 
-    TextRecord found = dao.findByRef(text.getCreatedBy(), text.getEndingBook(), text.getEndingChapter(), text.getEndingVerse(), text.getStartingBook(), text.getStartingChapter(), text.getStartingVerse());
+    String solrQuery = String.format("'created_by:%s" +
+      " AND ending_book:%s" +
+      " AND ending_chapter:%s" +
+      " AND ending_verse:%s" +
+      " AND starting_book:%s" +
+      " AND starting_chapter:%s" +
+      " AND starting_verse:%s'", this.getCreatedBy(), this.getEndingBook(), this.getEndingChapter(), this.getEndingVerse(), this.getStartingBook(), this.getStartingChapter(), this.getStartingVerse());
+
+    
+    // not working unfortunately, spend maybe an hour and no luck
+    // TextRecord found = dao.findBySolr(solrQuery);
+    String query = "SELECT * FROM intertextuality_graph.texts where solr_query = " + solrQuery;
+    System.out.print("Running CQL: " + query);
+    ResultSet rs = CassandraDb.execute(query);
+    Row row = rs.one();
+
 
     // often we don't care about the returned record, just want to know whether it exists or not. But good to return a record anyways, just in case
-    if (found != null) {
-      return new Text(found);
+    if (row != null) {
+      // TODO this would be better, to return a Text instance
+      // return new Text(found);
+      return true;
     } else {
-      return null;
+      return false;
     }
 
   }

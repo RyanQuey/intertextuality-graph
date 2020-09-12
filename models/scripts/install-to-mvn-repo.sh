@@ -11,6 +11,9 @@ fi
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 . $parent_path/../../scripts/config/env-vars.sh
 
+# seems to get teh ds java driver generated classes to compile right more consistently
+rm -rf $INTERTEXTUALITY_GRAPH_MODELS_DIR/target
+
 version=$INTERTEXTUALITY_GRAPH_MODELS_VERSION
 artifactId=models
 

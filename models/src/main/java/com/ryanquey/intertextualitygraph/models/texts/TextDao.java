@@ -4,6 +4,7 @@ import com.datastax.oss.driver.api.mapper.annotations.Dao;
 import com.datastax.oss.driver.api.mapper.annotations.Select;
 import com.datastax.oss.driver.api.mapper.annotations.Update;
 import com.datastax.oss.driver.api.mapper.annotations.Insert;
+import com.datastax.oss.driver.api.mapper.annotations.Query;
 import com.datastax.oss.driver.api.mapper.entity.saving.NullSavingStrategy;
 import com.datastax.oss.driver.api.mapper.annotations.DefaultNullSavingStrategy;
 import java.util.UUID;
@@ -17,12 +18,12 @@ import com.ryanquey.datautils.models.BaseDao;
 @DefaultNullSavingStrategy(NullSavingStrategy.DO_NOT_SET) 
 public interface TextDao extends BaseDao<TextRecord> {
 
+  /*
+  @Query("SELECT * FROM intertextuality_graph.texts where solr_query = ':solr'")
+  TextRecord queryBySolr(String solr); 
+  */
+
   /** Simple selection by full primary key. */
   @Select
   TextRecord findOne(String startingBook, UUID id);
-
-    
-  // this is hideous
-  @Select(customWhereClause = "solr_query='created_by::createdBy AND ending_book::endingBook AND ending_chapter::endingChapter AND ending_verse::endingVerse AND starting_book::startingBook AND starting_chapter::startingChapter AND starting_verse::startingVerse'")
-  TextRecord findByRef(String createdBy, String endingBook, Integer endingChapter, Integer endingVerse, String startingBook, Integer startingChapter, Integer startingVerse); 
 }

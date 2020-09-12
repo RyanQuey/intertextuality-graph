@@ -35,7 +35,7 @@ public class Book extends BookBase implements Model {
   };
 
 
-  public void persist () {
+  public void persist () throws Exception {
     System.out.println("persisting book");
     BookRecord e =  new BookRecord(this);
 

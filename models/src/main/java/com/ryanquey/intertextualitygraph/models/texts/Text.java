@@ -40,9 +40,9 @@ public class Text extends TextBase implements Model {
     // TODO 
   };
 
-  public void persist () {
-    System.out.println("persisting text");
+  public void persist ()  throws Exception {
     TextRecord e =  new TextRecord(this);
+    System.out.println("persisting text " + e);
 
     TextDao dao = e.getDao();
 

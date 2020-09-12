@@ -123,21 +123,21 @@ object Helpers {
   }
 
   
-  def alludingTextsFieldsConverter (rawValue : String, csvField : String, field : String, fieldType : String) = {
-    val value = csvField match {
-      // they return a string, get the int at the end and use instead
-      case "starting_book" => rawValue // TODO int > bookname
-      case "starting_chapter" => rawValue
-      case "starting_verse" => rawValue
-      case "ending_book" => rawValue // TODO int > bookname
-      case "ending_chapter" => rawValue
-      case "ending_verse" => rawValue
-      case "comments" => rawValue
+  // def alludingTextsFieldsConverter (rawValue : String, csvField : String, field : String, fieldType : String) = {
+  //   val value = csvField match {
+  //     // they return a string, get the int at the end and use instead
+  //     case "starting_book" => rawValue // TODO int > bookname
+  //     case "starting_chapter" => rawValue
+  //     case "starting_verse" => rawValue
+  //     case "ending_book" => rawValue // TODO int > bookname
+  //     case "ending_chapter" => rawValue
+  //     case "ending_verse" => rawValue
+  //     case "comments" => rawValue
 
-      case _ => typecast(rawValue, fieldType)
-    }
+  //     case _ => typecast(rawValue, fieldType)
+  //   }
 
-    value
-  }
+  //   value
+  // }
 }
 

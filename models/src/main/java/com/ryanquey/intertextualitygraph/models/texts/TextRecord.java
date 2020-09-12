@@ -1,6 +1,7 @@
 package com.ryanquey.intertextualitygraph.models.texts;
 
 import java.util.UUID;
+import java.util.List;
 
 import com.datastax.oss.driver.api.mapper.annotations.Entity;
 import com.datastax.oss.driver.api.mapper.annotations.CqlName;
@@ -21,14 +22,15 @@ class TextRecord extends TextBase implements Record {
   private String startingBook;
 
   @ClusteringColumn(0)
-  private String splitPassages;
+  private List<String> splitPassages;
 
-  TextRecord(Text text) {
+  TextRecord(Text text)  throws Exception {
     DataClassesHelpers.copyMatchingFields(text, this);
   }
 
   // keeping empty constructor for use with Dao
   TextRecord() {};
+  
   TextDao getDao () {
     return InventoryMapperObj
       .inventoryMapper

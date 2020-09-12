@@ -36,7 +36,7 @@ public class Verse extends VerseBase implements Model {
   };
 
 
-  public void persist () {
+  public void persist ()  throws Exception {
     System.out.println("persisting verse");
     VerseRecord e =  new VerseRecord(this);
 

@@ -30,7 +30,7 @@ public class Chapter extends ChapterBase implements Model {
   };
 
 
-  public void persist () {
+  public void persist ()  throws Exception {
     System.out.println("persisting chapter");
     ChapterRecord e =  new ChapterRecord(this);
 

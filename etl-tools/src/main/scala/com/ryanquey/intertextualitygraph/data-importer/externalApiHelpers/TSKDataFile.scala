@@ -1,6 +1,7 @@
 package com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers
 import java.nio.file.{Path, Paths, Files}
 import java.io.{File, Reader, FileReader, InputStreamReader, FileInputStream}
+import java.util.{List, ArrayList, Arrays}
 import org.apache.commons.io.input.BOMInputStream
 import scalaj.http._
 import scala.io.Source
@@ -55,12 +56,18 @@ class TSKDataFile (table : String, filename : String) {
       val allRefsStr : String = csvRecord.get("refs") 
 
       // unfortunately this will create multiple records for something like jhn.1.1, jhn.1.3-5, even though really it should only be one edge. It's fine for now though
+      println("allRefsStr: " + allRefsStr)
       val sourceTexts : Array[Text] = allRefsStr.split(";").map((osisRange : String) => {
         // examples: 
         // ps.95.5
         // ps.104.3;ps.104.5-ps.104.9
+        
+        // sometimes there are typos, and you ahve two semicolons together. In that case, just skip
+        
         val srcText = new Text()
-        TextHelpers.populateFieldsfromOsis(osisRange, srcText)
+        if (osisRange != "") {
+          TextHelpers.populateFieldsfromOsis(osisRange, srcText)
+        }
 
         srcText
       })
@@ -81,12 +88,27 @@ class TSKDataFile (table : String, filename : String) {
       alludingText.setEndingBook(atBook)
       alludingText.setEndingChapter(atChapter)
       alludingText.setEndingVerse(atVerse)
+      
+      // make sur eto set type as Java string, or you will get Scala array back which doesn't convert to list the same way
+      val splitPassages = allRefsStr.split(";").toList.asJava
+      
+      alludingText.setSplitPassages(splitPassages)
 
-			println(s"Persisting")
-      alludingText.persist();
+      
       for (srcText <- sourceTexts) {
-        srcText.persist()
+        breakable {
+  			  println(s"Persisting sourceText ${srcText}")
+  			  // if ref was a blank string, skip it
+  			  if (srcText.getStartingBook() == null) {
+  			    // continue
+  			    break
+  			  }
+  			  
+          srcText.persist()
+        }
       }
+			println(s"Persisting alludingText​${alludingText}")
+      alludingText.persist();
 
 			println(s"---- Persisted!! ----")
 			println(s"---- Continuing to next ----")

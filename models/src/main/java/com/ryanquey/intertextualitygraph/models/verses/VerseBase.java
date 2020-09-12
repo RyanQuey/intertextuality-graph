@@ -2,11 +2,12 @@ package com.ryanquey.intertextualitygraph.models.verses;
 
 import java.time.Instant;
 
+import com.ryanquey.datautils.models.ModelBase;
 // needs to be java bean, so record can be compatible with Cassandra java driver
 // set all db fields in here. So BookRecord can work with it. But will inherit by Book class also, so DRY up Book class
 // will not use this class directly, but will be parent class to other classes
 
-public class VerseBase {
+public class VerseBase extends ModelBase {
   private Integer number;  // INT
   private Integer yearWritten;  // INT 
   private String author;  // TEXT

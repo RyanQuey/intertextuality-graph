@@ -21,7 +21,7 @@ class ChapterRecord extends ChapterBase implements Record {
   @ClusteringColumn(0) 
   private Integer number; // C* INT 
 
-  ChapterRecord(Chapter chapter) {
+  ChapterRecord(Chapter chapter)  throws Exception {
     DataClassesHelpers.copyMatchingFields(chapter, this);
   }
 

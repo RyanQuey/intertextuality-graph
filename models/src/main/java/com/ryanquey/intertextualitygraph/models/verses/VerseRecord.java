@@ -24,7 +24,7 @@ class VerseRecord extends VerseBase implements Record {
   @ClusteringColumn(1)
   private Integer number;
 
-  VerseRecord(Verse verse) {
+  VerseRecord(Verse verse)  throws Exception {
     DataClassesHelpers.copyMatchingFields(verse, this);
   }
 

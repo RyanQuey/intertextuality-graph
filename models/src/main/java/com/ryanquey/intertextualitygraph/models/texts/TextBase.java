@@ -5,22 +5,24 @@ import java.util.UUID;
 import java.util.List;
 import java.time.Instant;
 
+import com.ryanquey.datautils.models.ModelBase;
+
 // needs to be java bean, so record can be compatible with Cassandra java driver
 // set all db fields in here. So BookRecord can work with it. But will inherit by Book class also, so DRY up Book class
 // will not use this class directly, but will be parent class to other classes
 
-public class TextBase {
+public class TextBase extends ModelBase {
+  private String startingBook;  
+  private List<String> splitPassages;  // LIST<TEXT>
   private Integer yearWritten;  // INT 
   private String author;  // TEXT
   private Boolean canonical;  // BOOLEAN 
   private String canonicalText;  // TEXT
-  private String startingBook;  
   private Integer startingChapter;  
   private Integer startingVerse;  
   private String endingBook;  
   private Integer endingChapter; 
   private Integer endingVerse;  
-  private List<String> splitPassages;  // LIST<TEXT>
   private String testament;  // TEXT 
   private String greekTranslation;  // TEXT 
   private String englishTranslation;  // TEXT 

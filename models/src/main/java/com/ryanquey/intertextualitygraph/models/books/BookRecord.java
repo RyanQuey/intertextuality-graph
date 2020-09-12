@@ -18,7 +18,7 @@ class BookRecord extends BookBase implements Record {
   @PartitionKey(0) 
   private String name; // C* TEXT 
 
-  BookRecord(Book book) {
+  BookRecord(Book book) throws Exception {
     DataClassesHelpers.copyMatchingFields(book, this);
   }
 

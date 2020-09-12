@@ -4,9 +4,13 @@ import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
+import scala.collection.JavaConverters._ 
+
 
 // TODO make this, I think it's helpful. Can have better helpers
 // case class Reference()
+
+// avoiding 
 
 object TextHelpers {
   // NOTE could be a range, but osisRange could also be a single ref. You won't know until you parse
@@ -23,24 +27,41 @@ object TextHelpers {
     val startingRefData = startingRef.split("\\.")
     println(s"starting ref is: $startingRef")
     val startingBookOsis = startingRefData(0)
+    
     val startingBookName = BookHelpers.osisNameToName(startingBookOsis)
-    val startingChapter = startingRefData(1).toInt
-    val startingVerse = startingRefData(2).toInt
-
     text.setStartingBook(startingBookName)
+    val startingChapter = startingRefData(1).toInt
     text.setStartingChapter(startingChapter)
-    text.setStartingVerse(startingVerse)
+    if (startingRefData.length > 2) {
+      // has a verse (most do for TSK)
+      val startingVerse = startingRefData(2).toInt
+      text.setStartingVerse(startingVerse)
+    }
 
     // parse endingRef
     val endingRefData = endingRef.split("\\.")
     val endingBookOsis = endingRefData(0)
     val endingBookName = BookHelpers.osisNameToName(endingBookOsis)
-    val endingChapter = endingRefData(1).toInt
-    val endingVerse = endingRefData(2).toInt
-
     text.setEndingBook(endingBookName)
+    val endingChapter = endingRefData(1).toInt
     text.setEndingChapter(endingChapter)
-    text.setEndingVerse(endingVerse)
+    
+    if (endingRefData.length > 2) {
+      // has a verse (most do for TSK)
+      val endingVerse = endingRefData(2).toInt
+      text.setEndingVerse(endingVerse)
+    }
 
+    
+    // NOTE for TSK data at least, should not have any semicolon at this point, so will just be a single split passage.
+    val splitPassages = osisRange.split(";").toList.asJava
+      
+    text.setSplitPassages(splitPassages)
+
+  }
+  
+  def connectTexts (srcText : Text, alludingText : Text) = {
+    srcText
+    // ...
   }
 }

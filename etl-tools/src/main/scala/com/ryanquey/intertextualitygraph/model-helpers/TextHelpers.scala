@@ -68,22 +68,34 @@ object TextHelpers {
     // find by ref. Use the unchangeable columns, though eventually split_passages should work too. 
     // do in dao, even though this si too specific and too many moving parts to entrust to their limited api in the dao. Makes it easy, you get your model back
     // using solr query, would be like so if we didn't use dao
-    val solrQuery = s"""SELECT * FROM intertextuality_graph.texts WHERE solr_query = 'created_by:${text.getCreatedBy} 
-      AND ending_book:${text.getEndingBook}
+
+    val startingVersePart = if (text.getStartingVerse != null) s" AND starting_verse:${text.getStartingVerse} " else "";
+
+    val endingVersePart = if (text.getEndingVerse != null) s" AND ending_verse:${text.getEndingVerse} " else "";
+    val solrQuery = s"""solr_query = 'created_by:"${text.getCreatedBy}"
+      AND ending_book:"${text.getEndingBook}"
       AND ending_chapter:${text.getEndingChapter}
-      AND ending_verse:${text.getEndingVerse}
-      AND starting_book:${text.getStartingBook}
+      $endingVersePart
+
+      AND starting_book:"${text.getStartingBook}"
       AND starting_chapter:${text.getStartingChapter}
-      AND starting_verse:${text.getStartingVerse}' LIMIT 1;
+      $startingVersePart
+      
+      ' LIMIT 1;
       """
 
+    val query = s"SELECT * FROM intertextuality_graph.texts WHERE $solrQuery"
+
+    println("running query: " + query)
+    // val dbMatch : Text = Text.findOneBySolr(solrQuery);
+    // val dbMatch : Text = Text.findOneByQuery(query);
     // consider using bindMarker() for performance if we end up using this a lot
     // val query = selectFrom("texts").all().whereColumn("solr_query").isEqualTo(literal(solrQuery).limit(1);
-    val rs : ResultSet = CassandraDb.execute(solrQuery)
-    val result : Row = rs.one()
+    val rs : ResultSet = CassandraDb.execute(query)
+    val dbMatch : Row = rs.one()
 
-    val dbMatch : Boolean = text.existsByRef();
-    if (!dbMatch) {
+
+    if (dbMatch == null) {
       // go ahead and create another
       text.persist();
     }

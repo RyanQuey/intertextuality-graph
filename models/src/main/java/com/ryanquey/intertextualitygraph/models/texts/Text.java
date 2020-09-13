@@ -60,6 +60,29 @@ public class Text extends TextBase implements Model {
     dao.save(e);
   };
 
+  /*
+  public static Text findOneByQuery (String query) throws Exception {
+    TextDao dao = new TextRecord().getDao();
+    TextRecord record = dao.findOneByQuery(query);
+    if (record == null) {
+      return null;
+    } else {
+      return new Text(record);
+    }
+  }
+
+  // making this minimal, so can easily access via scala without changing the java code
+  // NOTE TODO not yet able to make this work
+  public static Text findOneBySolr (String solrQuery) throws Exception {
+    TextDao dao = new TextRecord().getDao();
+    TextRecord record = dao.findOneBySolr(solrQuery);
+    if (record == null) {
+      return null;
+    } else {
+      return new Text(record);
+    }
+  }
+
   // returns null if nothing found
   // NOTE TODO currently doesn't work, returns error InvalidQueryException: Undefined column name solr_query
   public Boolean existsByRef () throws Exception {
@@ -93,4 +116,5 @@ public class Text extends TextBase implements Model {
     }
 
   }
+  */
 }

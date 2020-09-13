@@ -2,6 +2,7 @@ package com.ryanquey.intertextualitygraph.models.chapters;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.time.Instant;
 
 import com.ryanquey.datautils.models.Model;
 
@@ -32,6 +33,7 @@ public class Chapter extends ChapterBase implements Model {
 
   public void persist ()  throws Exception {
     System.out.println("persisting chapter");
+    this.setUpdatedAt(Instant.now());
     ChapterRecord e =  new ChapterRecord(this);
 
     ChapterDao dao = e.getDao();

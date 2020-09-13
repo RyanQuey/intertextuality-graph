@@ -2,6 +2,7 @@ package com.ryanquey.intertextualitygraph.models.verses;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.time.Instant;
 
 import com.ryanquey.datautils.models.Model;
 
@@ -38,6 +39,7 @@ public class Verse extends VerseBase implements Model {
 
   public void persist ()  throws Exception {
     System.out.println("persisting verse");
+    this.setUpdatedAt(Instant.now());
     VerseRecord e =  new VerseRecord(this);
 
     VerseDao dao = e.getDao();

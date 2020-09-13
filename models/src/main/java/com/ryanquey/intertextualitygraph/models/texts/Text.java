@@ -3,6 +3,7 @@ package com.ryanquey.intertextualitygraph.models.texts;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
+import java.time.Instant;
 
 import com.ryanquey.datautils.models.Model;
 import com.datastax.oss.driver.api.core.uuid.Uuids;
@@ -52,6 +53,7 @@ public class Text extends TextBase implements Model {
   };
 
   public void persist ()  throws Exception {
+    this.setUpdatedAt(Instant.now());
     TextRecord e =  new TextRecord(this);
     System.out.println("persisting text " + e);
 

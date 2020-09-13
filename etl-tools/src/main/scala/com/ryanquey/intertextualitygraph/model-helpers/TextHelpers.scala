@@ -7,6 +7,7 @@ import com.ryanquey.intertextualitygraph.models.texts.Text
 import scala.collection.JavaConverters._ 
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
+import java.util.UUID;
 import com.datastax.oss.driver.api.core.cql._;
 
 // TODO make this, I think it's helpful. Can have better helpers
@@ -62,13 +63,7 @@ object TextHelpers {
     text.setSplitPassages(splitPassages)
   }
 
-  // you don't want to do this all the time, but only when you don't have access to the id of a text, and want to make sure to not create duplicates (e.g., when importing data from a file, and want to be able to do so multiple times without creating duplicates)
-  // NOTE does not update...that would require doing some stuff, and I dont need updating yet
-  def createByRefIfNotExists (text : Text) = {
-    // find by ref. Use the unchangeable columns, though eventually split_passages should work too. 
-    // do in dao, even though this si too specific and too many moving parts to entrust to their limited api in the dao. Makes it easy, you get your model back
-    // using solr query, would be like so if we didn't use dao
-
+  def findMatchByRef (text : Text) : Row = {
     val startingVersePart = if (text.getStartingVerse != null) s" AND starting_verse:${text.getStartingVerse} " else "";
 
     val endingVersePart = if (text.getEndingVerse != null) s" AND ending_verse:${text.getEndingVerse} " else "";
@@ -94,8 +89,34 @@ object TextHelpers {
     val rs : ResultSet = CassandraDb.execute(query)
     val dbMatch : Row = rs.one()
 
+    dbMatch
+  }
 
-    if (dbMatch == null) {
+  def updateOrCreateByRef (text : Text) = {
+    // find by ref. Use the unchangeable columns, though eventually split_passages should work too. 
+
+    val dbMatch = findMatchByRef(text)
+
+
+    if (dbMatch != null) {
+      // go ahead and create another
+      text.persist();
+    } else {
+      text.setId(dbMatch.getUuid("id"))
+    }
+  }
+
+  // you don't want to do this all the time, but only when you don't have access to the id of a text, and want to make sure to not create duplicates (e.g., when importing data from a file, and want to be able to do so multiple times without creating duplicates)
+  // NOTE does not update...that would require doing some stuff, and I dont need updating yet
+  def createByRefIfNotExists (text : Text) = {
+    // find by ref. Use the unchangeable columns, though eventually split_passages should work too. 
+    // would do in dao, even though this si too specific and too many moving parts to entrust to their limited api in the dao. Makes it easy, you get your model back...but had way too much trouble. So just do string
+    // using solr query, would be like so if we didn't use dao
+
+    val dbMatch = findMatchByRef(text)
+
+
+    if (dbMatch != null) {
       // go ahead and create another
       text.persist();
     }

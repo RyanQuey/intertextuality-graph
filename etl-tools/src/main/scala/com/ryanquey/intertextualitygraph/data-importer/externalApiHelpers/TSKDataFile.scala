@@ -108,12 +108,12 @@ class TSKDataFile (table : String, filename : String) {
   			  }
   			  
   			  // don't want dupes, so find or create
-          TextHelpers.createByRefIfNotExists(srcText)
+          TextHelpers.updateOrCreateByRef(srcText)
         }
       }
       // don't want dupes, so find or create
 			println(s"Persisting alludingText ${alludingText} if not exists")
-      TextHelpers.createByRefIfNotExists(alludingText)
+      TextHelpers.updateOrCreateByRef(alludingText)
 
 			println(s"---- Persisted!! ----")
 			println(s"---- Continuing to next ----")

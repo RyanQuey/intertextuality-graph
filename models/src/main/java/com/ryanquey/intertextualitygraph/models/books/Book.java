@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import com.ryanquey.datautils.models.Model;
+import java.time.Instant;
 
 public class Book extends BookBase implements Model {
 
@@ -37,6 +38,7 @@ public class Book extends BookBase implements Model {
 
   public void persist () throws Exception {
     System.out.println("persisting book");
+    this.setUpdatedAt(Instant.now());
     BookRecord e =  new BookRecord(this);
 
     BookDao dao = e.getDao();

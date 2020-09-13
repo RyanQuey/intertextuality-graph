@@ -34,6 +34,8 @@ services:
       memlock: -1
     ports:
       - "9042:9042"
+    networks: 
+      - i-graph
 
   #dse-01:
   #  image: datastax/dse-server:6.8.3-ubi7-1
@@ -66,3 +68,8 @@ services:
       - dse
     ports:
       - "9091:9091"
+    networks: 
+      - i-graph
+networks:
+  i-graph:
+    external: true

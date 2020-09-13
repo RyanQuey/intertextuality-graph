@@ -32,6 +32,10 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 # required to package first at least for play, since we need other projects' jars in the lib dir. 
 # but for now, will assume that that has been ran already
 FILE=$INTERTEXTUALITY_GRAPH_PLAY_API_DIR/lib/data-utils-$DATA_UTILS_VERSION.jar    
+
+# only need to do this once, but running again shouldn't hurt anything
+docker network create i-graph
+
 if [ -f $FILE ]; then
   echo "File $FILE exists."
 else

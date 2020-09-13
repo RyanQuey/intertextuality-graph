@@ -98,11 +98,12 @@ object TextHelpers {
     val dbMatch = findMatchByRef(text)
 
 
-    if (dbMatch != null) {
+    if (dbMatch == null) {
       // go ahead and create another
       text.persist();
     } else {
       text.setId(dbMatch.getUuid("id"))
+      text.persist();
     }
   }
 

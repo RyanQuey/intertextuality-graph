@@ -18,6 +18,7 @@ import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
+import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
 // needed so I can call .asScala
 import scala.collection.JavaConverters._
@@ -97,6 +98,9 @@ class TSKDataFile (table : String, filename : String) {
       
       alludingText.setSplitPassages(splitPassages)
 
+      // don't want dupes, so find or create
+			println(s"Persisting alludingText ${alludingText} if not exists")
+      TextHelpers.updateOrCreateByRef(alludingText)
       
       for (srcText <- sourceTexts) {
         breakable {
@@ -109,13 +113,13 @@ class TSKDataFile (table : String, filename : String) {
   			  
   			  // don't want dupes, so find or create
           TextHelpers.updateOrCreateByRef(srcText)
+          println(s"---- Connecting text... ----")
+          IntertextualConnectionsHelpers.connectTexts(srcText, alludingText, "from-generic-list", 30.toFloat)
         }
       }
-      // don't want dupes, so find or create
-			println(s"Persisting alludingText ${alludingText} if not exists")
-      TextHelpers.updateOrCreateByRef(alludingText)
 
 			println(s"---- Persisted!! ----")
+
 			println(s"---- Continuing to next ----")
     }
 

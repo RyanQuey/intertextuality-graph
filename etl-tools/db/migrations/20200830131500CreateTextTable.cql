@@ -10,11 +10,13 @@ CREATE TABLE IF NOT EXISTS intertextuality_graph.texts (
   ending_book TEXT,
   ending_chapter INT,
   ending_verse INT,
-  split_passages frozen <LIST<TEXT>>,
+  // TODO make this a set? but then by default as easy to read...hmmm...
+  split_passages <LIST<TEXT>>,
   testament TEXT, 
   greek_translation TEXT, 
   english_translation TEXT, 
   comments TEXT,
+  // this is like through the play-app, or through treasury-of-scripture-knowledge, or ...(not user_id)
   created_by TEXT,
   updated_by TEXT,
   updated_at TIMESTAMP, 

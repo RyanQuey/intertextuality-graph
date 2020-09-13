@@ -8,6 +8,7 @@ import scala.collection.JavaConverters._
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
 import java.util.UUID;
+import java.time.Instant;
 import com.datastax.oss.driver.api.core.cql._;
 
 // TODO make this, I think it's helpful. Can have better helpers
@@ -112,7 +113,6 @@ object TextHelpers {
   def createByRefIfNotExists (text : Text) = {
     // find by ref. Use the unchangeable columns, though eventually split_passages should work too. 
     // would do in dao, even though this si too specific and too many moving parts to entrust to their limited api in the dao. Makes it easy, you get your model back...but had way too much trouble. So just do string
-    // using solr query, would be like so if we didn't use dao
 
     val dbMatch = findMatchByRef(text)
 

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS intertextuality_graph.intertextual_connections (
   // table for the edge
-  id UUID,
+  id TIMEUUID,
   // how confident we can be that this connection was meant by original author
   confidence_level FLOAT,
 

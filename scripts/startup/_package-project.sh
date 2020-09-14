@@ -16,4 +16,6 @@ $parent_path/_build-data-utils-jar.sh && \
 $INTERTEXTUALITY_GRAPH_MODELS_DIR/scripts/install-to-mvn-repo.sh && \
 
 # package data importer tools (sbt)
-$INTERTEXTUALITY_GRAPH_ETL_TOOLS_DIR/scripts/sbt/package.sh
+$INTERTEXTUALITY_GRAPH_ETL_TOOLS_DIR/scripts/sbt/package.sh && \
+  # play app depends on etl-tools, so publish etl tools locally and now play app can load the jar from ivy dir.
+$INTERTEXTUALITY_GRAPH_ETL_TOOLS_DIR/scripts/sbt/sbt.sh publishLocal

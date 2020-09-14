@@ -8,6 +8,12 @@ import SEO from "../components/seo"
 import { Vega } from 'react-vega';
 import spec1 from '../utils/spec1';
 import spec2 from '../utils/spec2';
+
+// I'm using Approach #2 from vega docs
+// https://github.com/vega/react-vega/tree/master/packages/react-vega#approach2-use-vega-generic-class-and-pass-in-spec-for-dynamic-component
+// want vega for more power, but want flexibility of react. Though...maybe later it's 
+
+// https://github.com/vega/react-vega/tree/master/packages/react-vega#data
 import barData from '../data/sample.json';
 
 // check out their demo for help:
@@ -23,7 +29,8 @@ const signalListeners = { hover: handleHover };
 const ArcDiagram = () => (
   <Layout>
     <SEO title="ArcDiagram" />
-      <Vega spec={spec1} data={barData} signalListeners={signalListeners} />,
+
+		<Vega spec={spec1} data={barData} signalListeners={signalListeners} />
   </Layout>
 )
 

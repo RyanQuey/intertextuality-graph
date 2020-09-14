@@ -1,7 +1,5 @@
 // From https://vega.github.io/vega/examples/bar-chart/
 
-import { VisualizationSpec } from "../../../react-vega/src";
-
 export default {
   $schema: 'https://vega.github.io/schema/vega/v5.json',
   width: 400,
@@ -11,16 +9,16 @@ export default {
   data: [
     {
       name: 'table',
-      values: [
-        { category: 'A', amount: 28 },
-        { category: 'B', amount: 55 },
-        { category: 'C', amount: 43 },
-        { category: 'D', amount: 91 },
-        { category: 'E', amount: 81 },
-        { category: 'F', amount: 53 },
-        { category: 'G', amount: 19 },
-        { category: 'H', amount: 87 },
-      ],
+      // values: [
+      //   { category: 'A', amount: 28 },
+      //   { category: 'B', amount: 55 },
+      //   { category: 'C', amount: 43 },
+      //   { category: 'D', amount: 91 },
+      //   { category: 'E', amount: 81 },
+      //   { category: 'F', amount: 53 },
+      //   { category: 'G', amount: 19 },
+      //   { category: 'H', amount: 87 },
+      // ],
     },
   ],
 
@@ -55,6 +53,7 @@ export default {
     { orient: 'left', scale: 'yscale' },
   ],
 
+  // I think this is the only thing that is different between spec1 and spec2
   marks: [
     {
       type: 'rect',
@@ -91,4 +90,4 @@ export default {
       },
     },
   ],
-} as VisualizationSpec;
+};

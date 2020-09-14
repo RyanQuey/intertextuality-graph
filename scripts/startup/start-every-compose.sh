@@ -33,8 +33,10 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 # but for now, will assume that that has been ran already
 FILE=$INTERTEXTUALITY_GRAPH_PLAY_API_DIR/lib/data-utils-$DATA_UTILS_VERSION.jar    
 
-# only need to do this once, but running again shouldn't hurt anything
-docker network create i-graph
+# create network if not exists
+# https://stackoverflow.com/a/53052379/6952495
+docker network inspect i-graph >/dev/null 2>&1 || \
+  docker network create i-graph
 
 if [ -f $FILE ]; then
   echo "File $FILE exists."

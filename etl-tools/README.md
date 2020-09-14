@@ -1,7 +1,21 @@
 # NOTE out of date, and just copied from my podcast tool
 
 ## How to start
+### Get books and verses and chapters in the db
+Note might currently need to be called from the etl-tools dir
+```
+cd etl-tools/
+./scripts/import-theographic-data.sh
+```
+### Add some texts and intertextual connections
+```
+./scripts/import-tsk-data.sh
+```
+
 ### Import data from Tyndale Data set
+NOTE currently not really doing much, but it's ready to once I figure out what I need from it
+
+
 Old Way:
 ```
 cd ./etl-tools
@@ -33,7 +47,7 @@ Then open another one with the sbt console going, and can call `run` every so of
 ```
 ./scripts/sbt/sbt.sh 
 # Then in the console: 
-runMain com.ryanquey.intertextualitygraph.dataimporter.ImportTreasuryOfScriptureKnowledgeData
+runMain com.ryanquey.intertextualitygraph.dataimporter.ImportTreasuryOfScriptureKnowledge
 
 # or if you don't know which class you want:
 run 

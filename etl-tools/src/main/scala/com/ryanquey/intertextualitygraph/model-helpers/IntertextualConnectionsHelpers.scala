@@ -17,7 +17,6 @@ import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
 case class IntertextualConnection(
-  id : UUID,
   sourceTextStartingBook : String,
   sourceTextId : UUID,
   alludingTextStartingBook : String,
@@ -53,7 +52,7 @@ object IntertextualConnectionsHelpers {
     // mostly these will be built mostly with gremlin, so not bothering to do the whole model thing for now
     // Make case classes for this at most
 
-    val connection = IntertextualConnection(Uuids.timeBased(), srcText.getStartingBook(), srcText.getId(), alludingText.getStartingBook(), alludingText.getId(), connectionType, confidenceLevel, Instant.now())
+    val connection = IntertextualConnection(srcText.getStartingBook(), srcText.getId(), alludingText.getStartingBook(), alludingText.getId(), connectionType, confidenceLevel, Instant.now())
 
     persistConnection(connection)
   }
@@ -62,7 +61,6 @@ object IntertextualConnectionsHelpers {
     // note that query builder makes immutable objects, so adding any value creates new obj
     // TODO this creates a lot of tombstones, since will have a lot of null values
     var query = insertInto("intertextual_connections")
-			.value("id", literal(ic.id))
       .value("confidence_level", literal(ic.confidenceLevel))
 
   // how important this connection is in teh argument of original author. Hays' criteria "volume"

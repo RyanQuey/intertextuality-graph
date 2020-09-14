@@ -1,6 +1,4 @@
 CREATE TABLE IF NOT EXISTS intertextuality_graph.intertextual_connections (
-  // table for the edge
-  id TIMEUUID,
   // how confident we can be that this connection was meant by original author
   confidence_level FLOAT,
 
@@ -22,5 +20,5 @@ CREATE TABLE IF NOT EXISTS intertextuality_graph.intertextual_connections (
   source_language TEXT,
   updated_at TIMESTAMP, 
   // this will allow good default order in the db when we do basic selects. 
-  PRIMARY KEY (id)
+  PRIMARY KEY (source_text_id, source_text_starting_book, alluding_text_id, alluding_text_starting_book)
 );

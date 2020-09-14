@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS intertextuality_graph.texts (
   ending_chapter INT,
   ending_verse INT,
   // TODO make this a set? but then by default as easy to read...hmmm...
-  split_passages <LIST<TEXT>>,
+  split_passages LIST<TEXT>,
   testament TEXT, 
   greek_translation TEXT, 
   english_translation TEXT, 

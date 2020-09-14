@@ -7,7 +7,7 @@ import scala.collection.immutable.Map
 import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers._
 import com.ryanquey.intertextualitygraph.initializers.Initialize
 
-object ImportTreasuryOfScriptureKnowledgeData {
+object ImportTreasuryOfScriptureKnowledge {
 
   // csv file name to the table 
   val dataSourceFiles = Map(

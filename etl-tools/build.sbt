@@ -8,7 +8,7 @@ ThisBuild / scalaVersion := "2.13.1"
 ThisBuild / organization := "com.ryanquey"
 ThisBuild / organizationName := "ryanquey"
 name := "intertextuality-graph-etl-tools"
-version := "0.1.0"
+version := "0.1.0-SNAPSHOT"
 
 
 // allow my projects which are installed to local mvn work here. Should work after running packaging scripts in root of this git repo

@@ -10,7 +10,7 @@
 		<dependency>
 			<groupId>com.ryanquey</groupId>
 			<artifactId>data-utils</artifactId>
-      <version>${env.DATA_UTILS_VERSION}</version>
+      <version>0.5.2</version>
 		</dependency>
 
     <!-- Google core libraries for Java https://github.com/google/guava --> 
@@ -41,13 +41,6 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.6</version>
 		</dependency> 
-    <!-- https://github.com/datastax/java-driver/tree/4.x/manual/core/logging#setup. 
-      when didn't use this one, would silently fail if we forgot to start our db before running package -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.28</version>
-    </dependency>
 
     <!-- datastax/cassandra stuff -->
 
@@ -114,6 +107,6 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven.compiler.source>1.8</maven.compiler.source>
 		<java-driver.version>4.9.0</java-driver.version>
-		<project-package.version>0.3.0</project-package.version>
+		<project-package.version>0.3.0-SNAPSHOT</project-package.version>
 	</properties>
 </project>

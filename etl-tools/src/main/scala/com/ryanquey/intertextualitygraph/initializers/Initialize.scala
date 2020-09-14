@@ -12,6 +12,7 @@ import com.google.inject.name.Names
 import com.ryanquey.intertextualitygraph.models.{InventoryMapper, InventoryMapperObj}
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
+// not used in etl-tools, but is basically how you do initializers in play framework
 class EagerLoadModule extends AbstractModule {
   override def configure() = {
     bind(classOf[Initialize]).asEagerSingleton

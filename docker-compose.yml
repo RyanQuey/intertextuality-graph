@@ -13,6 +13,9 @@ services:
         #   - IPC_LOCK
         # ulimits:
         #   memlock: -1
+    volumes:
+      # https://kelda.io/blog/docker-volumes-for-development/
+      - ${INTERTEXTUALITY_GRAPH_PLAY_API_DIR:-./play-app}:/app
     ports:
       - 9000:9000
 

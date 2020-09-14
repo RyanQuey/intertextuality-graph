@@ -10,7 +10,7 @@ ENV OPENJDK_TAG=8u232
 # we're setting 1.3.4 in our build.sbt, but latest is 1.3.13
 ENV SBT_VERSION=1.3.13
 
-# if are doing dev, would use a volume instead
+# if are doing dev, would use a volume instead. Putting the volumen in docker-compose.yml for now
 COPY . /app 
 WORKDIR /app 
 

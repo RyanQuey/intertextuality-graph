@@ -1,15 +1,21 @@
 // From https://vega.github.io/editor/#/examples/vega/arc-diagram
 
-export default {
+// I find that passing data in here works best, so everything can be easily ported into the online
+// VEGA REPL and also easier to match up what is happening in React with Vega's main api
+export default (data) => ({
+
   "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "An arc diagram depicting character co-occurrence in the novel Les Misérables.",
+  // TODO simplifying for now, can add back in later
+  // "description": "An arc diagram depicting character co-occurrence in the novel Les Misérables.",
   "width": 770,
-  "padding": 5,
+  // TODO simplifying for now, can add back in later
+  //"padding": 5,
 
   "data": [
     {
       "name": "edges",
-      //"url": "data/miserables.json",
+      // "url": "data/miserables.json",
+      values: data,
       "format": {"type": "json", "property": "links"}
     },
     {
@@ -28,7 +34,8 @@ export default {
     },
     {
       "name": "nodes",
-      //"url": "data/miserables.json",
+      values: data,
+      // "url": "data/miserables.json",
       "format": {"type": "json", "property": "nodes"},
       "transform": [
         { "type": "window", "ops": ["rank"], "as": ["order"] },
@@ -121,20 +128,21 @@ export default {
         }
       }
     },
-    {
-      "type": "text",
-      "from": {"data": "nodes"},
-      "encode": {
-        "update": {
-          "x": {"scale": "position", "field": "order"},
-          "y": {"value": 7},
-          "fontSize": {"value": 9},
-          "align": {"value": "right"},
-          "baseline": {"value": "middle"},
-          "angle": {"value": -90},
-          "text": {"field": "name"}
-        }
-      }
-    }
+    // temporarily remove text labels to start simply TODO add back in later
+    // {
+    //   "type": "text",
+    //   "from": {"data": "nodes"},
+    //   "encode": {
+    //     "update": {
+    //       "x": {"scale": "position", "field": "order"},
+    //       "y": {"value": 7},
+    //       "fontSize": {"value": 9},
+    //       "align": {"value": "right"},
+    //       "baseline": {"value": "middle"},
+    //       "angle": {"value": -90},
+    //       "text": {"field": "name"}
+    //     }
+    //   }
+    // }
   ]
-};
+});

@@ -14,7 +14,7 @@ import spec1 from '../configs/arc-spec1';
 
 // https://vega.github.io/editor/data/miserables.json
 // if put "url" instead "of" in the data in specification, can load a json or CSV file
-import barData from '../data/les-mis-arc-diagram-sample.json';
+import arcData from '../data/les-mis-arc-diagram-sample.json';
 
 // check out their demo for help:
 // https://github.com/vega/react-vega/blob/master/packages/react-vega-demo/stories/ReactVegaDemo.tsx
@@ -30,7 +30,10 @@ const ArcDiagram = () => (
   <Layout>
     <SEO title="ArcDiagram" />
 
-		<Vega spec={spec1} data={barData} signalListeners={signalListeners} />
+    <Vega 
+      spec={spec1(arcData)} 
+      signalListeners={signalListeners} 
+    />
   </Layout>
 )
 

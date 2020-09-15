@@ -10,7 +10,7 @@
 		<dependency>
 			<groupId>com.ryanquey</groupId>
 			<artifactId>data-utils</artifactId>
-      <version>0.5.2</version>
+      <version>0.6.0</version>
 		</dependency>
 
     <!-- Google core libraries for Java https://github.com/google/guava --> 

@@ -5,6 +5,8 @@ if [ "$BASH" != "/bin/bash" ]; then
   exit 1
 fi
 
+# NOTE does not start gatsby
+
 #########################################
 # instructions: 
 #########################################

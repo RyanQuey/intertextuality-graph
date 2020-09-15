@@ -2,14 +2,15 @@
 
 // I find that passing data in here works best, so everything can be easily ported into the online
 // VEGA REPL and also easier to match up what is happening in React with Vega's main api
+// TODO this could potentially have memory issues if we repeat the data, so better to not use
+// property in data.format, but just only set the data we want on that key.
 export default (data) => ({
 
   "$schema": "https://vega.github.io/schema/vega/v5.json",
   // TODO simplifying for now, can add back in later
   // "description": "An arc diagram depicting character co-occurrence in the novel Les Misérables.",
   "width": 770,
-  // TODO simplifying for now, can add back in later
-  //"padding": 5,
+  "padding": 5,
 
   "data": [
     {
@@ -128,21 +129,20 @@ export default (data) => ({
         }
       }
     },
-    // temporarily remove text labels to start simply TODO add back in later
-    // {
-    //   "type": "text",
-    //   "from": {"data": "nodes"},
-    //   "encode": {
-    //     "update": {
-    //       "x": {"scale": "position", "field": "order"},
-    //       "y": {"value": 7},
-    //       "fontSize": {"value": 9},
-    //       "align": {"value": "right"},
-    //       "baseline": {"value": "middle"},
-    //       "angle": {"value": -90},
-    //       "text": {"field": "name"}
-    //     }
-    //   }
-    // }
+    {
+      "type": "text",
+      "from": {"data": "nodes"},
+      "encode": {
+        "update": {
+          "x": {"scale": "position", "field": "order"},
+          "y": {"value": 7},
+          "fontSize": {"value": 9},
+          "align": {"value": "right"},
+          "baseline": {"value": "middle"},
+          "angle": {"value": -90},
+          "text": {"field": "name"}
+        }
+      }
+    }
   ]
 });

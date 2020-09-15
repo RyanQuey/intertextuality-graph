@@ -27,6 +27,12 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd $parent_path
 git submodule update --init --recursive
 
+###########################
+# Run migrations
+##########################
+$INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/scripts/run_migrations.sh
+
+
 #################################################
 # START THE DOCKER CONTAINERS with docker-compose
 #################################################
@@ -35,12 +41,17 @@ git submodule update --init --recursive
 # Note that if it is in one docker-compose statement like this, it allows the separate services to talk to one another even though they have separate docker-compose yml files
 
 
-###########################
-# Run migrations
-##########################
+
+
+
 # TODO add conditional if jar exists already. Or even better, track changes in git and find out if need to rebuild jar...that's getting a little bit crazy though
 $parent_path/startup/start-every-compose.sh
 
+###########################
+# Prepare the gatsby / react frontend
+##########################
+# NOTE TODO only necessary for development, will deploy to CDN for prod
+$INTERTEXTUALITY_GRAPH_GATSBY_DIR/scripts/setup-dev.sh
 
 echo "waiting for Cassandra to be available..." && \
 CASSANDRA_IS_UP=false

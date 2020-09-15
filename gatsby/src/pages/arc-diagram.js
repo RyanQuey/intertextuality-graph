@@ -14,6 +14,7 @@ import spec2 from '../utils/spec2';
 // want vega for more power, but want flexibility of react. Though...maybe later it's 
 
 // https://github.com/vega/react-vega/tree/master/packages/react-vega#data
+// if put "url" instead "of" in the data in specification, can load a json or CSV file
 import barData from '../data/sample.json';
 
 // check out their demo for help:

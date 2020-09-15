@@ -62,7 +62,7 @@ public class Text extends TextBase implements Model {
     dao.save(e);
   };
 
-  /*
+  // query should be solr query, e.g., `book:Genesis`
   public static Text findOneByQuery (String query) throws Exception {
     TextDao dao = new TextRecord().getDao();
     TextRecord record = dao.findOneByQuery(query);
@@ -73,6 +73,7 @@ public class Text extends TextBase implements Model {
     }
   }
 
+  /*
   // making this minimal, so can easily access via scala without changing the java code
   // NOTE TODO not yet able to make this work
   public static Text findOneBySolr (String solrQuery) throws Exception {

@@ -18,10 +18,10 @@ import com.ryanquey.datautils.models.BaseDao;
 @DefaultNullSavingStrategy(NullSavingStrategy.DO_NOT_SET) 
 public interface TextDao extends BaseDao<TextRecord> {
 
-  /*
-  @Query("SELECT * FROM intertextuality_graph.texts where solr_query = ':solr'")
-  TextRecord queryBySolr(String solr); 
-  */
+  // https://community.datastax.com/questions/8352/support-for-solr-query-in-java-driver-mapper.html
+  // https://github.com/msmygit/dse-titbits/blob/master/java-driver-4.x/src/main/java/com/madhavan/demos/mapper/ExampleDao.java#L21
+  @Query("SELECT * FROM intertextuality_graph.texts where solr_query = :solr_query")
+  TextRecord findOneByQuery(String solr_query); 
 
   /** Simple selection by full primary key. */
   @Select

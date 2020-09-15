@@ -64,18 +64,22 @@ object TextHelpers {
     text.setSplitPassages(splitPassages)
   }
 
-  def findMatchByRef (text : Text) : Row = {
-    val startingVersePart = if (text.getStartingVerse != null) s" AND starting_verse:${text.getStartingVerse} " else "";
+  // NOTE hits db, using solr
+  def findByReference (startingBook : String, startingChapter : Int, startingVerse : Int, endingBook : String, endingChapter : Int, endingVerse : Int, createdBy : String) : Row = {
+    val startingVersePart = if (startingVerse != null) s" AND starting_verse:${startingVerse} " else "";
 
-    val endingVersePart = if (text.getEndingVerse != null) s" AND ending_verse:${text.getEndingVerse} " else "";
-    val solrQuery = s"""solr_query = 'created_by:"${text.getCreatedBy}"
-      AND ending_book:"${text.getEndingBook}"
-      AND ending_chapter:${text.getEndingChapter}
+    val endingVersePart = if (endingVerse != null) s" AND ending_verse:${endingVerse} " else "";
+    val createdByStr = if (endingVerse != null) s" AND created_by:${createdBy} " else "";
+
+    val solrQuery = s"""solr_query = '
+      AND ending_book:"${endingBook}"
+      AND ending_chapter:${endingChapter}
       $endingVersePart
 
-      AND starting_book:"${text.getStartingBook}"
-      AND starting_chapter:${text.getStartingChapter}
+      AND starting_book:"${startingBook}"
+      AND starting_chapter:${startingChapter}
       $startingVersePart
+      $createdByStr
       
       ' LIMIT 1;
       """
@@ -90,6 +94,29 @@ object TextHelpers {
     val rs : ResultSet = CassandraDb.execute(query)
     val dbMatch : Row = rs.one()
 
+    // convert to Text
+
+    dbMatch
+  }
+
+  // basically just has starting and ending reference be identical
+  // NOTE hits db, using solr
+  // b
+  def findBySingleReference (book : String, chapter : Int, verse : Int) : Row  = {
+    // TODO could make just a shorter query for this, maybe faster? Are less params in a query faster?
+    //
+
+    TextHelpers.findByReference(book, chapter, verse, book, chapter, verse, null)
+  }
+
+  def testSolrQuery () : Text = {
+    val dbMatch : Text = Text.findOneByQuery("book:Genesis");
+    dbMatch
+  }
+
+  // NOTE hits db, using solr
+  def findMatchByRef (text : Text) : Row = {
+    val dbMatch = findByReference(text.getStartingBook, text.getStartingChapter, text.getStartingVerse, text.getEndingBook, text.getEndingChapter, text.getEndingVerse, text.getCreatedBy)
     dbMatch
   }
 

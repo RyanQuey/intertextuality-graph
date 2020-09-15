@@ -1,5 +1,6 @@
 package com.ryanquey.intertextualitygraph.models.books;
 
+import com.ryanquey.datautils.helpers.DataClassesHelpers;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -31,8 +32,8 @@ public class Book extends BookBase implements Model {
     schema.put("updatedAt", "Instant");// TIMESTAMP, 
   };
 
-  public Book(BookRecord bookRecord) {
-    // TODO 
+  public Book(BookRecord bookRecord) throws Exception {
+    DataClassesHelpers.copyMatchingFields(bookRecord, this);
   };
 
 

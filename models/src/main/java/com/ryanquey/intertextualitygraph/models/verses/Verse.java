@@ -3,6 +3,7 @@ package com.ryanquey.intertextualitygraph.models.verses;
 import java.util.Map;
 import java.util.HashMap;
 import java.time.Instant;
+import com.ryanquey.datautils.helpers.DataClassesHelpers;
 
 import com.ryanquey.datautils.models.Model;
 
@@ -32,8 +33,8 @@ public class Verse extends VerseBase implements Model {
     schema.put("updatedAt", "Instant"); // TIMESTAMP 
   };
 
-  public Verse(VerseRecord verseRecord) {
-    // TODO 
+  public Verse(VerseRecord verseRecord) throws Exception {
+    DataClassesHelpers.copyMatchingFields(verseRecord, this);
   };
 
 

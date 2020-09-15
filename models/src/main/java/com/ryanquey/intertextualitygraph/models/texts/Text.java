@@ -7,6 +7,7 @@ import java.time.Instant;
 
 import com.ryanquey.datautils.models.Model;
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import com.ryanquey.datautils.helpers.DataClassesHelpers;
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb;
 import com.datastax.oss.driver.api.core.cql.*;
 
@@ -17,7 +18,7 @@ public class Text extends TextBase implements Model {
 
   public Map<String, String> schema = new HashMap<String, String>();
   static {
-    
+    // TODO what was I going to do here?
   }
 
   // constructors
@@ -48,8 +49,8 @@ public class Text extends TextBase implements Model {
     }
   };
 
-  public Text(TextRecord textRecord) {
-    // TODO 
+  public Text(TextRecord textRecord) throws Exception {
+    DataClassesHelpers.copyMatchingFields(textRecord, this);
   };
 
   public void persist ()  throws Exception {
@@ -66,6 +67,8 @@ public class Text extends TextBase implements Model {
   public static Text findOneByQuery (String query) throws Exception {
     TextDao dao = new TextRecord().getDao();
     TextRecord record = dao.findOneByQuery(query);
+    System.out.println("found one by solr: " + record);
+
     if (record == null) {
       return null;
     } else {

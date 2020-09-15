@@ -65,20 +65,40 @@ object TextHelpers {
   }
 
   // NOTE hits db, using solr
-  def findByReference (startingBook : String, startingChapter : Int, startingVerse : Int, endingBook : String, endingChapter : Int, endingVerse : Int, createdBy : String) : Row = {
-    val startingVersePart = if (startingVerse != null) s" AND starting_verse:${startingVerse} " else "";
+  def findByReference (startingBook : String, startingChapter : Option[Int], startingVerse : Option[Int], endingBook : String, endingChapter : Option[Int], endingVerse : Option[Int], createdBy : Option[String]) : Row = {
+    val startingChapterPart = startingChapter match {
+      case None => ""
+      case Some(str) => s" AND starting_verse:${str}"
+    }
 
-    val endingVersePart = if (endingVerse != null) s" AND ending_verse:${endingVerse} " else "";
-    val createdByStr = if (endingVerse != null) s" AND created_by:${createdBy} " else "";
+    val endingChapterPart = endingChapter match {
+      case None => ""
+      case Some(str) => s" AND ending_verse:${str}"
+    }
+
+    val startingVersePart = startingVerse match {
+      case None => ""
+      case Some(str) => s" AND starting_verse:${str}"
+    }
+
+    val endingVersePart = endingVerse match {
+      case None => ""
+      case Some(str) => s" AND ending_verse:${str}"
+    }
+
+    val createdByStr = createdBy match {
+      case None => ""
+      case Some(str) => s" AND created_by:${str}"
+    }
 
     val solrQuery = s"""solr_query = '
       AND ending_book:"${endingBook}"
-      AND ending_chapter:${endingChapter}
       $endingVersePart
+      $endingChapterPart
 
       AND starting_book:"${startingBook}"
-      AND starting_chapter:${startingChapter}
       $startingVersePart
+      $startingChapterPart
       $createdByStr
       
       ' LIMIT 1;
@@ -87,7 +107,9 @@ object TextHelpers {
     val query = s"SELECT * FROM intertextuality_graph.texts WHERE $solrQuery"
 
     println("running query: " + query)
+    // inherited from BaseDao
     // val dbMatch : Text = Text.findOneBySolr(solrQuery);
+    //
     // val dbMatch : Text = Text.findOneByQuery(query);
     // consider using bindMarker() for performance if we end up using this a lot
     // val query = selectFrom("texts").all().whereColumn("solr_query").isEqualTo(literal(solrQuery).limit(1);
@@ -99,24 +121,31 @@ object TextHelpers {
     dbMatch
   }
 
-  // basically just has starting and ending reference be identical
+  // basically just assumes starting and ending reference are identical
   // NOTE hits db, using solr
-  // b
-  def findBySingleReference (book : String, chapter : Int, verse : Int) : Row  = {
+  def findBySingleReference (book : String, chapter : Option[Int], verse : Option[Int]) : Row  = {
     // TODO could make just a shorter query for this, maybe faster? Are less params in a query faster?
     //
 
-    TextHelpers.findByReference(book, chapter, verse, book, chapter, verse, null)
+    TextHelpers.findByReference(book, chapter, verse, book, chapter, verse, None)
   }
 
   def testSolrQuery () : Text = {
-    val dbMatch : Text = Text.findOneByQuery("book:Genesis");
+    val dbMatch : Text = Text.findOneByQuery("starting_book:Genesis");
     dbMatch
   }
 
+  // takes a Text instance and checks for mathcing text instance with teh same reference and creator
   // NOTE hits db, using solr
   def findMatchByRef (text : Text) : Row = {
-    val dbMatch = findByReference(text.getStartingBook, text.getStartingChapter, text.getStartingVerse, text.getEndingBook, text.getEndingChapter, text.getEndingVerse, text.getCreatedBy)
+    // https://stackoverflow.com/a/31977225/6952495
+    // chapter and verse are optional, so be ready for some None values
+    val startC = Option(text.getStartingChapter).map {_.toInt}
+    val startV = Option(text.getStartingVerse).map {_.toInt}
+    val endC = Option(text.getEndingChapter).map {_.toInt}
+    val endV = Option(text.getEndingVerse).map {_.toInt}
+
+    val dbMatch = findByReference(text.getStartingBook, startC, startV, text.getEndingBook, endC, endV, Some(text.getCreatedBy))
     dbMatch
   }
 

@@ -1,5 +1,6 @@
 package com.ryanquey.intertextualitygraph.models.chapters;
 
+import com.ryanquey.datautils.helpers.DataClassesHelpers;
 import java.util.Map;
 import java.util.HashMap;
 import java.time.Instant;
@@ -26,8 +27,8 @@ public class Chapter extends ChapterBase implements Model {
     schema.put("updatedAt", "Instant"); // TIMESTAMP 
   };
 
-  public Chapter(ChapterRecord chapterRecord) {
-    // TODO 
+  public Chapter(ChapterRecord chapterRecord) throws Exception {
+    DataClassesHelpers.copyMatchingFields(chapterRecord, this);
   };
 
 

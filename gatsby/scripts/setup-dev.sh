@@ -8,7 +8,7 @@ fi
 
 # always base everything relative to this file to make it simple
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-. $parent_path/config/env-vars.sh
+. $parent_path/../../scripts/config/env-vars.sh
 
 cd $INTERTEXTUALITY_GRAPH_GATSBY_DIR && \
   # run nvm use if they have nvm...

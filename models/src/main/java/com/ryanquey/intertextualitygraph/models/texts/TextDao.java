@@ -20,9 +20,13 @@ public interface TextDao extends BaseDao<TextRecord> {
 
   // https://community.datastax.com/questions/8352/support-for-solr-query-in-java-driver-mapper.html
   // https://github.com/msmygit/dse-titbits/blob/master/java-driver-4.x/src/main/java/com/madhavan/demos/mapper/ExampleDao.java#L21
-  // TODO can use the method from BaseDao instead now: findOneBySolr
-  @Query("SELECT * FROM intertextuality_graph.texts where solr_query = :solr_query")
-  TextRecord findOneByQuery(String solr_query); 
+  // This works also, but just removing since the one below is simpler
+  // @Query("SELECT * FROM intertextuality_graph.texts where solr_query = :solr_query")
+  // TextRecord findOneByQuery(String solr_query); 
+
+  // Working!
+  @Select(customWhereClause = "solr_query = :solr_query")
+  TextRecord findOneBySolr(String solr_query); 
 
   /** Simple selection by full primary key. */
   @Select

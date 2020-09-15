@@ -10,9 +10,11 @@ import com.ryanquey.intertextualitygraph.modelhelpers._
 
 object SearchSolr {
 
-  def main (args: Array[String]) = {
+  def main (args: Array[String]): Unit = {
     new Initialize()
     // get the data files
-    TextHelpers.testSolrQuery()
+    val result = TextHelpers.testSolrQuery()
+    println(result)
+
   }
 }

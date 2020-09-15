@@ -76,6 +76,20 @@ public class Text extends TextBase implements Model {
     }
   }
 
+  // should have the same result as findOneByQuery if ev erything is working correctly
+  public static Text findOneBySolr (String query) throws Exception {
+    TextDao dao = new TextRecord().getDao();
+
+    TextRecord record = dao.findOneBySolr(query);
+
+    if (record == null) {
+      return null;
+    } else {
+      return new Text(record);
+    }
+  }
+
+
   /*
   // making this minimal, so can easily access via scala without changing the java code
   // NOTE TODO not yet able to make this work

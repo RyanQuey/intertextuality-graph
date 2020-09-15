@@ -65,15 +65,16 @@ object TextHelpers {
   }
 
   // NOTE hits db, using solr
-  def findByReference (startingBook : String, startingChapter : Option[Int], startingVerse : Option[Int], endingBook : String, endingChapter : Option[Int], endingVerse : Option[Int], createdBy : Option[String]) : Row = {
+  // TODO find a way to deal with when verses are not set. Since if not set, will get more than what we want, the search will be too broad
+  def findByReference (startingBook : String, startingChapter : Option[Int], startingVerse : Option[Int], endingBook : String, endingChapter : Option[Int], endingVerse : Option[Int], createdBy : Option[String]) : Text = {
     val startingChapterPart = startingChapter match {
       case None => ""
-      case Some(str) => s" AND starting_verse:${str}"
+      case Some(str) => s" AND starting_chapter:${str}"
     }
 
     val endingChapterPart = endingChapter match {
       case None => ""
-      case Some(str) => s" AND ending_verse:${str}"
+      case Some(str) => s" AND ending_chapter:${str}"
     }
 
     val startingVersePart = startingVerse match {
@@ -91,39 +92,29 @@ object TextHelpers {
       case Some(str) => s" AND created_by:${str}"
     }
 
-    val solrQuery = s"""solr_query = '
+    val solrQuery = s"""
+      starting_book:"${startingBook}"
+      $startingVersePart
+      $startingChapterPart
+
       AND ending_book:"${endingBook}"
       $endingVersePart
       $endingChapterPart
 
-      AND starting_book:"${startingBook}"
-      $startingVersePart
-      $startingChapterPart
       $createdByStr
-      
-      ' LIMIT 1;
       """
 
-    val query = s"SELECT * FROM intertextuality_graph.texts WHERE $solrQuery"
+    val query = s"SELECT * FROM intertextuality_graph.texts WHERE solr_query = $solrQuery"
 
     println("running query: " + query)
-    // inherited from BaseDao
-    // val dbMatch : Text = Text.findOneBySolr(solrQuery);
-    //
-    // val dbMatch : Text = Text.findOneByQuery(query);
-    // consider using bindMarker() for performance if we end up using this a lot
-    // val query = selectFrom("texts").all().whereColumn("solr_query").isEqualTo(literal(solrQuery).limit(1);
-    val rs : ResultSet = CassandraDb.execute(query)
-    val dbMatch : Row = rs.one()
-
-    // convert to Text
+    val dbMatch : Text = Text.findOneBySolr(solrQuery);
 
     dbMatch
   }
 
   // basically just assumes starting and ending reference are identical
   // NOTE hits db, using solr
-  def findBySingleReference (book : String, chapter : Option[Int], verse : Option[Int]) : Row  = {
+  def findBySingleReference (book : String, chapter : Option[Int], verse : Option[Int]) : Text  = {
     // TODO could make just a shorter query for this, maybe faster? Are less params in a query faster?
     //
 
@@ -131,13 +122,13 @@ object TextHelpers {
   }
 
   def testSolrQuery () : Text = {
-    val dbMatch : Text = Text.findOneByQuery("starting_book:Genesis");
+    val dbMatch : Text = Text.findOneBySolr("starting_book:Genesis");
     dbMatch
   }
 
   // takes a Text instance and checks for mathcing text instance with teh same reference and creator
   // NOTE hits db, using solr
-  def findMatchByRef (text : Text) : Row = {
+  def findMatchByRef (text : Text) : Text = {
     // https://stackoverflow.com/a/31977225/6952495
     // chapter and verse are optional, so be ready for some None values
     val startC = Option(text.getStartingChapter).map {_.toInt}
@@ -149,6 +140,8 @@ object TextHelpers {
     dbMatch
   }
 
+  // TODO find a way to deal with when verses are not set. Since if not set, will get more than what we want, the search will be too broad
+  // This will update records we don't want updated potentially
   def updateOrCreateByRef (text : Text) = {
     // find by ref. Use the unchangeable columns, though eventually split_passages should work too. 
 
@@ -159,7 +152,10 @@ object TextHelpers {
       // go ahead and create another
       text.persist();
     } else {
-      text.setId(dbMatch.getUuid("id"))
+      // basically, update the old record with data from the new record
+      // this is if dbMatch is a Row instance
+      // text.setId(dbMatch.getUuid("id"))
+      text.setId(dbMatch.getId())
       text.persist();
     }
   }

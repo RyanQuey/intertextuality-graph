@@ -10,7 +10,9 @@ import com.ryanquey.intertextualitygraph.models.texts.Text
 
 
 object Helpers {
+  // converts a raw value into type that the model for this modelInstance expects for this field
   // field is modelField
+  //
   def convertRawValue (modelInstance : Model, csvField : String, field : String, rawValue : String) : Any = {
     val schema : Map[String, String] = modelInstance match {
       case b: Book => b.schema

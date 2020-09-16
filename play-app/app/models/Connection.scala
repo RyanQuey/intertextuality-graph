@@ -5,6 +5,7 @@ import play.api.mvc._
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
 
+import java.util.Collection
 
 /**
  * TODO add case class for intertextual_connections
@@ -12,19 +13,5 @@ import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
  */
 @Singleton
 class Connection {
-  /**
-   * http://www.doanduyhai.com/blog/?p=13301
-   *
-   */
-  def findAllSourcesRecursively : Iterator<Collection<String>> () = {
-    g.V().                   // Iterator<Vertex>
-			has("text", "userId", "u861"). // Iterator<User>
-			as("u861").                    // Label u861    
-			repeat(out("knows")).times(2). // 2nd degree friends
-			dedup().                       // Remove duplicates
-			where(neq("u861")).            // Exclude u861   
-			values("userId").              // Iterator<String>
-			fold()                         // Iterator<Collection<String>>
-  }
 
 }

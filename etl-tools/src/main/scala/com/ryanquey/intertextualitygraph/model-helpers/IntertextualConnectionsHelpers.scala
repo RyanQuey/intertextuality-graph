@@ -58,6 +58,9 @@ object IntertextualConnectionsHelpers {
   }
 
   def persistConnection (ic : IntertextualConnection) = {
+    // Not making intertextualconnection dao for now, or model, just do it using query builder until a need arises
+    // Want to try using case classes and use scala more for this, and especially, using graph instead of C*
+    //
     // note that query builder makes immutable objects, so adding any value creates new obj
     // TODO this creates a lot of tombstones, since will have a lot of null values
     var query = insertInto("intertextual_connections")

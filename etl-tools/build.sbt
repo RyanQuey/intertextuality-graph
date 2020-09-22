@@ -27,6 +27,7 @@ libraryDependencies += "org.apache.commons" % "commons-csv" % "1.8"
 
 
 
+
 libraryDependencies ++= Seq( 
   // required for datastax java driver to work, due to compatibility issues
   // https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-scala
@@ -34,7 +35,8 @@ libraryDependencies ++= Seq(
   "com.datastax.oss" % "java-driver-core" % cassandraJavaDriverVersion,
   "com.datastax.oss" % "java-driver-query-builder" % cassandraJavaDriverVersion,
   "com.datastax.oss" % "java-driver-mapper-runtime" % cassandraJavaDriverVersion,
-  "org.scala-lang" % "scala-reflect" % scalaVersion.value
+  "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  "com.michaelpollmeier" %% "gremlin-scala" % "3.4.7.2"
   )
 
 // local projects

@@ -8,6 +8,9 @@ import SEO from "../components/seo"
 import { Vega } from 'react-vega';
 import spec1 from '../configs/arc-spec1';
 // add a tooltip https://stackoverflow.com/a/53709494/6952495
+// https://github.com/vega/vega-tooltip/blob/master/docs/customizing_your_tooltip.md
+// examples (can look at source code in Vega Editor)
+// https://vega.github.io/vega-tooltip/vega-examples.html
 import { Handler } from 'vega-tooltip';
 
 
@@ -28,6 +31,11 @@ function handleHover(...args){
 }
 
 const signalListeners = { hover: handleHover };
+const tooltipOptions = {
+  theme: "dark"
+}
+
+const tooltip = new Handler(tooltipOptions).call
 
 const ArcDiagram = () => (
   <Layout>
@@ -36,7 +44,7 @@ const ArcDiagram = () => (
     <Vega 
       spec={spec1(arcData)} 
       signalListeners={signalListeners} 
-      tooltip={new Handler().call}
+      tooltip={tooltip}
     />
   </Layout>
 )

@@ -11,7 +11,6 @@ import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
 
 /**
  */
-@Singleton
 class Text {
 
 }

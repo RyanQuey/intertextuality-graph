@@ -40,6 +40,8 @@ lazy val intertextualityPlayApi = (project in file("."))
       "com.datastax.oss" % "java-driver-query-builder" % cassandraJavaDriverVersion,
       "com.datastax.oss" % "java-driver-mapper-runtime" % cassandraJavaDriverVersion,
 
+      "com.michaelpollmeier" %% "gremlin-scala" % "3.4.7.2",
+
       "com.ryanquey.intertextuality-graph" % "models" % modelsVersion.get,
       // for now just putting the jar in the libs dir, rather than installing from local mvn repo
       // but maybe jar is better

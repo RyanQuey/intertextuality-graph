@@ -2,22 +2,23 @@
 version: '3.8'
 
 services:
-  play-server:
-    build:
-      context: ./play-app
-    hostname: i-graph-play-server
-    container_name: i-graph-play-server
-    environment:
-      - "DSE_SEEDS=dse"
-        # cap_add:
-        #   - IPC_LOCK
-        # ulimits:
-        #   memlock: -1
-    volumes:
-      # https://kelda.io/blog/docker-volumes-for-development/
-      - ${INTERTEXTUALITY_GRAPH_PLAY_API_DIR:-./play-app}:/app
-    ports:
-      - 9000:9000
+  # I don't think it works, and for now at least kind of is slowing down development, so just backlog adding this into docker for now
+  # play-server:
+  #   build:
+  #     context: ./play-app
+  #   hostname: i-graph-play-server
+  #   container_name: i-graph-play-server
+  #   environment:
+  #     - "DSE_SEEDS=dse"
+  #       # cap_add:
+  #       #   - IPC_LOCK
+  #       # ulimits:
+  #       #   memlock: -1
+  #   volumes:
+  #     # https://kelda.io/blog/docker-volumes-for-development/
+  #     - ${INTERTEXTUALITY_GRAPH_PLAY_API_DIR:-./play-app}:/app
+  #   ports:
+  #     - 9000:9000
 
   dse:
     image: datastax/dse-server:6.8.3-ubi7-1

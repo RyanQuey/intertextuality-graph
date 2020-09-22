@@ -23,7 +23,15 @@ export default (data) => ({
         return Object.assign((l), {id: index})
       }),
       "format": {"type": "json"}, // "property": "links"}
+      /*
+       * if wanted to add source name, so don't just show the source id, would do something like:
+       * (note that the code below does not work)
+      "transform": [
+        // {"type": "lookup", from: "nodes", key: "source", fields: ["name"], as: "sourceName", default: ""}
+      ],
+      */
     },
+    // aggregates used by nodes transformations to calculate degree
     {
       "name": "sourceDegree",
       "source": "edges",
@@ -46,17 +54,23 @@ export default (data) => ({
       "format": {"type": "json"}, // "property": "nodes"},
       "transform": [
         { "type": "window", "ops": ["rank"], "as": ["order"] },
-        // count how many times this node is a source
+        // count how many times this node is a source and set as "sourceDegree"
         {
-          "type": "lookup", "from": "sourceDegree", "key": "source",
-          "fields": ["index"], "as": ["sourceDegree"],
+          "type": "lookup", 
+          "from": "sourceDegree", 
+          "key": "source",
+          "fields": ["index"], 
+          "as": ["sourceDegree"],
           // start count at 0
           "default": {"count": 0}
         },
-        // count how many times this node is a target
+        // count how many times this node is a target and set as "targetDegree"
         {
-          "type": "lookup", "from": "targetDegree", "key": "target",
-          "fields": ["index"], "as": ["targetDegree"],
+          "type": "lookup", 
+          "from": "targetDegree", 
+          "key": "target",
+          "fields": ["index"], 
+          "as": ["targetDegree"],
           "default": {"count": 0}
         },
         {
@@ -127,6 +141,10 @@ export default (data) => ({
       "encode": {
         enter: {
           // put a "signal" on it to be able to get data from fields
+          // here's an example:           "tooltip": {
+          //             "signal": "{title: timeFormat(datum.date, '%b %d') + ', ' + datum.hour +
+          //             ':00', 'Average temperature': datum.temp + ' °F'}"
+          //                       }
           // all of these are working tooltips, ...but some work better than others haha
           //"tooltip": {"title": "hi", value: "datum.target", signal: "datum.source"},
           //"tooltip": {signal: "datum.source"},
@@ -134,7 +152,7 @@ export default (data) => ({
           //"tooltip": {signal: ["{'Source Node': datum.source}"}],
           "tooltip": {
             signal: [
-              "{'Source Node': datum.source, 'Target Node': datum.target}", 
+              "{title: 'Connection', 'Source Node': '(' + datum.source + ')', 'Target Node': '(' + datum.target + ')'}", 
             ]
           },
         },

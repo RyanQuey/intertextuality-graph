@@ -11,7 +11,6 @@ import java.util.Collection
  * TODO add case class for intertextual_connections
  * maybe import from etl-tools case class, (in data-importer helpers dir), or maybe just make a new one, it might have a different contractor anyway
  */
-@Singleton
 class Connection {
 
 }

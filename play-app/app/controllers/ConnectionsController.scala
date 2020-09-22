@@ -100,7 +100,7 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
    * https://docs.datastax.com/en/developer/java-driver/4.9/manual/core/dse/graph/
    */
   def _findAllSourcesRecursivelyForRef (book : String, chapter : Int, verse : Int)  = {
-    val g = CassandraDb.g
+    val g : GraphTraversalSource = CassandraDb.g
 
     // get the text
     val texts = g.V().has("text", "starting_book", book)

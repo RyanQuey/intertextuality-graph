@@ -48,6 +48,7 @@ lazy val intertextualityPlayApi = (project in file("."))
       "com.ryanquey" % "data-utils" % dataUtilsVersion.get,
 
       // if this doesn't work, make sure to run ./scripts/sbt/sbt.sh publishLocal from the etl-tools dir
+      // play app will only see changes made that get published using publishLocal
       "com.ryanquey" %% "intertextuality-graph-etl-tools" % "0.1.0-SNAPSHOT"
     ),
     scalacOptions ++= Seq(

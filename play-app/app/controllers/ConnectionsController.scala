@@ -100,23 +100,26 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
    * https://docs.datastax.com/en/developer/java-driver/4.9/manual/core/dse/graph/
    */
   def _findAllSourcesRecursivelyForRef (book : String, chapter : Int, verse : Int)  = {
-    val g : GraphTraversalSource = CassandraDb.g
+    val g : GraphTraversalSource = CassandraDb.graph
 
     // get the text
-    val texts = g.V().has("text", "starting_book", book)
-      .has("starting_chapter", chapter)
-      .has("starting_verse",  verse)
+    //val texts = g.V() //.has("text", "starting_book", book)
+      // .has("starting_chapter", chapter)
+      // .has("starting_verse",  verse)
       //.next() // just get first hit
       // .valueMap(true) // can you also use this and get the properties even when you're going to traverse its edges later? Also can't use valueMap with next, it is one or the other
       //.limit(1)
-      .toList()
+     // .toList()
 
+     // val all = g.V().next()
 
+      /*
 
       // I think we will often need to typecast to make sure we get the right format here. maybe scala dsl won't need it
     val connections = g.V(texts).                   // Iterator<Vertex>
-			repeat(out("intertextual_connection")).times(4). // 4th degree of connections. TODO consider using map or flatmap in there, so gets their connectinos??
-			dedup().                       // Remove duplicates
+			//repeat(out("intertextual_connection")).times(1). // 4th degree of connections. TODO consider using map or flatmap in there, so gets their connectinos??
+			out("intertextual_connection"). // starting simple
+			//dedup().                       // Remove duplicates
 			//where(neq("u861")).            // Exclude u861   
 			values("split_passages"). // starting simple; will use scala dsl later
       // valueMap(true). // can you also use this and get the properties even when you're going to traverse its edges later?
@@ -132,5 +135,7 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
     val connectionJson = Json.toJson(connections)
     // val textJson = Json.toJson(text)
     connectionJson
+      */
+     "hi there"
   }
 }

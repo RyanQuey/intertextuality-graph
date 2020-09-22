@@ -44,14 +44,51 @@ docker-compose up -d
 git push
 ```
 
-## Debugging Docker/the deploy process
-```
-# go in and look around
-docker run -it --entrypoint /bin/bash cambodia-in-charts
+## Try the console
+https://www.playframework.com/documentation/2.8.x/PlayConsole
 
-# play console - https://www.playframework.com/documentation/2.8.x/PlayConsole
-sbt # or try sbt console
 ```
+./scripts/sbt/sbt.sh console
+```
+
+Now you can play around, using any of the classes it from this play app's classpath.
+
+
+Some commands to try
+```
+import com.ryanquey.datautils.cassandraHelpers.CassandraDb
+import com.ryanquey.intertextualitygraph.initializers.Initialize
+
+new Initialize()
+val graph = CassandraDb.graph
+// If you want to try implicit execution:
+// if this doesn't work, you know something is wrong 
+graph.V().next()
+
+// Can also try explicit execution
+// can also try using CassandraDb.executeGraphTraversal(traversal); which gives better error message
+import com.datastax.dse.driver.api.core.graph.DseGraph.g;
+import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
+import org.apache.tinkerpop.gremlin.structure.Vertex
+val traversal : GraphTraversal[Vertex, Vertex]  = g.V();
+val result = CassandraDb.executeGraphTraversal(traversal);
+result
+
+
+// try calling a raw string
+import com.datastax.dse.driver.api.core.graph.ScriptGraphStatement
+val groovyScript : String = "system.graphs()";
+val graphs = CassandraDb.executeGraphString(groovyScript);
+graphs.all()
+
+
+```
+
+## DB config
+The play app is sharing configuration file with etl-tools, since etl-tools is on the classpath. See the ../etl-tools/src/main/resources/application.conf file. 
+
+
 # Development
 ## Add Dependencies
 https://www.playframework.com/documentation/2.8.x/sbtDependencies#Managed-dependencies

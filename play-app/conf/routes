@@ -10,6 +10,7 @@ GET     /tutorial                           controllers.HomeController.tutorial
 GET     /test                               controllers.HomeController.test
 GET     /our-world-in-data-cambodia                           controllers.ChartsController.iframes
 GET     /find-all-sources-for-ref           controllers.ConnectionsController.findAllSourcesRecursivelyForRef
+GET     /find-texts-starting-with-ref           controllers.ConnectionsController.findTextsByStartingRef
 
 
 # Map static resources from the /public folder to the /assets URL path

@@ -94,9 +94,15 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
    * The configuration in the `routes` file means that this method
    * will be called when the application receives a `GET` request with
    * a path of `/`.
+   *
+   * NOTE despite the name, only going four deep for now
    */
   def findAllSourcesRecursivelyForRef() = Action { implicit request: Request[AnyContent] =>
     Ok(_findAllSourcesRecursivelyForRef("Genesis", 1, 1))
+  }
+
+  def findTextsByStartingRef() = Action { implicit request: Request[AnyContent] =>
+    Ok(_findTextByStartingRef("Genesis", 1, 1))
   }
 
   /**
@@ -142,9 +148,6 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
     val texts = g.V().has("text", "starting_book", book)
       .has("starting_chapter", chapter)
       .has("starting_verse",  verse)
-      //.next() // just get first hit
-      // .valueMap(true) // can you also use this and get the properties even when you're going to traverse its edges later? Also can't use valueMap with next, it is one or the other
-      //.limit(1)
       .toList()
 
     val connectionsWithFields = g.V(texts).                
@@ -158,5 +161,20 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
 
     outputJson
   }
+
+  def _findTextByStartingRef (book : String, chapter : Int, verse : Int)  = {
+    val g : GraphTraversalSource = CassandraDb.graph
+
+    val texts = g.V().has("text", "starting_book", book)
+      .has("starting_chapter", chapter)
+      .has("starting_verse",  verse)
+      .valueMap() // 
+      .toList()
+
+    val outputJson = json_mapper.writeValueAsString(texts)
+
+    outputJson
+  }
+
 }
 

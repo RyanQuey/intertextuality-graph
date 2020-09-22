@@ -41,6 +41,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__._;
 
 // end over-importing tinkerpop classes
 
+import org.apache.tinkerpop.gremlin.structure.Vertex
+import gremlin.scala._
 
 
 /**
@@ -103,28 +105,51 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
     val g : GraphTraversalSource = CassandraDb.graph
 
     // get the text
-    //val texts = g.V() //.has("text", "starting_book", book)
-      // .has("starting_chapter", chapter)
-      // .has("starting_verse",  verse)
+    val texts = g.V() //.has("text", "starting_book", book)
+      .has("starting_chapter", chapter)
+      .has("starting_verse",  verse)
       //.next() // just get first hit
       // .valueMap(true) // can you also use this and get the properties even when you're going to traverse its edges later? Also can't use valueMap with next, it is one or the other
       //.limit(1)
-     // .toList()
+      .toList()
 
-     // val all = g.V().next()
+    // val all = g.V().next()
 
-      /*
 
-      // I think we will often need to typecast to make sure we get the right format here. maybe scala dsl won't need it
-    val connections = g.V(texts).                   // Iterator<Vertex>
-			//repeat(out("intertextual_connection")).times(1). // 4th degree of connections. TODO consider using map or flatmap in there, so gets their connectinos??
-			out("intertextual_connection"). // starting simple
+    // print one vertex
+    val connections : List[Vertex] = g.V(texts)                   // Iterator<Vertex>
+			.out("intertextual_connection") // starting simple
+			.toList() // to java list
+			.asScala.toList // to scala buffer > scala list
+
+		val oneConn = connections(0)
+		println(oneConn)
+
+    // get some split passages from one connection
+    val connections2 : List[java.util.ArrayList[String]] = g.V(texts).                   // Iterator<Vertex>
+			out("intertextual_connection") // starting simple
+			.values("split_passages")
+
+			.asScala.toList // to scala buffer > scala list
+
+		val oneConn2sp : java.util.ArrayList[String] = connections2(0)
+		println(oneConn2sp.get(0))
+
+    val output = oneConn2sp.get(0)
+
 			//dedup().                       // Remove duplicates
+			//repeat(out("intertextual_connection")).times(1). // 4th degree of connections. TODO consider using map or flatmap in there, so gets their connectinos??
 			//where(neq("u861")).            // Exclude u861   
-			values("split_passages"). // starting simple; will use scala dsl later
-      // valueMap(true). // can you also use this and get the properties even when you're going to traverse its edges later?
-    // currently List[java.util.Map[Object,Nothing]] when use valueMap
-			toList().asScala 
+			//values("split_passages"). // starting simple; will use scala dsl later
+      //valueMap(true). // can you also use this and get the properties even when you're going to traverse its edges later?
+
+		// val oneConnArr = connections(0)(0)
+		// val oneConn  = oneConnArr.asScala
+
+
+	  //val connCC : IntertextualConnection = oneConn.toCC[IntertextualConnection]
+		// if don't convert to scala, is ArrayList
+
 
     // https://www.baeldung.com/java-convert-iterator-to-list#guava
     // getting the wrong type, having a hard time converting to list
@@ -132,10 +157,13 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
     // convert to json for sending to frontend
     // TODO might need to convert from Iterator<Collection<String>> to something that toJson can handle
     // Cannot write an instance of Iterator[java.util.Collection[String]] to HTTP response. Try to define a Writeable[Iterator[java.util.Collection[String]]]]
-    val connectionJson = Json.toJson(connections)
+    // val connectionJson = Json.toJson(connections)
+    
+    // val oneConnectionJson = Json.toJson(connCC)
+    // val oneConnectionJson = Json.toJson(oneConn)
+
     // val textJson = Json.toJson(text)
-    connectionJson
-      */
-     "hi there"
+    //connectionJson
+    output.toString
   }
 }

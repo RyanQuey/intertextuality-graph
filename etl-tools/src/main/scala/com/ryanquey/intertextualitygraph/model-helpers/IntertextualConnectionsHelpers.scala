@@ -15,6 +15,7 @@ import com.datastax.oss.driver.api.querybuilder.QueryBuilder._;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
+import 
 
 case class IntertextualConnection(
   sourceTextStartingBook : String,

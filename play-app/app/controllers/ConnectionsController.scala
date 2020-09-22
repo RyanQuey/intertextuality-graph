@@ -43,6 +43,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__._;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import gremlin.scala._
+import org.apache.tinkerpop.gremlin.structure.io.graphson.{GraphSONMapper, GraphSONVersion}
 
 
 /**
@@ -81,6 +82,11 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
     (JsPath \ "sourceLanguage").write[Option[String]])(unlift(IntertextualConnection.unapply))
 
 
+  val json_mapper = GraphSONMapper.
+                build().
+                version(GraphSONVersion.V1_0).
+                create().
+                createMapper()
 
   /**
    * Create an Action to render an HTML page.
@@ -122,8 +128,8 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
 			.toList() // to java list
 			.asScala.toList // to scala buffer > scala list
 
-		val oneConn = connections(0)
-		println(oneConn)
+		// val oneConn = connections(0)
+		//println(oneConn)
 
     // get some split passages from one connection
     val connections2 : List[java.util.ArrayList[String]] = g.V(texts).                   // Iterator<Vertex>
@@ -133,14 +139,118 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
 			.asScala.toList // to scala buffer > scala list
 
 		val oneConn2sp : java.util.ArrayList[String] = connections2(0)
-		println(oneConn2sp.get(0))
+		//println(oneConn2sp.get(0))
 
-    val output = oneConn2sp.get(0)
+    val connectionsWithFields = g.V(texts).                
+			out("intertextual_connection") // starting simple
+			.valueMap()
+			.toList
+
+    val connectionsWithSpecifiedFields = g.V(texts)
+			.out("intertextual_connection") // starting simple
+      .values(
+        "id", // TIMEUUID 
+        "year_written", // INT 
+        "author", // TEXT
+        "canonical", // BOOLEAN 
+        "canonical_text", // TEXT
+        "starting_book", // TEXT
+        "starting_chapter", // INT
+        "starting_verse", // INT
+        "ending_book", // TEXT
+        "ending_chapter", // INT
+        "ending_verse", // INT
+// TODO make this a set? but then by default as easy to read...hmmm...
+        "split_passages", // LIST<TEXT>
+        "testament", // TEXT 
+        "greek_translation", // TEXT 
+        "english_translation", // TEXT 
+        "comments", // TEXT
+        "// this is like through the play-app, or through", // treasury-of-scripture-knowledge or ...(not user_id)
+        "created_by", // TEXT
+        "updated_by", // TEXT
+        "updated_at", // TIMESTAMP 
+      )
+      .toList
+
+		//println("one from graphson" + json_mapper.writeValueAsString(g.V(texts).out("intertextual_connection").valueMap().next()))
+
+    val scalaConnectionsWithSpecifiedFields = g.V(texts)
+			.out("intertextual_connection") 
+      .values(
+        "id", // TIMEUUID 
+        "year_written", // INT 
+        "author", // TEXT
+        "canonical", // BOOLEAN 
+        "canonical_text", // TEXT
+        "starting_book", // TEXT
+        "starting_chapter", // INT
+        "starting_verse", // INT
+        "ending_book", // TEXT
+        "ending_chapter", // INT
+        "ending_verse", // INT
+// TODO make this a set? but then by default as easy to read...hmmm...
+        "split_passages", // LIST<TEXT>
+        "testament", // TEXT 
+        "greek_translation", // TEXT 
+        "english_translation", // TEXT 
+        "comments", // TEXT
+        "// this is like through the play-app, or through", // treasury-of-scripture-knowledge or ...(not user_id)
+        "created_by", // TEXT
+        "updated_by", // TEXT
+        "updated_at", // TIMESTAMP 
+      )
+      .asScala
+      .toList
+
+
+      /* had trouble getting this one working
+       * I think it's harder because of trying to use the map, which doesn't have a clear type
+    val typecastConnectionsWithFields : List[java.util.Map[Object,Nothing]] = g.V(texts).                
+			out("intertextual_connection") // starting simple
+			.valueMap()
+			.toList
+			.asScala
+      .toList
+       */
+      
+/* TODO
+    val edges = g.E()
+      .values(
+        "source_text_id",
+        "source_text_starting_book",
+        "alluding_text_id",
+        "alluding_text_starting_book",
+        "connection_type",
+        "updated_at"
+      )
+      */
+
+
+
+    // this works too
+    //val output = oneConn2sp.get(0)
+    // this works too
+    //val output = oneConn2sp
+    // this works too
+    //val output = connections2
+    // this works too(outputs almost json...I think)
+    //val output = connectionsWithFields
+
+		// val oneWithSpecified = connectionsWithSpecifiedFields.get(0)
+		// println(oneWithSpecified)
+
+    // this works too (outputs array with values as strings, no keys...and all values are dates right now...)
+    // val output = connectionsWithSpecifiedFields
+    // FINALLY!! The best
+    val output = connectionsWithFields
+
+		// NOTE not working with json_mapper, probably because made into scala
+    //val output = scalaConnectionsWithSpecifiedFields
 
 			//dedup().                       // Remove duplicates
 			//repeat(out("intertextual_connection")).times(1). // 4th degree of connections. TODO consider using map or flatmap in there, so gets their connectinos??
 			//where(neq("u861")).            // Exclude u861   
-			//values("split_passages"). // starting simple; will use scala dsl later
       //valueMap(true). // can you also use this and get the properties even when you're going to traverse its edges later?
 
 		// val oneConnArr = connections(0)(0)
@@ -161,9 +271,12 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
     
     // val oneConnectionJson = Json.toJson(connCC)
     // val oneConnectionJson = Json.toJson(oneConn)
+    //val outputJson = Json.toJson(output)
+    //val outputJson = output.toString
+    val outputJson = json_mapper.writeValueAsString(output)
 
     // val textJson = Json.toJson(text)
-    //connectionJson
-    output.toString
+    outputJson
   }
 }
+

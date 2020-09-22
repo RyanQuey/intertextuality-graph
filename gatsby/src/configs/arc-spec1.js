@@ -16,8 +16,8 @@ export default (data) => ({
     {
       "name": "edges",
       // "url": "data/miserables.json",
-      values: data,
-      "format": {"type": "json", "property": "links"}
+      values: data.links,
+      "format": {"type": "json"}, // "property": "links"}
     },
     {
       "name": "sourceDegree",
@@ -34,10 +34,11 @@ export default (data) => ({
       ]
     },
     {
+      // aka vertices
       "name": "nodes",
-      values: data,
+      values: data.nodes,
       // "url": "data/miserables.json",
-      "format": {"type": "json", "property": "nodes"},
+      "format": {"type": "json"}, // "property": "nodes"},
       "transform": [
         { "type": "window", "ops": ["rank"], "as": ["order"] },
         {
@@ -88,7 +89,7 @@ export default (data) => ({
           "y": {"value": 0},
           "size": {"field": "degree", "mult": 5, "offset": 10},
           "fill": {"scale": "color", "field": "group"}
-        }
+        },
       }
     },
     {
@@ -98,6 +99,11 @@ export default (data) => ({
         "update": {
           "stroke": {"value": "#000"},
           "strokeOpacity": {"value": 0.2},
+          "strokeWidth": {"field": "value"}
+        },
+        "hover": {
+          "stroke": {"value": "#000"},
+          "strokeOpacity": {"value": 0.6},
           "strokeWidth": {"field": "value"}
         }
       },

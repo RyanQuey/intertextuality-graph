@@ -111,7 +111,7 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
     val g : GraphTraversalSource = CassandraDb.graph
 
     // get the text
-    val texts = g.V() //.has("text", "starting_book", book)
+    val texts = g.V().has("text", "starting_book", book)
       .has("starting_chapter", chapter)
       .has("starting_verse",  verse)
       //.next() // just get first hit
@@ -119,163 +119,43 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
       //.limit(1)
       .toList()
 
-    // val all = g.V().next()
+    val connectionsWithFields = g.V(texts)
+			.out("intertextual_connection")  // TODO can use repeat 4 times
+			.out("intertextual_connection") 
+			.out("intertextual_connection") 
+			.out("intertextual_connection") 
+			.valueMap()
+			.toList
 
+    val output = connectionsWithFields
 
-    // print one vertex
-    val connections : List[Vertex] = g.V(texts)                   // Iterator<Vertex>
-			.out("intertextual_connection") // starting simple
-			.toList() // to java list
-			.asScala.toList // to scala buffer > scala list
+    val outputJson = json_mapper.writeValueAsString(output)
 
-		// val oneConn = connections(0)
-		//println(oneConn)
+    outputJson
+  }
 
-    // get some split passages from one connection
-    val connections2 : List[java.util.ArrayList[String]] = g.V(texts).                   // Iterator<Vertex>
-			out("intertextual_connection") // starting simple
-			.values("split_passages")
+  // only goes one deep
+  def _findAllSourcesForRef (book : String, chapter : Int, verse : Int)  = {
+    val g : GraphTraversalSource = CassandraDb.graph
 
-			.asScala.toList // to scala buffer > scala list
-
-		val oneConn2sp : java.util.ArrayList[String] = connections2(0)
-		//println(oneConn2sp.get(0))
+    // get the text
+    val texts = g.V().has("text", "starting_book", book)
+      .has("starting_chapter", chapter)
+      .has("starting_verse",  verse)
+      //.next() // just get first hit
+      // .valueMap(true) // can you also use this and get the properties even when you're going to traverse its edges later? Also can't use valueMap with next, it is one or the other
+      //.limit(1)
+      .toList()
 
     val connectionsWithFields = g.V(texts).                
 			out("intertextual_connection") // starting simple
 			.valueMap()
 			.toList
 
-    val connectionsWithSpecifiedFields = g.V(texts)
-			.out("intertextual_connection") // starting simple
-      .values(
-        "id", // TIMEUUID 
-        "year_written", // INT 
-        "author", // TEXT
-        "canonical", // BOOLEAN 
-        "canonical_text", // TEXT
-        "starting_book", // TEXT
-        "starting_chapter", // INT
-        "starting_verse", // INT
-        "ending_book", // TEXT
-        "ending_chapter", // INT
-        "ending_verse", // INT
-// TODO make this a set? but then by default as easy to read...hmmm...
-        "split_passages", // LIST<TEXT>
-        "testament", // TEXT 
-        "greek_translation", // TEXT 
-        "english_translation", // TEXT 
-        "comments", // TEXT
-        "// this is like through the play-app, or through", // treasury-of-scripture-knowledge or ...(not user_id)
-        "created_by", // TEXT
-        "updated_by", // TEXT
-        "updated_at", // TIMESTAMP 
-      )
-      .toList
-
-		//println("one from graphson" + json_mapper.writeValueAsString(g.V(texts).out("intertextual_connection").valueMap().next()))
-
-    val scalaConnectionsWithSpecifiedFields = g.V(texts)
-			.out("intertextual_connection") 
-      .values(
-        "id", // TIMEUUID 
-        "year_written", // INT 
-        "author", // TEXT
-        "canonical", // BOOLEAN 
-        "canonical_text", // TEXT
-        "starting_book", // TEXT
-        "starting_chapter", // INT
-        "starting_verse", // INT
-        "ending_book", // TEXT
-        "ending_chapter", // INT
-        "ending_verse", // INT
-// TODO make this a set? but then by default as easy to read...hmmm...
-        "split_passages", // LIST<TEXT>
-        "testament", // TEXT 
-        "greek_translation", // TEXT 
-        "english_translation", // TEXT 
-        "comments", // TEXT
-        "// this is like through the play-app, or through", // treasury-of-scripture-knowledge or ...(not user_id)
-        "created_by", // TEXT
-        "updated_by", // TEXT
-        "updated_at", // TIMESTAMP 
-      )
-      .asScala
-      .toList
-
-
-      /* had trouble getting this one working
-       * I think it's harder because of trying to use the map, which doesn't have a clear type
-    val typecastConnectionsWithFields : List[java.util.Map[Object,Nothing]] = g.V(texts).                
-			out("intertextual_connection") // starting simple
-			.valueMap()
-			.toList
-			.asScala
-      .toList
-       */
-      
-/* TODO
-    val edges = g.E()
-      .values(
-        "source_text_id",
-        "source_text_starting_book",
-        "alluding_text_id",
-        "alluding_text_starting_book",
-        "connection_type",
-        "updated_at"
-      )
-      */
-
-
-
-    // this works too
-    //val output = oneConn2sp.get(0)
-    // this works too
-    //val output = oneConn2sp
-    // this works too
-    //val output = connections2
-    // this works too(outputs almost json...I think)
-    //val output = connectionsWithFields
-
-		// val oneWithSpecified = connectionsWithSpecifiedFields.get(0)
-		// println(oneWithSpecified)
-
-    // this works too (outputs array with values as strings, no keys...and all values are dates right now...)
-    // val output = connectionsWithSpecifiedFields
-    // FINALLY!! The best
     val output = connectionsWithFields
 
-		// NOTE not working with json_mapper, probably because made into scala
-    //val output = scalaConnectionsWithSpecifiedFields
-
-			//dedup().                       // Remove duplicates
-			//repeat(out("intertextual_connection")).times(1). // 4th degree of connections. TODO consider using map or flatmap in there, so gets their connectinos??
-			//where(neq("u861")).            // Exclude u861   
-      //valueMap(true). // can you also use this and get the properties even when you're going to traverse its edges later?
-
-		// val oneConnArr = connections(0)(0)
-		// val oneConn  = oneConnArr.asScala
-
-
-	  //val connCC : IntertextualConnection = oneConn.toCC[IntertextualConnection]
-		// if don't convert to scala, is ArrayList
-
-
-    // https://www.baeldung.com/java-convert-iterator-to-list#guava
-    // getting the wrong type, having a hard time converting to list
-
-    // convert to json for sending to frontend
-    // TODO might need to convert from Iterator<Collection<String>> to something that toJson can handle
-    // Cannot write an instance of Iterator[java.util.Collection[String]] to HTTP response. Try to define a Writeable[Iterator[java.util.Collection[String]]]]
-    // val connectionJson = Json.toJson(connections)
-    
-    // val oneConnectionJson = Json.toJson(connCC)
-    // val oneConnectionJson = Json.toJson(oneConn)
-    //val outputJson = Json.toJson(output)
-    //val outputJson = output.toString
     val outputJson = json_mapper.writeValueAsString(output)
 
-    // val textJson = Json.toJson(text)
     outputJson
   }
 }

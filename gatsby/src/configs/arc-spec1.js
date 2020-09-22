@@ -128,9 +128,9 @@ export default (data) => ({
           "stroke": {"value": "#000"},
           "strokeOpacity": [
             // if nothing selected, everythign has medium opacity
-            {"test": "!length(data('selectedEdges'))", "value": 0.2},
-            // if this edge's id is in selected-edges data, make this bolder and everything else lighter
-            {"test": "indata('selectedEdges', 'value', datum.id)", "value": 0.3},
+            {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 0.2},
+            // if this edge's id is in selected-edges data, or the source or target is selected, make this bolder and everything else lighter
+            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.source) ||indata('selectedNodes', 'value', datum.target) ", "value": 0.3},
             // array values means defaults to last value
             {"value": 0.1},
           ],

@@ -127,17 +127,19 @@ export default (data) => ({
         "update": {
           "stroke": {"value": "#000"},
           "strokeOpacity": [
-            // if this edge's id is in selected-edges data, make this bolder
-            {"test": "indata('selectedEdges', 'value', datum.id)", "value": 0.6},
+            // if nothing selected, everythign has medium opacity
+            {"test": "!length(data('selectedEdges'))", "value": 0.2},
+            // if this edge's id is in selected-edges data, make this bolder and everything else lighter
+            {"test": "indata('selectedEdges', 'value', datum.id)", "value": 0.3},
             // array values means defaults to last value
-            {"value": 0.2},
+            {"value": 0.1},
           ],
           "strokeWidth": {"field": "value"}
         },
         // on hover, increase opacity of strokes for this edge to .6 (make darker)
         "hover": {
           "stroke": {"value": "#000"},
-          "strokeOpacity": {"value": 0.6},
+          "strokeOpacity": {"value": 0.3},
           "strokeWidth": {"field": "value"}
         }
       },
@@ -186,7 +188,8 @@ export default (data) => ({
           "align": {"value": "right"},
           // if don't set here, will never revert after hovering
           "fontWeight": [
-            {"test": "!length(data('selectedNodes')) || indata('selectedNodes', 'value', datum.index)", "value": 0.6},
+            // make it bolder if selected
+            {"test": "indata('selectedNodes', 'value', datum.index)", "value": 600},
             {"value": 200},
           ],
           "baseline": {"value": "middle"},

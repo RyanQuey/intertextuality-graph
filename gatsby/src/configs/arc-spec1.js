@@ -12,6 +12,7 @@ export default (data) => ({
   "width": 770,
   "padding": 5,
 
+
   "data": [
     {
       "name": "edges",
@@ -124,13 +125,26 @@ export default (data) => ({
       "from": {"data": "edges"},
       "name": "edgeLabel",
       "encode": {
+        enter: {
+          // put a "signal" on it to be able to get data from fields
+          // all of these are working tooltips, ...but some work better than others haha
+          //"tooltip": {"title": "hi", value: "datum.target", signal: "datum.source"},
+          //"tooltip": {signal: "datum.source"},
+          //"tooltip": {signal: "{'Source Node': datum.source}"},
+          //"tooltip": {signal: ["{'Source Node': datum.source}"}],
+          "tooltip": {
+            signal: [
+              "{'Source Node': datum.source, 'Target Node': datum.target}", 
+            ]
+          },
+        },
         "update": {
           "stroke": {"value": "#000"},
           "strokeOpacity": [
             // if nothing selected, everythign has medium opacity
             {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 0.2},
             // if this edge's id is in selected-edges data, or the source or target is selected, make this bolder and everything else lighter
-            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.source) ||indata('selectedNodes', 'value', datum.target) ", "value": 0.3},
+            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.source) || indata('selectedNodes', 'value', datum.target) ", "value": 0.3},
             // array values means defaults to last value
             {"value": 0.1},
           ],
@@ -242,5 +256,5 @@ export default (data) => ({
         }
       ]
     },
-	]
+	],
 });

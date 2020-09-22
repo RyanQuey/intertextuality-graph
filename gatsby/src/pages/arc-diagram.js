@@ -7,6 +7,9 @@ import SEO from "../components/seo"
 
 import { Vega } from 'react-vega';
 import spec1 from '../configs/arc-spec1';
+// add a tooltip https://stackoverflow.com/a/53709494/6952495
+import { Handler } from 'vega-tooltip';
+
 
 // I'm using Approach #2 from vega docs
 // https://github.com/vega/react-vega/tree/master/packages/react-vega#approach2-use-vega-generic-class-and-pass-in-spec-for-dynamic-component
@@ -33,6 +36,7 @@ const ArcDiagram = () => (
     <Vega 
       spec={spec1(arcData)} 
       signalListeners={signalListeners} 
+      tooltip={new Handler().call}
     />
   </Layout>
 )

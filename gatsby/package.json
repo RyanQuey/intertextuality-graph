@@ -22,7 +22,8 @@
     "react-helmet": "^6.1.0",
     "react-vega": "^7.4.1",
     "vega": "^5.15.0",
-    "vega-lite": "^4.15.0"
+    "vega-lite": "^4.15.0",
+    "vega-tooltip": "^0.24.1"
   },
   "devDependencies": {
     "prettier": "2.0.5"

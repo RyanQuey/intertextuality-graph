@@ -6,7 +6,7 @@ import Image from "../components/image"
 import SEO from "../components/seo"
 
 import { Vega } from 'react-vega';
-import spec1 from '../configs/arc-spec1';
+import spec1 from '../configs/intertextual-arc-spec1';
 // add a tooltip https://stackoverflow.com/a/53709494/6952495
 // https://github.com/vega/vega-tooltip/blob/master/docs/customizing_your_tooltip.md
 // examples (can look at source code in Vega Editor)
@@ -20,7 +20,6 @@ import { Handler } from 'vega-tooltip';
 
 // https://vega.github.io/editor/data/miserables.json
 // if put "url" instead "of" in the data in specification, can load a json or CSV file
-import arcData from '../data/les-mis-arc-diagram-sample.json';
 
 // check out their demo for help:
 // https://github.com/vega/react-vega/blob/master/packages/react-vega-demo/stories/ReactVegaDemo.tsx
@@ -38,12 +37,14 @@ const tooltipOptions = {
 
 const tooltip = new Handler(tooltipOptions).call
 
+
+
 const ArcDiagram = () => (
   <Layout>
     <SEO title="ArcDiagram" />
 
     <Vega 
-      spec={spec1(arcData)} 
+      spec={spec1()} 
       signalListeners={signalListeners} 
       tooltip={tooltip}
     />

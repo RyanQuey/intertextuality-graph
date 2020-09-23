@@ -116,6 +116,8 @@ export default (data) => ({
 
   "marks": [
     // these are the little dots at the ends of the labels, where the edges meet 
+    // OR maybe this is all invisible, but makes placeholders that other marks refer to (hence,
+    // opacity 0)
     {
       "type": "symbol",
       "name": "layout",

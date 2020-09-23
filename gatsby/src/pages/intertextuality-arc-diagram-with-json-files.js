@@ -33,16 +33,14 @@ const tooltip = new Handler(tooltipOptions).call
 const spec = spec1(edgesData, verticesData)
 console.log(spec)
 
-const ArcDiagram = () => (
+const IArcDiagramWithFile = () => (
   <Layout>
-    <SEO title="ArcDiagram" />
+    <SEO title="IArcDiagramWithFile" />
 
     <Vega 
       spec={spec} 
-      signalListeners={signalListeners} 
-      tooltip={tooltip}
     />
   </Layout>
 )
 
-export default ArcDiagram
+export default IArcDiagramWithFile

@@ -16,7 +16,6 @@ export default (edgesData, verticesData) => ({
   "data": [
     {
       "name": "edges",
-      // "url": "data/miserables.json",
       // way to do this, but I'm not sure what it is yet)
       values: edgesData.map((e, index) => {
         // for now, instead of using the vega/d3 api which would have better performance, or even
@@ -96,7 +95,6 @@ export default (edgesData, verticesData) => ({
         }
       ]
     },
-    /*
     // data we're storing, to remember state of which vertices are selected
 		// https://vega.github.io/vega/examples/interactive-legend/
     {
@@ -115,7 +113,6 @@ export default (edgesData, verticesData) => ({
         {"trigger": "clickedEdge", "toggle": "clickedEdge"}
       ]
     }
-    */
   ],
 
   "scales": [
@@ -160,21 +157,20 @@ export default (edgesData, verticesData) => ({
       "from": {"data": "edges"},
       "name": "edgeLabel",
       "encode": {
-        /*
         enter: {
           "tooltip": {
             signal: [
               "{title: 'Connection', 'Source Node': '(' + datum.source + ')', 'Target Node': '(' + datum.target + ')'}", 
             ]
           },
-        },*/
+        },
         "update": {
           "stroke": {"value": "#000"},
           "strokeOpacity": [
             // if nothing selected, everythign has medium opacity
-            //{"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 0.2},
+            {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 0.2},
             // if this edge's id is in selected-edges data, or the source or target is selected, make this bolder and everything else lighter
-            //{"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.source) || indata('selectedNodes', 'value', datum.target) ", "value": 0.3},
+            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.source) || indata('selectedNodes', 'value', datum.target) ", "value": 0.3},
             // array values means defaults to last value
             {"value": 0.1},
           ],
@@ -233,7 +229,7 @@ export default (edgesData, verticesData) => ({
           // if don't set here, will never revert after hovering
           "fontWeight": [
             // make it bolder if selected
-            //{"test": "indata('selectedNodes', 'value', datum.index)", "value": 600},
+            {"test": "indata('selectedNodes', 'value', datum.index)", "value": 600},
             {"value": 200},
           ],
           "baseline": {"value": "middle"},
@@ -253,7 +249,6 @@ export default (edgesData, verticesData) => ({
       }
     }
   ], // end of marks
-	  /*
 	"signals": [
 	  {
       "name": "clickedNode", "value": null,
@@ -290,5 +285,4 @@ export default (edgesData, verticesData) => ({
       ]
     },
 	],
-    */
 });

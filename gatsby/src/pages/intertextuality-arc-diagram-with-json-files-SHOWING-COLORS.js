@@ -6,7 +6,7 @@ import Image from "../components/image"
 import SEO from "../components/seo"
 
 import { Vega } from 'react-vega';
-import spec1 from '../configs/intertextual-arc-spec-with-json-files';
+import spec1 from '../configs/intertextual-arc-spec-with-json-files-SHOWING-COLORS';
 import { Handler } from 'vega-tooltip';
 
 import edgesData from '../data/intertextuality-edges.json';

@@ -95,6 +95,7 @@ export default (edgesData, verticesData) => ({
         }
       ]
     },
+    /*
     // data we're storing, to remember state of which vertices are selected
 		// https://vega.github.io/vega/examples/interactive-legend/
     {
@@ -113,6 +114,7 @@ export default (edgesData, verticesData) => ({
         {"trigger": "clickedEdge", "toggle": "clickedEdge"}
       ]
     }
+    */
   ],
 
   "scales": [
@@ -152,6 +154,7 @@ export default (edgesData, verticesData) => ({
       }
     },
     // the bands for each edge connecting nodes
+    /*
     {
       "type": "path",
       "from": {"data": "edges"},
@@ -165,6 +168,7 @@ export default (edgesData, verticesData) => ({
             ]
           },
         },*/
+    /*
         "update": {
           "stroke": {"value": "#000"},
           "strokeOpacity": [
@@ -203,6 +207,7 @@ export default (edgesData, verticesData) => ({
         }
       ]
     },
+    */
     // I think styles the colored dot for each node further
     {
       "type": "symbol",
@@ -230,7 +235,7 @@ export default (edgesData, verticesData) => ({
           // if don't set here, will never revert after hovering
           "fontWeight": [
             // make it bolder if selected
-            {"test": "indata('selectedNodes', 'value', datum.index)", "value": 600},
+            //{"test": "indata('selectedNodes', 'value', datum.index)", "value": 600},
             {"value": 200},
           ],
           "baseline": {"value": "middle"},
@@ -242,9 +247,11 @@ export default (edgesData, verticesData) => ({
           "fontWeight": {"value": 700},
         },
         // how to react when "select" event signal happens on this node
+        /*
         "select": {
           "fontWeight": {"value": 900},
         }
+        */
       }
     }
   ], // end of marks

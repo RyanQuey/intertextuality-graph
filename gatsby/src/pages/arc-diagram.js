@@ -37,13 +37,16 @@ const tooltipOptions = {
 }
 
 const tooltip = new Handler(tooltipOptions).call
+const spec = spec1(arcData)
+
+console.log("sample arc diagram spec", Object.assign({}, spec))
 
 const ArcDiagram = () => (
   <Layout>
     <SEO title="ArcDiagram" />
 
     <Vega 
-      spec={spec1(arcData)} 
+      spec={spec} 
       signalListeners={signalListeners} 
       tooltip={tooltip}
     />

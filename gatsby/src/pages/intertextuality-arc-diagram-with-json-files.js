@@ -31,7 +31,7 @@ const tooltip = new Handler(tooltipOptions).call
 
 
 const spec = spec1(edgesData, verticesData)
-console.log(spec)
+console.log(Object.assign({}, spec))
 
 const IArcDiagramWithFile = () => (
   <Layout>

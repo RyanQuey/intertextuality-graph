@@ -64,6 +64,7 @@ public class Text extends TextBase implements Model {
   };
 
   // query should be solr query, e.g., `book:Genesis`
+  /*
   public static Text findOneByQuery (String query) throws Exception {
     TextDao dao = new TextRecord().getDao();
     TextRecord record = dao.findOneByQuery(query);
@@ -75,6 +76,7 @@ public class Text extends TextBase implements Model {
       return new Text(record);
     }
   }
+  */
 
   // should have the same result as findOneByQuery if ev erything is working correctly
   public static Text findOneBySolr (String query) throws Exception {

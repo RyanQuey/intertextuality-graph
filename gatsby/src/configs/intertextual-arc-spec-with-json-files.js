@@ -59,10 +59,11 @@ export default (edgesData, verticesData) => ({
       "name": "nodes",
       values: verticesData.map((n, index) => {
         return Object.assign({//(n), {
+          id: n.id[0],
           index,
           // TODO what to use for this? maybe take random number from 1-25. Better would be to use
           // book order, mapping starting book name to order . Do later
-          group: Math.floor(Math.random() * Math.floor(6)),
+          group: Math.floor(Math.random() * Math.floor(6) + 1),
           name: n.split_passages[0].join(", "),
         })
       }),
@@ -75,7 +76,7 @@ export default (edgesData, verticesData) => ({
           "type": "lookup", 
           "from": "sourceDegree", 
           "key": "source",
-          "fields": ["index"], 
+          "fields": ["id"], 
           "as": ["sourceDegree"],
           // start count at 0
           "default": {"count": 0}
@@ -85,7 +86,7 @@ export default (edgesData, verticesData) => ({
           "type": "lookup", 
           "from": "targetDegree", 
           "key": "target",
-          "fields": ["index"], 
+          "fields": ["id"], 
           "as": ["targetDegree"],
           "default": {"count": 0}
         },
@@ -154,7 +155,6 @@ export default (edgesData, verticesData) => ({
       }
     },
     // the bands for each edge connecting nodes
-    /*
     {
       "type": "path",
       "from": {"data": "edges"},
@@ -168,7 +168,6 @@ export default (edgesData, verticesData) => ({
             ]
           },
         },*/
-    /*
         "update": {
           "stroke": {"value": "#000"},
           "strokeOpacity": [
@@ -194,6 +193,7 @@ export default (edgesData, verticesData) => ({
           "fields": ["datum.source", "datum.target"],
           "as": ["sourceNode", "targetNode"]
         },
+        /*
         {
           "type": "linkpath",
           // goes FROM the minimum between the x value of the source and the target
@@ -205,9 +205,9 @@ export default (edgesData, verticesData) => ({
           "targetY": {"expr": "0"},
           "shape": "arc"
         }
+        */
       ]
     },
-    */
     // I think styles the colored dot for each node further
     {
       "type": "symbol",

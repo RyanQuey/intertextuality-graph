@@ -233,6 +233,7 @@ export default (edgesData, verticesData) => ({
         "hover": {
           "stroke": {"value": "#000"},
           "strokeOpacity": {"value": 0.3},
+          "strokeWidth": {"field": "value", "mult": 5},
         }
       },
       "transform": [

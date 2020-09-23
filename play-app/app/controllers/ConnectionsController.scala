@@ -103,6 +103,7 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
     Ok(_findAllSourcesForRef("Genesis", 1, 1))
   }
 
+  // for now requiring a separate API call, but maybe later we'll just merge these into the target vertices as well
   def findTextsByStartingRef() = Action { implicit request: Request[AnyContent] =>
     Ok(_findTextByStartingRef("Genesis", 1, 1))
   }

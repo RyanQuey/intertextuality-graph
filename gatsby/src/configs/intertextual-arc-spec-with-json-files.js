@@ -134,8 +134,8 @@ export default (edgesData, verticesData) => ({
   ],
 
   "marks": [
-    // these are the little dots at the ends of the labels, where the edges meet 
-    // OR maybe this is all invisible, but makes placeholders that other marks refer to (hence,
+    // I think maps out x/y coordinates for our nodes
+    // I think all invisible, but makes placeholders that other marks refer to (hence,
     // opacity 0)
     {
       "type": "symbol",
@@ -189,11 +189,10 @@ export default (edgesData, verticesData) => ({
       },
       "transform": [
         {
-          "type": "lookup", "from": "layout", "key": "datum.index",
+          "type": "lookup", "from": "layout", "key": "datum.id",
           "fields": ["datum.source", "datum.target"],
           "as": ["sourceNode", "targetNode"]
         },
-        /*
         {
           "type": "linkpath",
           // goes FROM the minimum between the x value of the source and the target
@@ -205,10 +204,9 @@ export default (edgesData, verticesData) => ({
           "targetY": {"expr": "0"},
           "shape": "arc"
         }
-        */
       ]
     },
-    // I think styles the colored dot for each node further
+    // I think styles the colored dot for each node 
     {
       "type": "symbol",
       "from": {"data": "layout"},

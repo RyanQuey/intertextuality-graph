@@ -12,4 +12,5 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
 cd $INTERTEXTUALITY_GRAPH_GATSBY_DIR && \
   curl "http://localhost:9000/find-all-sources-for-ref" > ./src/data/intertextuality-vertices.json && \
-  curl "http://localhost:9000/find-paths-for-sources-starting-with-ref" > ./src/data/intertextuality-edges.json
+  curl "http://localhost:9000/find-paths-for-sources-starting-with-ref" > ./src/data/intertextuality-edges.json && \
+  curl "http://localhost:9000/find-texts-starting-with-ref" > ./src/data/intertextuality-source-vertices.json

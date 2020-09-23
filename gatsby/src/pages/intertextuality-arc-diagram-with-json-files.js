@@ -10,7 +10,8 @@ import spec1 from '../configs/intertextual-arc-spec-with-json-files';
 import { Handler } from 'vega-tooltip';
 
 import edgesData from '../data/intertextuality-edges.json';
-import verticesData from '../data/intertextuality-vertices.json';
+import targetVerticesData from '../data/intertextuality-vertices.json';
+import sourceVerticesData from '../data/intertextuality-source-vertices.json';
 
 
 /*
@@ -30,7 +31,10 @@ const tooltipOptions = {
 const tooltip = new Handler(tooltipOptions).call
 
 
-const spec = spec1(edgesData, verticesData)
+// merge vertices data together
+const allVerticesData = sourceVerticesData.concat(targetVerticesData)
+const spec = spec1(edgesData, allVerticesData)
+
 console.log("intertextuality graph using json files", Object.assign({}, spec))
 
 const IArcDiagramWithFile = () => (

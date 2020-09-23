@@ -33,8 +33,15 @@ export default (edgesData, verticesData) => ({
       /*
        * if wanted to add source name, so don't just show the source id, would do something like:
        * (note that the code below does not work)
+       * doesn't work since nodes isn't defined yet. needs to run in order
       "transform": [
-        // {"type": "lookup", from: "nodes", key: "source", fields: ["name"], as: "sourceName", default: ""}
+        {
+          "type": "lookup", 
+          from: "nodes", 
+          key: "source", 
+          fields: ["name"], 
+          as: ["sourceName"], 
+        }
       ],
       */
     },
@@ -151,57 +158,6 @@ export default (edgesData, verticesData) => ({
         },
       }
     },
-    // the bands for each edge connecting nodes
-    {
-      "type": "path",
-      "from": {"data": "edges"},
-      "name": "edgeLabel",
-      "encode": {
-        enter: {
-          "tooltip": {
-            signal: [
-              "{title: 'Connection', 'Source Node': '(' + datum.source + ')', 'Target Node': '(' + datum.target + ')'}", 
-            ]
-          },
-        },
-        "update": {
-          "stroke": {"value": "#000"},
-          "strokeOpacity": [
-            // if nothing selected, everythign has medium opacity
-            {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 0.2},
-            // if this edge's id is in selected-edges data, or the source or target is selected, make this bolder and everything else lighter
-            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.source) || indata('selectedNodes', 'value', datum.target) ", "value": 0.3},
-            // array values means defaults to last value
-            {"value": 0.1},
-          ],
-          "strokeWidth": {"field": "value"}
-        },
-        // on hover, increase opacity of strokes for this edge to .6 (make darker)
-        "hover": {
-          "stroke": {"value": "#000"},
-          "strokeOpacity": {"value": 0.3},
-          "strokeWidth": {"field": "value"}
-        }
-      },
-      "transform": [
-        {
-          "type": "lookup", "from": "layout", "key": "datum.id",
-          "fields": ["datum.source", "datum.target"],
-          "as": ["sourceNode", "targetNode"]
-        },
-        {
-          "type": "linkpath",
-          // goes FROM the minimum between the x value of the source and the target
-          "sourceX": {"expr": "min(datum.sourceNode.x, datum.targetNode.x)"},
-          // goes TO the maximum between the x value of the source and the target
-          "targetX": {"expr": "max(datum.sourceNode.x, datum.targetNode.x)"},
-          // always ends at 0 (ie, bands go up into an arc then end back at the x axis)
-          "sourceY": {"expr": "0"},
-          "targetY": {"expr": "0"},
-          "shape": "arc"
-        }
-      ]
-    },
     // I think styles the colored dot for each node 
     {
       "type": "symbol",
@@ -247,7 +203,63 @@ export default (edgesData, verticesData) => ({
         }
         */
       }
-    }
+    },
+    // the bands for each edge connecting nodes
+    {
+      "type": "path",
+      "from": {"data": "edges"},
+      "name": "edgeLabel",
+      "encode": {
+        enter: {
+          "tooltip": {
+            signal: [
+              "{title: 'Connection', 'Source Node': '(' + datum.source + ')', 'Target Node': '(' + datum.target + ')'}", 
+            ]
+          },
+        },
+        "update": {
+          "stroke": {"value": "#000"},
+          "strokeOpacity": [
+            // if nothing selected, everythign has medium opacity
+            {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 0.2},
+            // if this edge's id is in selected-edges data, or the source or target is selected, make this bolder and everything else lighter
+            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.source) || indata('selectedNodes', 'value', datum.target) ", "value": 0.3},
+            // array values means defaults to last value
+            {"value": 0.1},
+          ],
+          "strokeWidth": {"field": "value", "mult": 3},
+        },
+        // on hover, increase opacity of strokes for this edge to .6 (make darker)
+        "hover": {
+          "stroke": {"value": "#000"},
+          "strokeOpacity": {"value": 0.3},
+        }
+      },
+      "transform": [
+        {
+          "type": "lookup", "from": "layout", 
+          // each layout datum takes its fields from nodes, so has an id that corresponds to a node,
+          // with the same id as that node
+          "key": "datum.id",
+          // take source (which is source id) and target (which is target id) from this edge and map
+          // them to the id on the layout to set sourceNode and targetNode here on the edge band's
+          // fields
+          "fields": ["datum.source", "datum.target"],
+          "as": ["sourceNode", "targetNode"]
+        },
+        {
+          "type": "linkpath",
+          // goes FROM the minimum between the x value of the source and the target
+          "sourceX": {"expr": "min(datum.sourceNode.x, datum.targetNode.x)"},
+          // goes TO the maximum between the x value of the source and the target
+          "targetX": {"expr": "max(datum.sourceNode.x, datum.targetNode.x)"},
+          // always ends at 0 (ie, bands go up into an arc then end back at the x axis)
+          "sourceY": {"expr": "0"},
+          "targetY": {"expr": "0"},
+          "shape": "arc"
+        }
+      ]
+    },
   ], // end of marks
 	"signals": [
 	  {
@@ -257,8 +269,8 @@ export default (edgesData, verticesData) => ({
           // can use @ sign to refer to a mark (NOTE cannot refer to a data directly I don't think,
           // not for events. Marks get events, data does not)
           "events": "@nodeLabel:click",
-					// hopefully adds this node index to the selectedNodes list
-          "update": "{value: datum.index}",
+					// hopefully adds this node id to the selectedNodes list
+          "update": "{value: datum.id}",
           "force":  true
         }
       ]

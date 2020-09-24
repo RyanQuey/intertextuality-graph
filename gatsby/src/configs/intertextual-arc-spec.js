@@ -23,7 +23,7 @@ export default (edgesUrl, verticesUrl) => ({
         {
           "type": "project", 
           fields: ["objects[0].id[0]", "objects[0].split_passages[0]", "objects[1].id[0]", "objects[1].split_passages[0]"], 
-          as: ["source", "sourceSplitPassages", "target", "targetSplitPassages"], 
+          as: ["sourceId", "sourceSplitPassages", "targetId", "targetSplitPassages"], 
         },
         {"type": "identifier", "as": "id"},
       ],
@@ -33,14 +33,14 @@ export default (edgesUrl, verticesUrl) => ({
       "name": "sourceDegree",
       "source": "edges",
       "transform": [
-        {"type": "aggregate", "groupby": ["source"]}
+        {"type": "aggregate", "groupby": ["sourceId"]}
       ]
     },
     {
       "name": "targetDegree",
       "source": "edges",
       "transform": [
-        {"type": "aggregate", "groupby": ["target"]}
+        {"type": "aggregate", "groupby": ["targetId"]}
       ]
     },
     {
@@ -62,7 +62,7 @@ export default (edgesUrl, verticesUrl) => ({
         {
           "type": "lookup", 
           "from": "sourceDegree", 
-          "key": "source",
+          "key": "sourceId",
           "fields": ["id"], 
           "as": ["sourceDegree"],
           // start count at 0
@@ -72,7 +72,9 @@ export default (edgesUrl, verticesUrl) => ({
         {
           "type": "lookup", 
           "from": "targetDegree", 
-          "key": "target",
+          // foreign key
+          "key": "targetId",
+          // primary key of the node (?)
           "fields": ["id"], 
           "as": ["targetDegree"],
           "default": {"count": 0}
@@ -84,13 +86,12 @@ export default (edgesUrl, verticesUrl) => ({
       ]
     },
     // data we're storing, to remember state of which vertices are selected
-		// https://vega.github.io/vega/examples/interactive-legend/
     {
 		// https://vega.github.io/vega/examples/interactive-legend/
       "name": "selectedNodes",
       "on": [
         {"trigger": "clear", "remove": true},
-        {"trigger": "clickedNode", "toggle": "clickedNode"}
+        {"trigger": "clickedNode", "toggle": "clickedNode"},
       ]
     },
     {
@@ -98,7 +99,7 @@ export default (edgesUrl, verticesUrl) => ({
       "name": "selectedEdges",
       "on": [
         {"trigger": "clear", "remove": true},
-        {"trigger": "clickedEdge", "toggle": "clickedEdge"}
+        {"trigger": "clickedEdge", "toggle": "clickedEdge"},
       ]
     }
   ],
@@ -167,6 +168,10 @@ export default (edgesUrl, verticesUrl) => ({
           "fontWeight": [
             // make it bolder if selected
             {"test": "indata('selectedNodes', 'value', datum.id)", "value": 600},
+            // make it bolder if edge is selected and this node's id is the sourceId
+            {"test": "indata('selectedEdges', 'sourceId', datum.id)", "value": 600},
+            // make it bolder if edge is selected and this node's id is the targetId
+            {"test": "indata('selectedEdges', 'targetId', datum.id)", "value": 600},
             {"value": 200},
           ],
           "baseline": {"value": "middle"},
@@ -194,7 +199,7 @@ export default (edgesUrl, verticesUrl) => ({
         enter: {
           "tooltip": {
             signal: [
-              "{title: 'Connection', 'Source Node': '(' + datum.sourceSplitPassages + ')', 'Target Node': '(' + datum.targetSplitPassages + ')'}", 
+              "{title: 'Connection', 'Source Node': '- ' + datum.sourceSplitPassages, 'Target Node': '- ' + datum.targetSplitPassages}", 
             ]
           },
         },
@@ -204,7 +209,7 @@ export default (edgesUrl, verticesUrl) => ({
             // if nothing selected, everythign has medium opacity
             {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 0.2},
             // if this edge's id is in selected-edges data, or the source or target is selected, make this bolder and everything else lighter
-            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.source) || indata('selectedNodes', 'value', datum.target) ", "value": 0.3},
+            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.sourceId) || indata('selectedNodes', 'value', datum.targetId) ", "value": 0.3},
             // array values means defaults to last value
             {"value": 0.1},
           ],
@@ -226,7 +231,7 @@ export default (edgesUrl, verticesUrl) => ({
           // take source (which is source id) and target (which is target id) from this edge and map
           // them to the id on the layout to set sourceNode and targetNode here on the edge band's
           // fields
-          "fields": ["datum.source", "datum.target"],
+          "fields": ["datum.sourceId", "datum.targetId"],
           "as": ["sourceNode", "targetNode"]
         },
         {
@@ -259,13 +264,15 @@ export default (edgesUrl, verticesUrl) => ({
     },
 	  {
       "name": "clickedEdge", "value": null,
+      // what events will trigger this signal
       "on": [
         {
+					// when an edgeLabel is clicked, adds this edge id to whatever listens to this signal (since the edgeLabel has id that corresponds to edge)
           "events": "@edgeLabel:click",
-					// hopefully adds this edge id to the selectedEdges list
-          "update": "{value: datum.id}",
+					// corresponds to the edge)
+          "update": "{value: datum.id, sourceId: datum.sourceId, targetId: datum.targetId}",
           "force":  true
-        }
+        },
       ]
     },
     {

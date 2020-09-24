@@ -94,21 +94,53 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
    *
    * NOTE despite the name, only going four deep for now
    */
-  def findAllSourcesRecursivelyForRef() = Action { implicit request: Request[AnyContent] =>
+  // TODO merge this with findTextsByStartingRef by using repeat command, and passing in arg for number of repeats
+  def findSourcesRecursivelyForRef() = Action { implicit request: Request[AnyContent] =>
     Ok(_findAllSourcesRecursivelyForRef("Genesis", 1, 1))
   }
 
   // only get one
-  def findAllSourcesForRef() = Action { implicit request: Request[AnyContent] =>
+  // By "source" I'm referring to a source text, since the assumption is that a given inter-textual connection is from an alluding text to a source text. 
+  // Unfortunately, this is kind of confusing since it means that relative to graph terminology, the alluding text is the source node, and the source text is the target node.
+  def findSourcesForRef() = Action { implicit request: Request[AnyContent] =>
     Ok(_findAllSourcesForRef("Genesis", 1, 1))
   }
+
+
+  def findSourcesForRefWithAlludingTexts() = Action { implicit request: Request[AnyContent] =>
+
+    val textsWithValues = _fetchTextByStartingRef("Genesis", 1, 1)
+      .valueMap() 
+      .toList()
+
+    val g : GraphTraversalSource = CassandraDb.graph
+    // TODO could probably save a query to the database by reusing the traversal to teh alluding texts, but whatever
+    val texts = _fetchTextByStartingRef("Genesis", 1, 1)
+      .toList()
+
+    val connectionsWithFields = g.V(texts).                
+			out("intertextual_connection") // starting simple
+      .valueMap() 
+      .toList()
+
+    // combine the two java lists
+    textsWithValues.addAll(connectionsWithFields)
+    val outputJson = json_mapper.writeValueAsString(textsWithValues)
+
+    Ok(outputJson)
+  }
+
+
 
   // for now requiring a separate API call, but maybe later we'll just merge these into the target vertices as well
   def findTextsByStartingRef() = Action { implicit request: Request[AnyContent] =>
     Ok(_findTextByStartingRef("Genesis", 1, 1))
   }
 
-  def findPathsForAllSourcesForRef() = Action { implicit request: Request[AnyContent] =>
+
+
+  // gets paths for edges
+  def findPathsForSourcesForRef() = Action { implicit request: Request[AnyContent] =>
     val texts = _fetchTextByStartingRef("Genesis", 1, 1)
       .toList()
 
@@ -133,6 +165,7 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
    *
    * https://docs.datastax.com/en/developer/java-driver/4.9/manual/core/dse/graph/
    */
+  // TODO merge this with findTextsByStartingRef by using repeat command, and passing in arg for number of repeats
   def _findAllSourcesRecursivelyForRef (book : String, chapter : Int, verse : Int)  = {
     val texts = _fetchTextByStartingRef(book, chapter, verse)
       .toList()
@@ -198,7 +231,7 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
 
   def _outputAllValuesForTraversal (traversal : GraphTraversal[_, _]) : String = {
     val hitsList = traversal
-      .valueMap() // 
+      .valueMap() 
       .toList()
 
     val outputJson = json_mapper.writeValueAsString(hitsList)

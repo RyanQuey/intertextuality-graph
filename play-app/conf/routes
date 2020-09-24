@@ -9,10 +9,13 @@ GET     /explore                            controllers.HomeController.explore
 GET     /tutorial                           controllers.HomeController.tutorial
 GET     /test                               controllers.HomeController.test
 GET     /our-world-in-data-cambodia                           controllers.ChartsController.iframes
-GET     /find-all-sources-recursively-for-ref           controllers.ConnectionsController.findAllSourcesRecursivelyForRef
-GET     /find-all-sources-for-ref           controllers.ConnectionsController.findAllSourcesForRef
-GET     /find-texts-starting-with-ref           controllers.ConnectionsController.findTextsByStartingRef
-GET     /find-paths-for-sources-starting-with-ref           controllers.ConnectionsController.findPathsForAllSourcesForRef
+
+GET     /sources-recursively-for-ref           controllers.ConnectionsController.findSourcesRecursivelyForRef
+GET     /sources-for-ref           controllers.ConnectionsController.findSourcesForRef
+GET     /texts-starting-with-ref           controllers.ConnectionsController.findTextsByStartingRef
+GET     /sources-for-ref-with-alluding-texts           controllers.ConnectionsController.findSourcesForRefWithAlludingTexts
+GET     /paths-for-sources-starting-with-ref           controllers.ConnectionsController.findPathsForSourcesForRef
+
 
 
 # Map static resources from the /public folder to the /assets URL path

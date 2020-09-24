@@ -46,8 +46,7 @@ export default (edgesData, verticesData, edgesUrl, verticesUrl) => ({
     {
       // aka vertices
       "name": "nodes",
-      values: verticesData,
-      // "url": "data/miserables.json",
+      url: verticesUrl,
       "format": {"type": "json"}, // "property": "nodes"},
       "transform": [
         // grab only certain fields, and drill down as we do so

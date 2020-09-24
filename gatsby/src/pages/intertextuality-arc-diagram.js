@@ -6,6 +6,7 @@ import Image from "../components/image"
 import SEO from "../components/seo"
 
 import { Vega } from 'react-vega';
+// TODO for some reason changing this file does not really get updated by webpack hot reload
 import specBuilder from '../configs/intertextual-arc-spec';
 import { Handler } from 'vega-tooltip';
 

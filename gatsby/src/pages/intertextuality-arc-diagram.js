@@ -41,8 +41,8 @@ const apiUrl = "http://localhost:9000"
 // const targetVerticesPath = apiUrl + "/texts-starting-with-ref"
 // const allVerticesData = sourceVerticesData.concat(targetVerticesData)
 
-const verticesUrl = apiUrl + "/sources-for-ref-with-alluding-texts"
-const edgesUrl = apiUrl + "/paths-for-sources-starting-with-ref"
+const verticesUrlBase = apiUrl + "/sources-for-ref-with-alluding-texts"
+const edgesUrlBase = apiUrl + "/paths-for-sources-starting-with-ref"
 
 // merge vertices data together
 
@@ -51,7 +51,6 @@ class IArcDiagram extends React.Component {
     super(props)
 
     this.state = {
-      spec: specBuilder(edgesData, allVerticesData, edgesUrl, verticesUrl),
       startingBook: "Genesis",
     }
     console.log("intertextuality graph", this.state.spec)
@@ -59,12 +58,10 @@ class IArcDiagram extends React.Component {
     this.selectStartingBook = this.selectStartingBook.bind(this)
   }
 
-  buildSpec () {
-    return edgesUrl
-  }
-
   selectStartingBook (option) {
-    this.setState({startingBook: option.value})
+    this.setState({
+      startingBook: option.value
+    })
   }
 
   render () {
@@ -74,6 +71,12 @@ class IArcDiagram extends React.Component {
     ))
 
     const { startingBook } = this.state
+    const query = `book=${startingBook}&chapter=1&verse=1`
+
+    const edgesUrl = `${edgesUrlBase}?${query}`
+    const verticesUrl = `${verticesUrlBase}?${query}`
+    const spec = specBuilder(edgesUrl, verticesUrl)
+
     return (
       <Layout>
         <SEO title="Intertextuality Arc Diagram" />
@@ -87,7 +90,7 @@ class IArcDiagram extends React.Component {
           />
         </Form>
         <Vega 
-          spec={this.state.spec} 
+          spec={spec} 
         />
       </Layout>
     )

@@ -83,43 +83,29 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
     (JsPath \ "sourceVersion").write[Option[String]]).and(
     (JsPath \ "sourceLanguage").write[Option[String]])(unlift(IntertextualConnection.unapply))
 
-   */
 
-  /**
-   * Create an Action to render an HTML page.
-   *
-   * The configuration in the `routes` file means that this method
-   * will be called when the application receives a `GET` request with
-   * a path of `/`.
-   *
-   * NOTE despite the name, only going four deep for now
+
+
+
    */
-  // TODO merge this with findTextsByStartingRef by using repeat command, and passing in arg for number of repeats
-  def findSourcesRecursivelyForRef() = Action { implicit request: Request[AnyContent] =>
-    Ok(_findAllSourcesRecursivelyForRef("Genesis", 1, 1))
-  }
 
   // only get one
   // By "source" I'm referring to a source text, since the assumption is that a given inter-textual connection is from an alluding text to a source text. 
   // Unfortunately, this is kind of confusing since it means that relative to graph terminology, the alluding text is the source node, and the source text is the target node.
-  def findSourcesForRef() = Action { implicit request: Request[AnyContent] =>
-    Ok(_findAllSourcesForRef("Genesis", 1, 1))
+  def findSourcesForRef(book : String, chapter : Option[Int], verse : Option[Int]) = Action { implicit request: Request[AnyContent] =>
+    val sourceTexts = _findAllSourcesForRef(book, chapter, verse)
+
+    Ok(_outputAllValuesForTraversal(sourceTexts))
   }
 
 
-  def findSourcesForRefWithAlludingTexts() = Action { implicit request: Request[AnyContent] =>
+  def findSourcesForRefWithAlludingTexts(book : String, chapter : Option[Int], verse : Option[Int]) = Action { implicit request: Request[AnyContent] =>
 
-    val textsWithValues = _fetchTextByStartingRef("Genesis", 1, 1)
+    val textsWithValues = _getTextTraversal(book, chapter, verse)
       .valueMap() 
       .toList()
 
-    val g : GraphTraversalSource = CassandraDb.graph
-    // TODO could probably save a query to the database by reusing the traversal to teh alluding texts, but whatever
-    val texts = _fetchTextByStartingRef("Genesis", 1, 1)
-      .toList()
-
-    val connectionsWithFields = g.V(texts).                
-			out("intertextual_connection") // starting simple
+    val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse)
       .valueMap() 
       .toList()
 
@@ -131,28 +117,28 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
   }
 
 
-
   // for now requiring a separate API call, but maybe later we'll just merge these into the target vertices as well
-  def findTextsByStartingRef() = Action { implicit request: Request[AnyContent] =>
-    Ok(_findTextByStartingRef("Genesis", 1, 1))
+  def findTextsByStartingRef(book : String, chapter : Option[Int], verse : Option[Int]) = Action { implicit request: Request[AnyContent] =>
+    val texts = _getTextTraversal(book, chapter, verse)
+
+    Ok(_outputAllValuesForTraversal(texts))
   }
 
 
 
   // gets paths for edges
-  def findPathsForSourcesForRef() = Action { implicit request: Request[AnyContent] =>
-    val texts = _fetchTextByStartingRef("Genesis", 1, 1)
+  def findPathsForSourcesForRef(book : String, chapter : Option[Int], verse : Option[Int]) = Action { implicit request: Request[AnyContent] =>
+    val texts = _getTextTraversal(book, chapter, verse)
       .toList()
 
-    val g : GraphTraversalSource = CassandraDb.graph
-    val connectionsWithFields = g.V(texts).                
-			out("intertextual_connection") // starting simple
+    val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse)
 
     val paths = _findPathsForTraversal(connectionsWithFields).toList
     val output = json_mapper.writeValueAsString(paths)
 
     Ok(output)
   }
+
 
   //////////////////////////////////////////////////
   // graph traversals
@@ -165,51 +151,69 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
    *
    * https://docs.datastax.com/en/developer/java-driver/4.9/manual/core/dse/graph/
    */
-  // TODO merge this with findTextsByStartingRef by using repeat command, and passing in arg for number of repeats
-  def _findAllSourcesRecursivelyForRef (book : String, chapter : Int, verse : Int)  = {
-    val texts = _fetchTextByStartingRef(book, chapter, verse)
-      .toList()
 
-    val g : GraphTraversalSource = CassandraDb.graph
-    val connectionsWithFields = g.V(texts)
-			.out("intertextual_connection")  // TODO can use repeat 4 times
-			.out("intertextual_connection") 
-			.out("intertextual_connection") 
-			.out("intertextual_connection") 
-
-    _outputAllValuesForTraversal(connectionsWithFields)
-  }
-
-  // only goes one deep
-  def _findAllSourcesForRef (book : String, chapter : Int, verse : Int)  = {
-    val texts = _fetchTextByStartingRef(book, chapter, verse)
+  def _findAllSourcesForRef (book : String, chapter : Option[Int], verse : Option[Int])  = {
+    val texts = _getTextTraversal(book, chapter, verse)
       .toList()
 
     val g : GraphTraversalSource = CassandraDb.graph
     val connectionsWithFields = g.V(texts).                
-			out("intertextual_connection") // starting simple
+			repeat(out("intertextual_connection")).times(1)
 
-    _outputAllValuesForTraversal(connectionsWithFields)
+    connectionsWithFields
   }
 
-  def _findTextByStartingRef (book : String, chapter : Int, verse : Int)  = {
-    val texts = _fetchTextByStartingRef(book, chapter, verse)
-
-    _outputAllValuesForTraversal(texts)
-  }
 
   //////////////////////////////////////////////////
+  // TODO Move all of this kind of stuff into the model
   // graph traversal builders
 
+  /*
+   * return text traversal depending on how many args are passed in
+   * Does not allow verse without chapter
+   *
+   */
+  def _getTextTraversal (book : String, chapter : Option[Int], verse : Option[Int]) = {
+    val traversal = chapter match {
+      case Some(c) if verse.isDefined => _fetchTextByStartingVerse(book, c, verse.get)
+      case Some(c) => _fetchTextByStartingChapter(book, c)
+      case None => _fetchTextByStartingBook(book)
+    }
+
+    traversal
+  }
+
   // NOTE returns traversal, doesn't actually hit the db yet until something is called on it
-  def _fetchTextByStartingRef (book : String, chapter : Int, verse : Int)  = {
+  def _fetchTextByStartingVerse (book : String, chapter : Int, verse : Int)  = {
     val g : GraphTraversalSource = CassandraDb.graph
-    val texts : GraphTraversal[Vertex, Vertex] = g.V().has("text", "starting_book", book)
+    val texts : GraphTraversal[Vertex, Vertex] = g.V()
+      .has("text", "starting_book", book)
       .has("starting_chapter", chapter)
       .has("starting_verse",  verse)
 
     texts
   }
+
+  /*
+   * not using overloaded functions for now, since I think there might be distinctive enough behavior for these different queries down the road, so just make them separate
+   */
+  def _fetchTextByStartingChapter (book : String, chapter : Int)  = {
+    val g : GraphTraversalSource = CassandraDb.graph
+    val texts : GraphTraversal[Vertex, Vertex] = g.V()
+      .has("text", "starting_book", book)
+      .has("starting_chapter", chapter)
+
+    texts
+  }
+
+  def _fetchTextByStartingBook (book : String)  = {
+    val g : GraphTraversalSource = CassandraDb.graph
+    val texts : GraphTraversal[Vertex, Vertex] = g.V()
+      .has("text", "starting_book", book)
+
+    texts
+  }
+
 
 
   //////////////////////////////////////////////////

@@ -10,11 +10,23 @@ GET     /tutorial                           controllers.HomeController.tutorial
 GET     /test                               controllers.HomeController.test
 GET     /our-world-in-data-cambodia                           controllers.ChartsController.iframes
 
-GET     /sources-recursively-for-ref           controllers.ConnectionsController.findSourcesRecursivelyForRef
-GET     /sources-for-ref           controllers.ConnectionsController.findSourcesForRef
-GET     /texts-starting-with-ref           controllers.ConnectionsController.findTextsByStartingRef
-GET     /sources-for-ref-with-alluding-texts           controllers.ConnectionsController.findSourcesForRefWithAlludingTexts
-GET     /paths-for-sources-starting-with-ref           controllers.ConnectionsController.findPathsForSourcesForRef
+
+
+# routes for accessing vertices/edges
+# currently also including routes that default to Gen 1:1 if nothing is passed in as params
+# TODO consolidate some of these, so users hit same route but different query params to get more specificity
+
+
+
+
+GET     /texts-starting-with-ref           controllers.ConnectionsController.findTextsByStartingRef(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
+
+# if you just want the source texts
+GET     /sources-for-ref           controllers.ConnectionsController.findSourcesForRef(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
+# if you also want the texts that start with the ref
+GET     /sources-for-ref-with-alluding-texts           controllers.ConnectionsController.findSourcesForRefWithAlludingTexts(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
+
+GET     /paths-for-sources-starting-with-ref           controllers.ConnectionsController.findPathsForSourcesForRef(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
 
 
 

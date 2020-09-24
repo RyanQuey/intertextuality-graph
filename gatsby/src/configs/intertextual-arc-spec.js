@@ -52,11 +52,12 @@ export default (edgesUrl, verticesUrl) => ({
         // grab only certain fields, and drill down as we do so
         {
           "type": "project", 
-          fields: ["id[0]", "split_passages[0]"], 
-          as: ["id", "split_passages"], 
+          fields: ["id[0]", "split_passages[0]", "starting_book[0]", "starting_chapter[0]", "starting_verse[0]"], 
+          as: ["id", "split_passages", "starting_book", "starting_chapter", "starting_verse"], 
         },
         // convert fields using an expression
         { "type": "formula", "expr": "join(datum.split_passages, ', ')", as: "passages" },
+        { "type": "formula", "expr": "datum.starting_book + ' ' + datum.starting_chapter + ':' + datum.starting_verse", as: "startingRef" },
         { "type": "window", "ops": ["rank"], "as": ["order"] },
         // count how many times this node is a source and set as "sourceDegree"
         {
@@ -82,7 +83,7 @@ export default (edgesUrl, verticesUrl) => ({
         {
           "type": "formula", "as": "degree",
           "expr": "datum.sourceDegree.count + datum.targetDegree.count"
-        }
+        },
       ]
     },
     // data we're storing, to remember state of which vertices are selected
@@ -176,11 +177,12 @@ export default (edgesUrl, verticesUrl) => ({
           ],
           "baseline": {"value": "middle"},
           "angle": {"value": -90},
-          "text": {"field": "passages"}
+          "text": {"field": "startingRef"},
         },
         // increase font weight for JUST the label when hovering over the label
         "hover": {
           "fontWeight": {"value": 700},
+          "fontSize": {"value": 11},
         },
         // how to react when "select" event signal happens on this node
         /*

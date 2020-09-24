@@ -75,7 +75,7 @@ class IArcDiagram extends React.Component {
 
     const edgesUrl = `${edgesUrlBase}?${query}`
     const verticesUrl = `${verticesUrlBase}?${query}`
-    const spec = specBuilder(edgesUrl, verticesUrl)
+    const spec = specBuilder(edgesUrl, verticesUrl, books)
 
 
     console.log("starting book", startingBook)

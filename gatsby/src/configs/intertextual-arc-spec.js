@@ -4,7 +4,7 @@
 // VEGA REPL and also easier to match up what is happening in React with Vega's main api
 // TODO this could potentially have memory issues if we repeat the data, so better to not use
 // property in data.format, but just only set the data we want on that key.
-export default (edgesUrl, verticesUrl) => ({
+export default (edgesUrl, verticesUrl, books) => ({
 
   "$schema": "https://vega.github.io/schema/vega/v5.json",
   // TODO simplifying for now, can add back in later
@@ -14,6 +14,16 @@ export default (edgesUrl, verticesUrl) => ({
 
 
   "data": [
+    {
+      "name": "books",
+      // way to do this, but I'm not sure what it is yet)
+      values: books,
+      "format": {"type": "json"}, // "property": "links"}
+      // bookname becomes datum.data, hte default field for an array passed in
+      "transform": [
+        {"type": "identifier", "as": "bookOrder"},
+      ],
+    },
     {
       "name": "edges",
       // way to do this, but I'm not sure what it is yet)
@@ -55,6 +65,22 @@ export default (edgesUrl, verticesUrl) => ({
           fields: ["id[0]", "split_passages[0]", "starting_book[0]", "starting_chapter[0]", "starting_verse[0]"], 
           as: ["id", "split_passages", "starting_book", "starting_chapter", "starting_verse"], 
         },
+				// sort by canonical order (eng order) 
+        {
+					"type": "lookup",
+          "from": "books",
+          "key": "data",
+          "fields": ["starting_book"], 
+          "as": ["startingBookData"],
+				},
+        {
+					"type": "collect",
+					"sort": {
+						// add another field to sort by something else as well
+						"field": ["startingBookData.bookOrder"],
+						"order": ["ascending"]
+					}
+				},
         // convert fields using an expression
         { "type": "formula", "expr": "join(datum.split_passages, ', ')", as: "passages" },
         { "type": "formula", "expr": "datum.starting_book + ' ' + datum.starting_chapter + ':' + datum.starting_verse", as: "startingRef" },

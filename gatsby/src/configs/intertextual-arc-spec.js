@@ -22,8 +22,8 @@ export default (edgesUrl, verticesUrl) => ({
       "transform": [
         {
           "type": "project", 
-          fields: ["objects[0].id[0]", "objects[1].id[0]"], 
-          as: ["source", "target"], 
+          fields: ["objects[0].id[0]", "objects[0].split_passages[0]", "objects[1].id[0]", "objects[1].split_passages[0]"], 
+          as: ["source", "sourceSplitPassages", "target", "targetSplitPassages"], 
         },
         {"type": "identifier", "as": "id"},
       ],
@@ -194,7 +194,7 @@ export default (edgesUrl, verticesUrl) => ({
         enter: {
           "tooltip": {
             signal: [
-              "{title: 'Connection', 'Source Node': '(' + datum.source + ')', 'Target Node': '(' + datum.target + ')'}", 
+              "{title: 'Connection', 'Source Node': '(' + datum.sourceSplitPassages + ')', 'Target Node': '(' + datum.targetSplitPassages + ')'}", 
             ]
           },
         },

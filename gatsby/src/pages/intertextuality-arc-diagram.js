@@ -6,49 +6,64 @@ import Image from "../components/image"
 import SEO from "../components/seo"
 
 import { Vega } from 'react-vega';
-import spec1 from '../configs/intertextual-arc-spec1';
-// add a tooltip https://stackoverflow.com/a/53709494/6952495
-// https://github.com/vega/vega-tooltip/blob/master/docs/customizing_your_tooltip.md
-// examples (can look at source code in Vega Editor)
-// https://vega.github.io/vega-tooltip/vega-examples.html
+import specBuilder from '../configs/intertextual-arc-spec';
 import { Handler } from 'vega-tooltip';
 
+import edgesData from '../data/intertextuality-edges.json';
+import targetVerticesData from '../data/intertextuality-vertices.json';
+import sourceVerticesData from '../data/intertextuality-source-vertices.json';
 
-// I'm using Approach #2 from vega docs
-// https://github.com/vega/react-vega/tree/master/packages/react-vega#approach2-use-vega-generic-class-and-pass-in-spec-for-dynamic-component
-// want vega for more power, but want flexibility of react. Though...maybe later it's 
 
-// https://vega.github.io/editor/data/miserables.json
-// if put "url" instead "of" in the data in specification, can load a json or CSV file
-
-// check out their demo for help:
-// https://github.com/vega/react-vega/blob/master/packages/react-vega-demo/stories/ReactVegaDemo.tsx
-
+/*
+ * Just a test component to see what kind of data I'm getting from my API, and how to manipulate it
+ *
+ */ 
 
 function handleHover(...args){
   console.log(args);
 }
 
-// TODO check to see if this does anything
 const signalListeners = { hover: handleHover };
 const tooltipOptions = {
   theme: "dark"
 }
 
 const tooltip = new Handler(tooltipOptions).call
+const apiUrl = "http://localhost:9000"
 
+// const sourceVerticesPath = apiUrl + "/sources-for-ref"
+// const targetVerticesPath = apiUrl + "/texts-starting-with-ref"
+const allVerticesData = sourceVerticesData.concat(targetVerticesData)
+const verticesPath = apiUrl + "/sources-for-ref-with-alluding-texts"
+const edgesUrl = apiUrl + "/paths-for-sources-starting-with-ref"
 
+// merge vertices data together
 
-const ArcDiagram = () => (
-  <Layout>
-    <SEO title="ArcDiagram" />
+class IArcDiagram extends React.Component {
+  constructor (props) {
+    super(props)
 
-    <Vega 
-      spec={spec1()} 
-      signalListeners={signalListeners} 
-      tooltip={tooltip}
-    />
-  </Layout>
-)
+    this.state = {
+      spec: specBuilder(edgesData, allVerticesData) 
+    }
+    console.log("intertextuality graph", this.state.spec)
+  }
 
-export default ArcDiagram
+  buildSpec () {
+    return edgesUrl
+  }
+
+  render () {
+    return (
+      <Layout>
+        <SEO title="IArcDiagramWithFile" />
+
+        <Vega 
+          spec={this.state.spec} 
+        />
+      </Layout>
+    )
+  }
+}
+
+export default IArcDiagram

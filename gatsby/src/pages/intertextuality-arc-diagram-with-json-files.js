@@ -35,11 +35,11 @@ const tooltip = new Handler(tooltipOptions).call
 const allVerticesData = sourceVerticesData.concat(targetVerticesData)
 const spec = spec1(edgesData, allVerticesData)
 
-console.log("intertextuality graph using json files", Object.assign({}, spec))
+console.log("intertextuality graph using Play API", Object.assign({}, spec))
 
-const IArcDiagramWithFile = () => (
+const IArcDiagram = () => (
   <Layout>
-    <SEO title="IArcDiagramWithFile" />
+    <SEO title="Intertextuality Arc Diagram" />
 
     <Vega 
       spec={spec} 
@@ -47,4 +47,5 @@ const IArcDiagramWithFile = () => (
   </Layout>
 )
 
-export default IArcDiagramWithFile
+export default IArcDiagram
+

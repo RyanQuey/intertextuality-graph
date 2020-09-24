@@ -22,7 +22,7 @@ export default (edgesUrl, verticesUrl) => ({
       "transform": [
         {
           "type": "project", 
-          fields: ["objects[0]", "objects[1]"], 
+          fields: ["objects[0].id[0]", "objects[1].id[0]"], 
           as: ["source", "target"], 
         },
         {"type": "identifier", "as": "id"},

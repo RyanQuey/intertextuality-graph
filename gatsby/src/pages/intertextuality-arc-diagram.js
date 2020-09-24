@@ -44,50 +44,54 @@ const apiUrl = "http://localhost:9000"
 const verticesUrlBase = apiUrl + "/sources-for-ref-with-alluding-texts"
 const edgesUrlBase = apiUrl + "/paths-for-sources-starting-with-ref"
 
-// merge vertices data together
+const bookOptions = books.map(b => ({
+  label: b, 
+  value: b}
+))
+
 
 class IArcDiagram extends React.Component {
   constructor (props) {
     super(props)
 
     this.state = {
-      startingBook: "Genesis",
+      // Genesis
+      startingBook: bookOptions[0],
     }
-    console.log("intertextuality graph", this.state.spec)
 
     this.selectStartingBook = this.selectStartingBook.bind(this)
   }
 
   selectStartingBook (option) {
     this.setState({
-      startingBook: option.value
+      startingBook: option
     })
   }
 
   render () {
-    const bookOptions = books.map(b => ({
-      label: b, 
-      value: b}
-    ))
-
     const { startingBook } = this.state
-    const query = `book=${startingBook}&chapter=1&verse=1`
+    // const query = `book=${startingBook}&chapter=1&verse=1`
+    const query = `book=${startingBook.value}&chapter=1`
 
     const edgesUrl = `${edgesUrlBase}?${query}`
     const verticesUrl = `${verticesUrlBase}?${query}`
     const spec = specBuilder(edgesUrl, verticesUrl)
 
+
+    console.log("starting book", startingBook)
+    console.log("edgesUrl", edgesUrl)
     return (
       <Layout>
         <SEO title="Intertextuality Arc Diagram" />
 
         <Form>
-          Choose a starting book (currently: {startingBook})
+          Choose a starting book (currently: {startingBook.label})
           <Select 
             options={bookOptions}
             onChange={this.selectStartingBook}
             currentOption={startingBook}
           />
+          Starting chapter: (1)
         </Form>
         <Vega 
           spec={spec} 

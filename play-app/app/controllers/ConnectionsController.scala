@@ -186,8 +186,8 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
   // NOTE returns traversal, doesn't actually hit the db yet until something is called on it
   def _fetchTextByStartingVerse (book : String, chapter : Int, verse : Int)  = {
     val g : GraphTraversalSource = CassandraDb.graph
-    val texts : GraphTraversal[Vertex, Vertex] = g.V()
-      .has("text", "starting_book", book)
+    val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
+      .has("starting_book", book)
       .has("starting_chapter", chapter)
       .has("starting_verse",  verse)
 
@@ -199,8 +199,8 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
    */
   def _fetchTextByStartingChapter (book : String, chapter : Int)  = {
     val g : GraphTraversalSource = CassandraDb.graph
-    val texts : GraphTraversal[Vertex, Vertex] = g.V()
-      .has("text", "starting_book", book)
+    val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
+      .has("starting_book", book)
       .has("starting_chapter", chapter)
 
     texts
@@ -208,8 +208,8 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
 
   def _fetchTextByStartingBook (book : String)  = {
     val g : GraphTraversalSource = CassandraDb.graph
-    val texts : GraphTraversal[Vertex, Vertex] = g.V()
-      .has("text", "starting_book", book)
+    val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
+      .has("starting_book", book)
 
     texts
   }
@@ -248,8 +248,8 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
    *
    */
   def _findPathsForTraversal (traversal : GraphTraversal[Vertex, Vertex]) = {
-    // our primary key for texts is id, so return only that
-    traversal.path().by("id")
+    // get values from source and target vertices
+    traversal.path().by(valueMap("id", "split_passages"))
   }
 
 

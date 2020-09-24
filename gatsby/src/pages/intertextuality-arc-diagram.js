@@ -12,6 +12,7 @@ import { Handler } from 'vega-tooltip';
 import edgesData from '../data/intertextuality-edges.json';
 import targetVerticesData from '../data/intertextuality-vertices.json';
 import sourceVerticesData from '../data/intertextuality-source-vertices.json';
+import allVerticesData from '../data/intertextuality-all-vertices.json';
 
 
 /*
@@ -33,8 +34,9 @@ const apiUrl = "http://localhost:9000"
 
 // const sourceVerticesPath = apiUrl + "/sources-for-ref"
 // const targetVerticesPath = apiUrl + "/texts-starting-with-ref"
-const allVerticesData = sourceVerticesData.concat(targetVerticesData)
-const verticesPath = apiUrl + "/sources-for-ref-with-alluding-texts"
+// const allVerticesData = sourceVerticesData.concat(targetVerticesData)
+
+const verticesUrl = apiUrl + "/sources-for-ref-with-alluding-texts"
 const edgesUrl = apiUrl + "/paths-for-sources-starting-with-ref"
 
 // merge vertices data together
@@ -44,7 +46,7 @@ class IArcDiagram extends React.Component {
     super(props)
 
     this.state = {
-      spec: specBuilder(edgesData, allVerticesData) 
+      spec: specBuilder(edgesData, allVerticesData, edgesUrl, verticesUrl) 
     }
     console.log("intertextuality graph", this.state.spec)
   }
@@ -56,7 +58,7 @@ class IArcDiagram extends React.Component {
   render () {
     return (
       <Layout>
-        <SEO title="IArcDiagramWithFile" />
+        <SEO title="Intertextuality Arc Diagram" />
 
         <Vega 
           spec={this.state.spec} 

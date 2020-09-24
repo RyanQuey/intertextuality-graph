@@ -4,7 +4,7 @@
 // VEGA REPL and also easier to match up what is happening in React with Vega's main api
 // TODO this could potentially have memory issues if we repeat the data, so better to not use
 // property in data.format, but just only set the data we want on that key.
-export default (edgesData, verticesData) => ({
+export default (edgesData, verticesData, edgesUrl, verticesUrl) => ({
 
   "$schema": "https://vega.github.io/schema/vega/v5.json",
   // TODO simplifying for now, can add back in later
@@ -17,8 +17,7 @@ export default (edgesData, verticesData) => ({
     {
       "name": "edges",
       // way to do this, but I'm not sure what it is yet)
-      //url: ,
-      values: edgesData,
+      url: edgesUrl,
       "format": {"type": "json"}, // "property": "links"}
       "transform": [
         {
@@ -137,7 +136,7 @@ export default (edgesData, verticesData) => ({
           "x": {"scale": "position", "field": "order"},
           "y": {"value": 0},
           "size": {"field": "degree", "mult": 5, "offset": 10},
-          "fill": {"scale": "color", "field": "group"}
+          "fill": {"scale": "color", "field": "order"}
         },
       }
     },

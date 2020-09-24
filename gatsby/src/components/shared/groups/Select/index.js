@@ -1,6 +1,7 @@
+import React from "react"
 import { Component } from 'react'
 import PropTypes from 'prop-types'
-import theme from 'theme'
+import theme from '../../../../theme'
 import { StyleSheet, css } from 'aphrodite'
 import classes from './style.scss'
 import Select from 'react-select'

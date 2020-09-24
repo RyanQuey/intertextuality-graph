@@ -15,6 +15,10 @@ import targetVerticesData from '../data/intertextuality-vertices.json';
 import sourceVerticesData from '../data/intertextuality-source-vertices.json';
 import allVerticesData from '../data/intertextuality-all-vertices.json';
 
+import Form from '../components/shared/elements/Form';
+import Button from '../components/shared/elements/Button';
+import Select from '../components/shared/groups/Select';
+import books from '../data/books';
 
 /*
  * Just a test component to see what kind of data I'm getting from my API, and how to manipulate it
@@ -47,20 +51,41 @@ class IArcDiagram extends React.Component {
     super(props)
 
     this.state = {
-      spec: specBuilder(edgesData, allVerticesData, edgesUrl, verticesUrl) 
+      spec: specBuilder(edgesData, allVerticesData, edgesUrl, verticesUrl),
+      startingBook: "Genesis",
     }
     console.log("intertextuality graph", this.state.spec)
+
+    this.selectStartingBook = this.selectStartingBook.bind(this)
   }
 
   buildSpec () {
     return edgesUrl
   }
 
+  selectStartingBook (option) {
+    this.setState({startingBook: option.value})
+  }
+
   render () {
+    const bookOptions = books.map(b => ({
+      label: b, 
+      value: b}
+    ))
+
+    const { startingBook } = this.state
     return (
       <Layout>
         <SEO title="Intertextuality Arc Diagram" />
 
+        <Form>
+          Choose a starting book (currently: {startingBook})
+          <Select 
+            options={bookOptions}
+            onChange={this.selectStartingBook}
+            currentOption={startingBook}
+          />
+        </Form>
         <Vega 
           spec={this.state.spec} 
         />

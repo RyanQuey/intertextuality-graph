@@ -5,3 +5,10 @@
  */
 
 // You can delete this file if you're not using it
+
+// TODO not working
+const lodash = require("lodash") 
+exports.onClientEntry = () => {
+  //window._ = lodash
+}
+//

@@ -1,6 +1,8 @@
+import React from "react"
 import PropTypes from 'prop-types'
-import theme from 'theme'
+import theme from '../../../../theme'
 import classes from './style.scss'
+import _ from "lodash"
 
 const Icon = ({ border, className, color, name, onClick, size, ...props }) => {
   let borderStyle = {}

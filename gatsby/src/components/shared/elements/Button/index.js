@@ -1,8 +1,9 @@
+import React from "react"
 import PropTypes from 'prop-types'
 import classes from './style.scss'
 import { StyleSheet, css } from 'aphrodite'
-import { Icon } from 'shared/components/elements'
-import theme from 'theme'
+import Icon from '../Icon'
+import theme from '../../../../theme'
 
 const STYLES = {
   primary: {

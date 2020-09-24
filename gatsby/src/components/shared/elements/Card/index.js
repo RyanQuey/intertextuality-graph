@@ -1,7 +1,8 @@
+import React from "react"
 import PropTypes from 'prop-types'
 import classes from './style.scss'
 import { StyleSheet, css } from 'aphrodite'
-import theme from 'theme'
+import theme from '../../../../theme'
 
 const Card = ({
   className,

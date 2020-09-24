@@ -249,7 +249,7 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
    */
   def _findPathsForTraversal (traversal : GraphTraversal[Vertex, Vertex]) = {
     // get values from source and target vertices
-    traversal.path().by(valueMap("id", "split_passages"))
+    traversal.path().by(valueMap("id", "split_passages", "starting_book"))
   }
 
 

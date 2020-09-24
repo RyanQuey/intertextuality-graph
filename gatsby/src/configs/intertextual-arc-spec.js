@@ -32,9 +32,30 @@ export default (edgesUrl, verticesUrl, books) => ({
       "transform": [
         {
           "type": "project", 
-          fields: ["objects[0].id[0]", "objects[0].split_passages[0]", "objects[1].id[0]", "objects[1].split_passages[0]"], 
-          as: ["sourceId", "sourceSplitPassages", "targetId", "targetSplitPassages"], 
+          fields: [
+            "objects[0].id[0]", 
+            "objects[0].split_passages[0]", 
+            "objects[0].starting_book[0]", 
+            "objects[1].id[0]", 
+            "objects[1].split_passages[0]",
+            "objects[1].starting_book[0]", 
+          ], 
+          as: ["sourceId", "sourceSplitPassages", "sourceStartingBookName", "targetId", "targetSplitPassages", "targetStartingBookName"], 
         },
+        {
+					"type": "lookup",
+          "from": "books",
+          "key": "data",
+          "fields": ["sourceStartingBookName"], 
+          "as": ["sourceStartingBookData"],
+				},
+        {
+					"type": "lookup",
+          "from": "books",
+          "key": "data",
+          "fields": ["targetStartingBookName"], 
+          "as": ["targetStartingBookData"],
+				},
         {"type": "identifier", "as": "id"},
       ],
     },
@@ -77,8 +98,8 @@ export default (edgesUrl, verticesUrl, books) => ({
 					"type": "collect",
 					"sort": {
 						// add another field to sort by something else as well
-						"field": ["startingBookData.bookOrder"],
-						"order": ["ascending"]
+						"field": ["startingBookData.bookOrder", "starting_chapter", "starting_verse"],
+						"order": ["ascending", "ascending", "ascending"]
 					}
 				},
         // convert fields using an expression
@@ -163,7 +184,8 @@ export default (edgesUrl, verticesUrl, books) => ({
           "x": {"scale": "position", "field": "order"},
           "y": {"value": 0},
           "size": {"field": "degree", "mult": 5, "offset": 10},
-          "fill": {"scale": "color", "field": "order"}
+          // refers to the scale we defined called "color"
+          "fill": {"scale": "color", "field": "startingBookData.bookOrder"}
         },
       }
     },
@@ -232,7 +254,10 @@ export default (edgesUrl, verticesUrl, books) => ({
           },
         },
         "update": {
-          "stroke": {"value": "#000"},
+          // refers to the scale we defined called "color"
+          //This works, but boring since for now all starting books are the same
+          //"stroke": {"scale": "color", "field": "sourceStartingBookData.bookOrder"},
+          "stroke": {"scale": "color", "field": "targetStartingBookData.bookOrder"},
           "strokeOpacity": [
             // if nothing selected, everythign has medium opacity
             {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 0.2},

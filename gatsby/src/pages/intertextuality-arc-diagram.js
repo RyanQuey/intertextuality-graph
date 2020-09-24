@@ -85,7 +85,7 @@ class IArcDiagram extends React.Component {
         <SEO title="Intertextuality Arc Diagram" />
 
         <Form>
-          Choose a starting book (currently: {startingBook.label})
+          Find connections for book {startingBook.label} Chapter 1 (only shows where connection originates from {startingBook.label})
           <Select 
             options={bookOptions}
             onChange={this.selectStartingBook}

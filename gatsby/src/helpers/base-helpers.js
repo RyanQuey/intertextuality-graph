@@ -121,14 +121,6 @@ let Helpers = {
 
   timestamp: () => moment.utc().format("YYYYMMDDTHHmmss[Z]"),
 
-  /* takes the return value of parsed_entities() and returns Boolean if valid
-  */
-  osisDataIsValid: (osisData) => {
-    return osisData.length == 1 && Helpers.safeDataPath(osisData, "0.osis", false)
-  },
-  osisDataValue: (osisData) => {
-    return Helpers.osisDataIsValid(osisData) ? Helpers.safeDataPath(osisData, "0.osis", "") : "invalid"
-  },
 }
 
 // for adding more helper files to this one

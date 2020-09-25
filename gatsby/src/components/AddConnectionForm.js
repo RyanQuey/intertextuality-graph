@@ -6,6 +6,17 @@ import Image from "../components/image"
 
 import {getBookData} from '../helpers/book-helpers'
 import {getChapterData} from '../helpers/chapter-helpers'
+import {
+  osisDataValue, 
+  osisDataIsValid,
+  startingBookFromOsis,
+  startingChapterFromOsis,
+  startingVerseFromOsis,
+  endingBookFromOsis,
+  endingChapterFromOsis,
+  endingVerseFromOsis,
+} from '../helpers/text-helpers'
+import {createConnection} from '../helpers/connection-helpers'
 import Helpers from '../helpers/base-helpers'
 
 import Form from '../components/shared/elements/Form';
@@ -27,6 +38,8 @@ class AddConnectionForm extends React.Component {
 
     this.changeAlludingText = this.changeAlludingText.bind(this)
     this.changeSourceText = this.changeSourceText.bind(this)
+    this.submit = this.submit.bind(this)
+
     this.state = {
       versification: "English",
       alludingText: {},
@@ -47,10 +60,9 @@ class AddConnectionForm extends React.Component {
     const parsed = parser.parse(value).parsed_entities() 
     const alludingText = {
       referenceData: parsed,
-      valid: Helpers.osisDataIsValid(parsed),
-      osis: Helpers.osisDataValue(parsed),
+      valid: osisDataIsValid(parsed),
+      osis: osisDataValue(parsed),
     }
-    console.log("Alluding text:", parsed)
     this.setState({alludingText})
   }
 
@@ -67,12 +79,38 @@ class AddConnectionForm extends React.Component {
     const parsed = parser.parse(value).parsed_entities() 
     const sourceText = {
       referenceData: parsed,
-      valid: Helpers.osisDataIsValid(parsed),
-      osis: Helpers.osisDataValue(parsed),
+      valid: osisDataIsValid(parsed),
+      osis: osisDataValue(parsed),
     }
-    console.log("source text:", parsed)
     this.setState({sourceText})
   }
+
+  submit (e) {
+    e && e.preventDefault && e.preventDefault() 
+    const { sourceText, alludingText } = this.state
+    console.log("submitting", sourceText, alludingText )
+
+    createConnection({
+      sourceText: {
+        startingBook: startingBookFromOsis(sourceText.referenceData),
+        startingChapter: startingChapterFromOsis(sourceText.referenceData),
+        startingVerse: startingVerseFromOsis(sourceText.referenceData),
+        endingBook: endingBookFromOsis(sourceText.referenceData),
+        endingChapter: endingChapterFromOsis(sourceText.referenceData),
+        endingVerse: endingVerseFromOsis(sourceText.referenceData),
+        parsed: sourceText,
+      },
+      alludingText: {
+        startingBook: startingBookFromOsis(alludingText.referenceData),
+        startingChapter: startingChapterFromOsis(alludingText.referenceData),
+        startingVerse: startingVerseFromOsis(alludingText.referenceData),
+        endingBook: endingBookFromOsis(alludingText.referenceData),
+        endingChapter: endingChapterFromOsis(alludingText.referenceData),
+        endingVerse: endingVerseFromOsis(alludingText.referenceData),
+        parsed: alludingText,
+      },
+    }).then(console.log)
+	}
 
   componentDidMount () {
   }
@@ -82,7 +120,7 @@ class AddConnectionForm extends React.Component {
 
     return (
       <div>
-        <Form>
+        <Form onSubmit={this.submit}>
           <h3>Connect Two Texts</h3>
           Text: ({alludingText.valid ? alludingText.osis : "invalid"})
           <div>
@@ -97,6 +135,12 @@ class AddConnectionForm extends React.Component {
               onChange={this.changeSourceText}
             />
           </div>
+          <Button
+            onClick={this.submit}
+            disabled={!sourceText.valid || !alludingText.valid}
+          >
+            Submit
+          </Button>
         </Form>
       </div>
     )

@@ -13,7 +13,7 @@ import com.ryanquey.intertextualitygraph.models.InventoryMapperObj;
 
 @Entity 
 @CqlName("chapters") 
-class ChapterRecord extends ChapterBase implements Record {
+public class ChapterRecord extends ChapterBase implements Record {
   
   @PartitionKey(0) 
   private String book; // C* TEXT 
@@ -27,7 +27,16 @@ class ChapterRecord extends ChapterBase implements Record {
 
   // keeping empty constructor for use with Dao
   ChapterRecord() {};
+
+  // no sure why there was every nonstatic version
+  // TODO DEPRECATED
   ChapterDao getDao () {
+    return InventoryMapperObj
+      .inventoryMapper
+      .chapterDao("chapters");
+  }
+
+  public static ChapterDao dao () {
     return InventoryMapperObj
       .inventoryMapper
       .chapterDao("chapters");

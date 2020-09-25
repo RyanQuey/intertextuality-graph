@@ -16,7 +16,19 @@ GET     /our-world-in-data-cambodia                           controllers.Charts
 # currently also including routes that default to Gen 1:1 if nothing is passed in as params
 # TODO consolidate some of these, so users hit same route but different query params to get more specificity
 
+#########################
+# Books
+#########################
+GET     /books/:bookName           controllers.BooksController.findOne(bookName: String)
 
+#########################
+# Chapters 
+#########################
+GET     /books/:bookName/chapters/:chapterNumber           controllers.ChaptersController.findOne(bookName: String, chapterNumber: Int)
+
+#########################
+# texts / Connections
+#########################
 
 
 GET     /texts-starting-with-ref           controllers.ConnectionsController.findTextsByStartingRef(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)

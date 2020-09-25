@@ -21,11 +21,9 @@ import {getChapterData} from '../helpers/chapter-helpers'
 import Form from '../components/shared/elements/Form';
 import Button from '../components/shared/elements/Button';
 import Select from '../components/shared/groups/Select';
+
+import AddConnectionForm from '../components/AddConnectionForm';
 import books from '../data/books';
-/*
- * Just a test component to see what kind of data I'm getting from my API, and how to manipulate it
- *
- */ 
 
 function handleHover(...args){
   console.log(args);
@@ -64,6 +62,10 @@ class IArcDiagram extends React.Component {
   }
 
   componentDidMount () {
+    getBookData(bookOptions[0].value)
+      .then((result) => {
+        this.setState({startingBookData: result})
+      })
   }
 
   selectStartingBook (option) {
@@ -115,23 +117,32 @@ class IArcDiagram extends React.Component {
       <Layout>
         <SEO title="Intertextuality Arc Diagram" />
 
-        <Form>
-          Find connections for book {startingBook.label} Chapter 1 (only shows where connection originates from {startingBook.label})
-          <Select 
-            options={bookOptions}
-            onChange={this.selectStartingBook}
-            currentOption={startingBook}
-          />
-          Starting chapter: ({startingChapter.label})
+        <div>
+          <Form>
+            <div>
+              Find connections for book {startingBook.label} Chapter 1 (only shows where connection originates from {startingBook.label})
+              <Select 
+                options={bookOptions}
+                onChange={this.selectStartingBook}
+                currentOption={startingBook}
+              />
+              Starting chapter: ({startingChapter.label})
 
-          {chapterOptions && (
-            <Select 
-              options={chapterOptions}
-              onChange={this.selectStartingChapter}
-              currentOption={startingChapter}
-            />
-          )}
-        </Form>
+              {chapterOptions && (
+                <Select 
+                  options={chapterOptions}
+                  onChange={this.selectStartingChapter}
+                  currentOption={startingChapter}
+                />
+              )}
+            </div>
+
+          </Form>
+
+          <div>
+            <AddConnectionForm />
+          </div>
+        </div>
         <Vega 
           spec={spec} 
         />

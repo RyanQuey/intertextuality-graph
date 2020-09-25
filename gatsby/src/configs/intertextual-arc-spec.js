@@ -262,7 +262,7 @@ export default (edgesUrl, verticesUrl, books) => ({
             // if nothing selected, everythign has medium opacity
             {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 0.2},
             // if this edge's id is in selected-edges data, or the source or target is selected, make this bolder and everything else lighter
-            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.sourceId) || indata('selectedNodes', 'value', datum.targetId) ", "value": 0.3},
+            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.sourceId) || indata('selectedNodes', 'value', datum.targetId) ", "value": 0.6},
             // array values means defaults to last value
             {"value": 0.1},
           ],

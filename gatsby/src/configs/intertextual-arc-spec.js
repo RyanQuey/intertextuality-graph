@@ -82,8 +82,16 @@ export default (edgesUrl, verticesUrl, books) => ({
       "transform": [
         // grab only certain fields, and drill down as we do so
         {
+          "type": "formula",
+          // basically a ternary. They have ternary syntax also but this seems less buggy. If not an
+          // array, means it is nothing. For some reason, just passing in datum.starting_verse does
+          // not seem to be truthy enough for vega
+          expr: "if(isArray(datum.starting_verse), datum.starting_verse[0], 1)", "as": "starting_verse",
+          as: "starting_verse",
+        },
+        {
           "type": "project", 
-          fields: ["id[0]", "split_passages[0]", "starting_book[0]", "starting_chapter[0]", "starting_verse[0]"], 
+          fields: ["id[0]", "split_passages[0]", "starting_book[0]", "starting_chapter[0]", "starting_verse"], 
           as: ["id", "split_passages", "starting_book", "starting_chapter", "starting_verse"], 
         },
 				// sort by canonical order (eng order) 

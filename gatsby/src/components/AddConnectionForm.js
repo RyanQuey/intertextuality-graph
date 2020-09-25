@@ -98,7 +98,7 @@ class AddConnectionForm extends React.Component {
         endingBook: endingBookFromOsis(sourceText.referenceData),
         endingChapter: endingChapterFromOsis(sourceText.referenceData),
         endingVerse: endingVerseFromOsis(sourceText.referenceData),
-        parsed: sourceText,
+        parsed: sourceText.referenceData,
       },
       alludingText: {
         startingBook: startingBookFromOsis(alludingText.referenceData),
@@ -107,9 +107,11 @@ class AddConnectionForm extends React.Component {
         endingBook: endingBookFromOsis(alludingText.referenceData),
         endingChapter: endingChapterFromOsis(alludingText.referenceData),
         endingVerse: endingVerseFromOsis(alludingText.referenceData),
-        parsed: alludingText,
+        parsed: alludingText.referenceData,
       },
-    }).then(console.log)
+      confidenceLevel: 70.0,
+    }).then(r => console.log("saved to db: ", r))
+
 	}
 
   componentDidMount () {

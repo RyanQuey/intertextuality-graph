@@ -21,7 +21,10 @@ import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 // the case class
 import com.ryanquey.intertextualitygraph.modelhelpers.IntertextualConnection
+import com.ryanquey.intertextualitygraph.modelhelpers.IntertextualConnectionsHelpers
 import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers.{getBookByOsis}
+import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
+import com.ryanquey.intertextualitygraph.models.texts.Text
 
 
 // way overkill, but just trying to find what works for method "out"
@@ -95,18 +98,44 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
     // find or create vertices
 
     // https://www.playframework.com/documentation/2.8.x/ScalaJson#Traversing-a-JsValue-structure
-    val sourceText : JsValue = (connectionData \ "sourceText").get
-    val osisBookName = sourceText("startingBook").as[String]
-
+    val sourceTextData : JsValue = (connectionData \ "sourceText").get
+    // could be a single ref, or a range (e.g., Gen1.1-3.6)
+    val srcOsis = (sourceTextData \ "parsed" \ 0 \ "osis").as[String]
     // is a java bean, not a case class
-    val bookName = getBookByOsis(osisBookName).getName
-    println(bookName)
+    println(srcOsis)
 
+    val sourceText = new Text()
+    if (srcOsis != "") {
+      TextHelpers.populateFieldsfromOsis(srcOsis, sourceText)
+    }
+
+    val alludingTextData : JsValue = (connectionData \ "alludingText").get
+    // could be a single ref, or a range (e.g., Gen1.1-3.6)
+    val alludingOsis = (alludingTextData \ "parsed" \ 0 \ "osis").as[String]
+    // is a java bean, not a case class
+    println(alludingOsis)
+
+    val alludingText = new Text()
+    if (alludingOsis != "") {
+      TextHelpers.populateFieldsfromOsis(alludingOsis, alludingText)
+    }
+
+    sourceText.setCreatedBy("api-endpoint")
+    sourceText.setUpdatedBy("api-endpoint")
+    alludingText.setCreatedBy("api-endpoint")
+    alludingText.setUpdatedBy("api-endpoint")
+
+    // also filters by createdBy
+    TextHelpers.updateOrCreateByRef(alludingText)
+    TextHelpers.updateOrCreateByRef(sourceText)
+
+    val connectionConfidenceLevel = connectionData("confidenceLevel").as[Float]
+
+    val connection : IntertextualConnection = IntertextualConnectionsHelpers.connectTexts(sourceText, alludingText, "user-created", connectionConfidenceLevel)
     // https://www.playframework.com/documentation/2.8.x/ScalaJson#JsValue-to-a-model
-    //IntertextualConnection( )
 
     // find or create edge
-		Ok(Json.obj("message" -> (" '" + bookName + "' saved.")))
+		Ok(Json.obj("message" -> (" '" + connection + "' saved.")))
   }
 
 

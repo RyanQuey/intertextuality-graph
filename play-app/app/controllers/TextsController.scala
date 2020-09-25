@@ -139,6 +139,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    *
    */
   def _getTextTraversal (book : String, chapter : Option[Int], verse : Option[Int]) = {
+    println("getting text");
     val traversal = chapter match {
       case Some(c) if verse.isDefined => _fetchTextByStartingVerse(book, c, verse.get)
       case Some(c) => _fetchTextByStartingChapter(book, c)
@@ -150,6 +151,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
   // NOTE returns traversal, doesn't actually hit the db yet until something is called on it
   def _fetchTextByStartingVerse (book : String, chapter : Int, verse : Int)  = {
+    println("getting by starting verse");
     val g : GraphTraversalSource = CassandraDb.graph
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)
@@ -163,6 +165,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    * not using overloaded functions for now, since I think there might be distinctive enough behavior for these different queries down the road, so just make them separate
    */
   def _fetchTextByStartingChapter (book : String, chapter : Int)  = {
+    println("getting by starting chapter");
     val g : GraphTraversalSource = CassandraDb.graph
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)
@@ -172,6 +175,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   }
 
   def _fetchTextByStartingBook (book : String)  = {
+    println("getting by starting book");
     val g : GraphTraversalSource = CassandraDb.graph
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)

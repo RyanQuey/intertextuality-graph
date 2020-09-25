@@ -55,6 +55,9 @@ object IntertextualConnectionsHelpers {
     val connection = IntertextualConnection(srcText.getStartingBook(), srcText.getId(), alludingText.getStartingBook(), alludingText.getId(), connectionType, confidenceLevel, Instant.now())
 
     persistConnection(connection)
+
+    // if works, return IntertextualConnection instance
+    connection
   }
 
   def persistConnection (ic : IntertextualConnection) = {
@@ -63,6 +66,8 @@ object IntertextualConnectionsHelpers {
     //
     // note that query builder makes immutable objects, so adding any value creates new obj
     // TODO this creates a lot of tombstones, since will have a lot of null values
+
+
     var query = insertInto("intertextual_connections")
       .value("confidence_level", literal(ic.confidenceLevel))
 
@@ -74,6 +79,7 @@ object IntertextualConnectionsHelpers {
       .value("connection_type", literal(ic.connectionType)) 
       .value("updated_at", literal(ic.updatedAt)) 
 
+      // small helper to set more fields on this query builder that we're going to send to C* db
     def setField (col : String, field : Option[Any]) = field match {
       case Some(_) => { query = query.value(col, literal(field.get))}
       case None => 

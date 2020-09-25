@@ -69,6 +69,8 @@ class TSKDataFile (table : String, filename : String) {
         if (osisRange != "") {
           TextHelpers.populateFieldsfromOsis(osisRange, srcText)
         }
+        srcText.setCreatedBy("treasury-of-scripture-knowledge")
+        srcText.setUpdatedBy("treasury-of-scripture-knowledge")
 
         srcText
       })

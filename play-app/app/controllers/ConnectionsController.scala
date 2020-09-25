@@ -37,7 +37,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.SackFunctions._;
 import org.apache.tinkerpop.gremlin.process.traversal.Scope._;
 import org.apache.tinkerpop.gremlin.process.traversal.TextP._;
 import org.apache.tinkerpop.gremlin.structure.Column._;
-import org.apache.tinkerpop.gremlin.structure.Direction._;
 import org.apache.tinkerpop.gremlin.structure.T._;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__._;
 

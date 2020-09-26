@@ -28,6 +28,7 @@ import Select from '../components/shared/groups/Select';
 
 import AddConnectionForm from '../components/AddConnectionForm';
 import books from '../data/books';
+import classes from './scss/arc-diagram.scss'
 
 function handleHover(...args){
   console.log(args);
@@ -147,8 +148,10 @@ class IArcDiagram extends React.Component {
       <Layout>
         <SEO title="Intertextuality Arc Diagram" />
 
-        <div>
+        <div className={"configForm"}>
+
           <Form>
+            <h2>Now showing:</h2>
             <div>
               Texts that allude to {startingBook.label} {startingChapter.label}
               <Select 
@@ -168,10 +171,10 @@ class IArcDiagram extends React.Component {
             </div>
 
           </Form>
-
           <div>
             <AddConnectionForm triggerUpdateDiagram={this.refreshDataWithCurrentState}/>
           </div>
+
         </div>
         <Vega 
           spec={spec} 

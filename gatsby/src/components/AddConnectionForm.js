@@ -114,7 +114,9 @@ class AddConnectionForm extends React.Component {
     }).then(r => {
       console.log("saved to db: ", r)
       this.setState({formResult: {message: "Success!"}})
-      this.props.triggerUpdateDiagram()
+      setTimeout(this.props.triggerUpdateDiagram, 1000);
+
+      
 
     }).catch(err => {
       this.setState({formResult: {message: err}})
@@ -127,19 +129,23 @@ class AddConnectionForm extends React.Component {
 
   render () {
     const { sourceText, alludingText, formResult } = this.state
+    const invalid = !sourceText.valid || !alludingText.valid
+    const message = invalid ? "invalid" : `${alludingText.osis} alludes to ${sourceText.osis}`
 
     return (
       <div>
         <Form onSubmit={this.submit}>
           <h3>Connect Two Texts</h3>
-          Text: ({alludingText.valid ? alludingText.osis : "invalid"})
+          <h4>{message}</h4>
+
+          Alluding Text: ({alludingText.valid ? alludingText.osis : "invalid"})
           <div>
             <Input
               onChange={this.changeAlludingText}
             />
           </div>
 
-          alludes to text  ({sourceText.valid ? sourceText.osis : "invalid"}): 
+          Source text: ({sourceText.valid ? sourceText.osis : "invalid"}): 
           <div>
             <Input
               onChange={this.changeSourceText}
@@ -147,7 +153,7 @@ class AddConnectionForm extends React.Component {
           </div>
           <Button
             onClick={this.submit}
-            disabled={!sourceText.valid || !alludingText.valid}
+            disabled={invalid}
             type="submit"
           >
             Submit

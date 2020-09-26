@@ -150,14 +150,14 @@ class IArcDiagram extends React.Component {
         <div>
           <Form>
             <div>
-              Find connections for book {startingBook.label} Chapter 1 (only shows where connection originates from {startingBook.label})
+              Texts that allude to {startingBook.label} {startingChapter.label}
               <Select 
                 options={bookOptions}
                 onChange={this.selectStartingBook}
                 currentOption={startingBook}
               />
-              Starting chapter: ({startingChapter.label})
 
+              Chapter: ({startingChapter.label})
               {chapterOptions && (
                 <Select 
                   options={chapterOptions}
@@ -170,7 +170,7 @@ class IArcDiagram extends React.Component {
           </Form>
 
           <div>
-            <AddConnectionForm triggerUpdateDiagram={this.refreshData}/>
+            <AddConnectionForm triggerUpdateDiagram={this.refreshDataWithCurrentState}/>
           </div>
         </div>
         <Vega 

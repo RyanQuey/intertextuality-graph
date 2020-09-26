@@ -16,5 +16,6 @@ export async function createConnection (connectionData) {
 
   } catch (err) {
     console.error(err)
+    throw err
   }
 }

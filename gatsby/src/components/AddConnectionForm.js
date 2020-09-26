@@ -44,6 +44,7 @@ class AddConnectionForm extends React.Component {
       versification: "English",
       alludingText: {},
       sourceText: {},
+      formResult: false,
     }
 
   }
@@ -63,7 +64,7 @@ class AddConnectionForm extends React.Component {
       valid: osisDataIsValid(parsed),
       osis: osisDataValue(parsed),
     }
-    this.setState({alludingText})
+    this.setState({alludingText, formResult: false})
   }
 
   changeSourceText (value) {
@@ -82,12 +83,12 @@ class AddConnectionForm extends React.Component {
       valid: osisDataIsValid(parsed),
       osis: osisDataValue(parsed),
     }
-    this.setState({sourceText})
+    this.setState({sourceText, formResult: false})
   }
 
   submit (e) {
     e && e.preventDefault && e.preventDefault() 
-    const { sourceText, alludingText } = this.state
+    const { sourceText, alludingText, formResult } = this.state
     console.log("submitting", sourceText, alludingText )
 
     createConnection({
@@ -110,7 +111,12 @@ class AddConnectionForm extends React.Component {
         parsed: alludingText.referenceData,
       },
       confidenceLevel: 70.0,
-    }).then(r => console.log("saved to db: ", r))
+    }).then(r => {
+      console.log("saved to db: ", r)
+      this.setState({formResult: {message: "Success!"}})
+    }).catch(err => {
+      this.setState({formResult: {message: err}})
+    })
 
 	}
 
@@ -118,7 +124,7 @@ class AddConnectionForm extends React.Component {
   }
 
   render () {
-    const { sourceText, alludingText } = this.state
+    const { sourceText, alludingText, formResult } = this.state
 
     return (
       <div>
@@ -140,9 +146,11 @@ class AddConnectionForm extends React.Component {
           <Button
             onClick={this.submit}
             disabled={!sourceText.valid || !alludingText.valid}
+            type="submit"
           >
             Submit
           </Button>
+          {formResult && (<div>{formResult.message}</div>)}
         </Form>
       </div>
     )

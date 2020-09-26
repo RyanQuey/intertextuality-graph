@@ -54,6 +54,7 @@ object IntertextualConnectionsHelpers {
 
     val connection = IntertextualConnection(srcText.getStartingBook(), srcText.getId(), alludingText.getStartingBook(), alludingText.getId(), connectionType, confidenceLevel, Instant.now())
 
+    println("connecting...")
     persistConnection(connection)
 
     // if works, return IntertextualConnection instance
@@ -94,6 +95,7 @@ object IntertextualConnectionsHelpers {
     setField("source_version", ic.sourceVersion)
     setField("source_language", ic.sourceLanguage)
 
-    CassandraDb.execute(query.toString);
+    val result = CassandraDb.execute(query.toString);
+    println(s"result from creating connection: $result");
   }
 }

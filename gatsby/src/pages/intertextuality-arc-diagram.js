@@ -8,15 +8,19 @@ import SEO from "../components/seo"
 
 import { Vega } from 'react-vega';
 // TODO for some reason changing this file does not really get updated by webpack hot reload
-import specBuilder from '../configs/intertextual-arc-spec';
+//import specBuilder from '../configs/intertextual-arc-spec';
+import specBuilder from '../configs/intertextual-arc-spec-data-supplied';
 import { Handler } from 'vega-tooltip';
 
+/*
 import edgesData from '../data/intertextuality-edges.json';
 import targetVerticesData from '../data/intertextuality-vertices.json';
 import sourceVerticesData from '../data/intertextuality-source-vertices.json';
 import allVerticesData from '../data/intertextuality-all-vertices.json';
+*/
 import {getBookData} from '../helpers/book-helpers'
 import {getChapterData} from '../helpers/chapter-helpers'
+import {getVerticesForRef, getPathsForRef} from '../helpers/connection-helpers'
 
 import Form from '../components/shared/elements/Form';
 import Button from '../components/shared/elements/Button';
@@ -35,10 +39,11 @@ const tooltipOptions = {
 }
 
 const tooltip = new Handler(tooltipOptions).call
-const apiUrl = "http://localhost:9000"
+const apiUrl =  process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
 
-const verticesUrlBase = apiUrl + "/sources-for-ref-with-alluding-texts"
-const edgesUrlBase = apiUrl + "/paths-for-sources-starting-with-ref"
+
+// const verticesUrlBase = apiUrl + "/sources-for-ref-with-alluding-texts"
+// const edgesUrlBase = apiUrl + "/paths-for-sources-starting-with-ref"
 
 const bookOptions = books.map(b => ({
   label: b, 
@@ -55,17 +60,52 @@ class IArcDiagram extends React.Component {
       // Genesis
       startingBook: bookOptions[0],
       startingChapter: initialChapterOption,
+      refreshCounter: 0,
     }
 
     this.selectStartingBook = this.selectStartingBook.bind(this)
     this.selectStartingChapter = this.selectStartingChapter.bind(this)
+    this.fetchVerticesAndEdges = this.fetchVerticesAndEdges.bind(this)
+    this.refreshData = this.refreshData.bind(this)
+    this.refreshDataWithCurrentState = this.refreshDataWithCurrentState.bind(this)
   }
 
   componentDidMount () {
-    getBookData(bookOptions[0].value)
+    this.refreshDataWithCurrentState()
+  }
+
+  // TODO maybe always just use current state?
+  refreshDataWithCurrentState () {
+    const { startingBook, startingChapter} = this.state
+    this.refreshData(startingBook.value, startingChapter.value) 
+  }
+
+  // TODO not yet passing in verse
+  refreshData (book, chapter, verse) {
+    getBookData(book)
       .then((result) => {
         this.setState({startingBookData: result})
       })
+
+    if (chapter) {
+      getChapterData(book, chapter)
+        .then((result) => {
+          this.setState({startingChapterData: result})
+        })
+    }
+
+    // get edges and vertices one-time
+    this.fetchVerticesAndEdges(book, chapter, verse)
+  }
+
+  async fetchVerticesAndEdges (book, chapter, verse) {
+    const [vertices, edges] = await Promise.all([
+      getVerticesForRef(book, chapter, verse),
+      getPathsForRef(book, chapter, verse),
+    ])
+
+    console.log("got data", {edges, vertices})
+    this.setState({edges, vertices})
   }
 
   selectStartingBook (option) {
@@ -76,10 +116,8 @@ class IArcDiagram extends React.Component {
       startingChapter: initialChapterOption,
     })
 
-    getBookData(option.value)
-      .then((result) => {
-        this.setState({startingBookData: result})
-      })
+    const book = option.value
+    this.refreshData(book, this.state.startingChapter.value)
   }
 
   selectStartingChapter (option) {
@@ -87,20 +125,14 @@ class IArcDiagram extends React.Component {
       startingChapter: option
     })
 
-    getChapterData(this.state.selectStartingBook, option.value)
-      .then((result) => {
-        this.setState({startingChapterData: result})
-      })
+    const chapter = option.value
+    this.refreshData(this.state.startingBook.value, chapter)
   }
 
   render () {
-    const { startingBook, startingChapter, startingBookData, startingChapterData  } = this.state
-    // const query = `book=${startingBook}&chapter=1&verse=1`
-    const query = `book=${startingBook.value}&chapter=${startingChapter.value}`
+    const { startingBook, startingChapter, startingBookData, startingChapterData, edges, vertices  } = this.state
 
-    const edgesUrl = `${edgesUrlBase}?${query}`
-    const verticesUrl = `${verticesUrlBase}?${query}`
-    const spec = specBuilder(edgesUrl, verticesUrl, books)
+    const spec = specBuilder({edges, nodes: vertices, books})
 
     let chapterOptions
     if (startingBookData) {
@@ -111,8 +143,6 @@ class IArcDiagram extends React.Component {
       ))
     }
 
-    console.log("starting book", startingBook)
-    console.log("edgesUrl", edgesUrl)
     return (
       <Layout>
         <SEO title="Intertextuality Arc Diagram" />
@@ -140,7 +170,7 @@ class IArcDiagram extends React.Component {
           </Form>
 
           <div>
-            <AddConnectionForm />
+            <AddConnectionForm triggerUpdateDiagram={this.refreshData}/>
           </div>
         </div>
         <Vega 

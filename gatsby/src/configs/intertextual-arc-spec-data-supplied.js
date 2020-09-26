@@ -4,7 +4,7 @@
 // VEGA REPL and also easier to match up what is happening in React with Vega's main api
 // TODO this could potentially have memory issues if we repeat the data, so better to not use
 // property in data.format, but just only set the data we want on that key.
-export default (edgesUrl, verticesUrl, books) => ({
+export default (data) => ({
 
   "$schema": "https://vega.github.io/schema/vega/v5.json",
   // TODO simplifying for now, can add back in later
@@ -16,8 +16,7 @@ export default (edgesUrl, verticesUrl, books) => ({
   "data": [
     {
       "name": "books",
-      // way to do this, but I'm not sure what it is yet)
-      values: books,
+      values: data.books,
       "format": {"type": "json"}, // "property": "links"}
       // bookname becomes datum.data, hte default field for an array passed in
       "transform": [
@@ -26,8 +25,7 @@ export default (edgesUrl, verticesUrl, books) => ({
     },
     {
       "name": "edges",
-      // way to do this, but I'm not sure what it is yet)
-      url: edgesUrl,
+      values: data.edges,
       "format": {"type": "json"}, // "property": "links"}
       "transform": [
         {
@@ -77,7 +75,7 @@ export default (edgesUrl, verticesUrl, books) => ({
     {
       // aka vertices
       "name": "nodes",
-      url: verticesUrl,
+      values: data.nodes,
       "format": {"type": "json"}, // "property": "nodes"},
       "transform": [
         // grab only certain fields, and drill down as we do so

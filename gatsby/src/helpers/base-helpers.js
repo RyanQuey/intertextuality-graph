@@ -73,15 +73,20 @@ let Helpers = {
   },
 
   // for sending objs as query strings
+  // e.g., {a: "a", b: 3} => "a=a&b=3"
   toQueryString: (params) => {
     let paramArr = Object.keys(params).map((param) => {
       let value = params[param]
+
+      // TODO might be good to do something liek encodeURIComponent(p) 
+      // https://stackoverflow.com/a/1714899/6952495
       if (typeof value === "object") {
         value = JSON.stringify(value)
       }
 
-      return `${param}=${value}`
+      return `${param}=${encodeURIComponent(value)}`
     })
+    console.log("param arr", paramArr)
     return `${paramArr.join("&")}`
   },
 

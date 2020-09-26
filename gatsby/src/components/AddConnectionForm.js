@@ -114,6 +114,8 @@ class AddConnectionForm extends React.Component {
     }).then(r => {
       console.log("saved to db: ", r)
       this.setState({formResult: {message: "Success!"}})
+      this.props.triggerUpdateDiagram()
+
     }).catch(err => {
       this.setState({formResult: {message: err}})
     })

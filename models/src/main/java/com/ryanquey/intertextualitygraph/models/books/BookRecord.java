@@ -13,7 +13,7 @@ import com.ryanquey.intertextualitygraph.models.InventoryMapperObj;
 
 @Entity 
 @CqlName("books") 
-class BookRecord extends BookBase implements Record {
+public class BookRecord extends BookBase implements Record {
   
   @PartitionKey(0) 
   private String name; // C* TEXT 
@@ -24,7 +24,16 @@ class BookRecord extends BookBase implements Record {
 
   // keeping empty constructor for use with Dao
   BookRecord() {};
+
+  // no sure why there was every nonstatic version
+  // TODO DEPRECATED
   BookDao getDao () {
+    return InventoryMapperObj
+      .inventoryMapper
+      .bookDao("books");
+  }
+
+  public static BookDao dao () {
     return InventoryMapperObj
       .inventoryMapper
       .bookDao("books");

@@ -55,9 +55,6 @@ object TextHelpers {
       val endingVerse = endingRefData(2).toInt
       text.setEndingVerse(endingVerse)
     }
-
-    text.setCreatedBy("treasury-of-scripture-knowledge")
-    text.setUpdatedBy("treasury-of-scripture-knowledge")
     
     // NOTE for TSK data at least, should not have any semicolon at this point, so will just be a single split passage.
     val splitPassages = osisRange.split(";").toList.asJava
@@ -141,6 +138,7 @@ object TextHelpers {
   }
 
   // TODO find a way to deal with when verses are not set. Since if not set, will get more than what we want, the search will be too broad
+  // NOTE also by default searches by createdBy
   // This will update records we don't want updated potentially
   def updateOrCreateByRef (text : Text) = {
     // find by ref. Use the unchangeable columns, though eventually split_passages should work too. 

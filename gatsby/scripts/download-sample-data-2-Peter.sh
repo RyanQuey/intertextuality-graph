@@ -10,12 +10,7 @@ fi
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 . $parent_path/../../scripts/config/env-vars.sh
 
-# import for cloud9 to work
-PORT=8080
-IP=localhost
-
 cd $INTERTEXTUALITY_GRAPH_GATSBY_DIR && \
-  # run nvm use if they have nvm...
-  nvm use || true && \
-  npm i && \
-  gatsby develop -p $PORT -H $IP
+  
+  curl "http://localhost:9000/paths-for-sources-starting-with-ref?book=2+Peter&chapter=2" > ./src/data/intertextuality-paths-2Peter.json && \
+  curl "http://localhost:9000/sources-for-ref-with-alluding-texts?book=2+Peter&chapter=2" > ./src/data/intertextuality-all-vertices-2Peter.json

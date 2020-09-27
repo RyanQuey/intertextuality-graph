@@ -15,7 +15,5 @@ PORT=8080
 IP=localhost
 
 cd $INTERTEXTUALITY_GRAPH_GATSBY_DIR && \
-  # run nvm use if they have nvm...
   nvm use || true && \
-  npm i && \
   gatsby develop -p $PORT -H $IP

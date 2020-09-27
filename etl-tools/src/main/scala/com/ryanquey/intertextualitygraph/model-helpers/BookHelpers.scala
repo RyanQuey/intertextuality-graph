@@ -12,6 +12,12 @@ object BookHelpers {
   val dataFile = new TheographicDataFile("books", "books-Grid view.csv");
   val books : Iterable[Book] = dataFile.getModelInstances().asInstanceOf[Iterable[Book]]
 
+  ///////////////////////////////////////////////////////
+  // File IO
+  /*
+   * grab data for a book from the Theographic data File
+   * Does not touch the db
+   */ 
   def getBookByNum (bookNum : Int) : Book = {
     books.find((b) => b.getBookOrder() == bookNum).get
   }

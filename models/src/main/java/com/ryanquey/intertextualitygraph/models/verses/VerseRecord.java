@@ -13,7 +13,7 @@ import com.ryanquey.intertextualitygraph.models.InventoryMapperObj;
 
 @Entity 
 @CqlName("verses") 
-class VerseRecord extends VerseBase implements Record {
+public class VerseRecord extends VerseBase implements Record {
   
   @PartitionKey(0) 
   private String book;
@@ -30,7 +30,16 @@ class VerseRecord extends VerseBase implements Record {
 
   // keeping empty constructor for use with Dao
   VerseRecord() {};
+
+  // no sure why there was every nonstatic version
+  // TODO DEPRECATED
   VerseDao getDao () {
+    return InventoryMapperObj
+      .inventoryMapper
+      .verseDao("verses");
+  }
+
+  public static VerseDao dao () {
     return InventoryMapperObj
       .inventoryMapper
       .verseDao("verses");

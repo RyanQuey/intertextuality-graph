@@ -7,7 +7,6 @@ import SEO from "../components/seo"
 
 import { Vega } from 'react-vega';
 import spec1 from '../configs/block-spec1';
-import spec2 from '../configs/block-spec2';
 
 // I'm using Approach #2 from vega docs
 // https://github.com/vega/react-vega/tree/master/packages/react-vega#approach2-use-vega-generic-class-and-pass-in-spec-for-dynamic-component

@@ -16,7 +16,7 @@ import com.ryanquey.intertextualitygraph.models.InventoryMapperObj;
 
 @Entity 
 @CqlName("texts") 
-class TextRecord extends TextBase implements Record {
+public class TextRecord extends TextBase implements Record {
   
   @PartitionKey(0) 
   private String startingBook;
@@ -31,7 +31,15 @@ class TextRecord extends TextBase implements Record {
   // keeping empty constructor for use with Dao
   TextRecord() {};
   
+  // no sure why there was every nonstatic version
+  // TODO DEPRECATED
   TextDao getDao () {
+    return InventoryMapperObj
+      .inventoryMapper
+      .textDao("texts");
+  }
+
+  public static TextDao dao () {
     return InventoryMapperObj
       .inventoryMapper
       .textDao("texts");

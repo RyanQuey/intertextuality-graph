@@ -1,5 +1,7 @@
 import axios from 'axios'
-import Helpers from '../helpers/base-helpers'
+import Helpers from './base-helpers'
+import {osisToBookName} from './book-helpers'
+import {osisData} from '../constants/osis-data'
 
 const apiUrl = process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
 
@@ -20,7 +22,8 @@ export function startingRefFromOsis (osisData) {
 }
 export function startingBookFromOsis (osisData) {
   // watch out, will be e.g., Exod (osis format) not Exodus 
-  return startingRefFromOsis(osisData).b
+  const osisBookName = startingRefFromOsis(osisData).b
+  return osisToBookName(osisBookName)
 }
 export function startingChapterFromOsis (osisData) {
   return startingRefFromOsis(osisData).c
@@ -34,7 +37,8 @@ export function endingRefFromOsis (osisData) {
 }
 export function endingBookFromOsis (osisData) {
   // watch out, will be e.g., Exod (osis format) not Exodus 
-  return endingRefFromOsis(osisData).b
+  const osisBookName = endingRefFromOsis(osisData).b
+  return osisToBookName(osisBookName)
 }
 export function endingChapterFromOsis (osisData) {
   return endingRefFromOsis(osisData).c
@@ -42,3 +46,12 @@ export function endingChapterFromOsis (osisData) {
 export function endingVerseFromOsis (osisData) {
   return endingRefFromOsis(osisData).v
 }
+
+// returns either "Old Testament" or "New Testament"
+// assuming starting ref will be in same testament as ending ref
+export function osisDataToTestament (osisRefData) {
+  const osisBookName = startingRefFromOsis(osisRefData).b
+  const match = osisData.find(entry => entry.osisID == osisBookName)
+  return match ? match["book set"] : ""
+}
+ 

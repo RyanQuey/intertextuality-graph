@@ -4,7 +4,7 @@ import { Link } from "gatsby"
 import Image from "../components/image"
 
 
-import {getBookData} from '../helpers/book-helpers'
+import {getBookData, osisToBookName} from '../helpers/book-helpers'
 import {getChapterData} from '../helpers/chapter-helpers'
 import {
   osisDataValue, 
@@ -14,7 +14,8 @@ import {
   startingVerseFromOsis,
   endingBookFromOsis,
   endingChapterFromOsis,
-  endingVerseFromOsis,
+  endingVerseFromOsis, 
+  osisDataToTestament,
 } from '../helpers/text-helpers'
 import {createConnection} from '../helpers/connection-helpers'
 import Helpers from '../helpers/base-helpers'
@@ -96,7 +97,7 @@ class AddConnectionForm extends React.Component {
   submit (e) {
     e && e.preventDefault && e.preventDefault() 
     const { sourceText, alludingText, formResult } = this.state
-    console.log("submitting", sourceText, alludingText )
+    console.log("submitting data to create connection", sourceText, alludingText )
 
     createConnection({
       sourceText: {
@@ -140,6 +141,12 @@ class AddConnectionForm extends React.Component {
     const invalid = !sourceText.valid || !alludingText.valid
     const message = invalid ? "invalid" : `${alludingText.osis} alludes to ${sourceText.osis}`
 
+    // heb bible for ot, SBL GNT for NT
+    const alludingTestament = alludingText.valid && osisDataToTestament(alludingText.referenceData)
+    const alludingStepBibleVersion = alludingTestament == "Old Testament" ? "OHB" : "SBLG"
+    const sourceTestament = sourceText.valid && osisDataToTestament(sourceText.referenceData)
+    const sourceStepBibleVersion = sourceTestament == "Old Testament" ? "OHB" : "SBLG"
+
     return (
       <div>
         <Form onSubmit={this.submit} className="add-connection-form">
@@ -155,7 +162,11 @@ class AddConnectionForm extends React.Component {
                   onChange={this.changeSourceText}
                 />
               </div>
-              <iframe src={`https://www.stepbible.org/?q=version=OHB|reference=${sourceText.osis}&options=NUVGH`} height="400" width="450" title="Iframe Example"></iframe>
+              {sourceText.valid ? (
+                <iframe src={`https://www.stepbible.org/?q=version=${sourceStepBibleVersion}|reference=${sourceText.osis}&options=NUVGH`} height="400" width="450" title="Source Text STEP Bible Preview"></iframe>
+              ) : (
+                <div></div>
+              )}
             </div>
 
             <div className="connection-form-field-ctn">
@@ -165,7 +176,11 @@ class AddConnectionForm extends React.Component {
                   onChange={this.changeAlludingText}
                 />
               </div>
-              <iframe src={`https://www.stepbible.org/?q=version=OHB|reference=${alludingText.osis}&options=NUVGH`} height="400" width="450"  title="Iframe Example"></iframe>
+              {alludingText.valid ? (
+                <iframe src={`https://www.stepbible.org/?q=version=${alludingStepBibleVersion}|reference=${alludingText.osis}&options=NUVGH`} height="400" width="450"  title="Alluding Text STEP Bible Preview"></iframe>
+              ) : (
+                <div></div>
+              )}
             </div>
           </div>
           <Button

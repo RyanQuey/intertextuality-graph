@@ -1,0 +1,179 @@
+﻿osisID,Book Name,Alternate Names,Paratext Abbreviation
+Gen,Genesis,,GEN
+Exod,Exodus,,EXO
+Lev,Leviticus,,LEV
+Num,Numbers,,NUM
+Deut,Deuteronomy,,DEU
+Josh,Joshua,,JOS
+Judg,Judges,,JDG
+Ruth,Ruth,,RUT
+1Sam,1 Samuel,,1SA
+2Sam,2 Samuel,,2SA
+1Kgs,1 Kings,,1KI
+2Kgs,2 Kings,,2KI
+1Chr,1 Chronicles,,1CH
+2Chr,2 Chronicles,,2CH
+Ezra,Ezra,,EZR
+Neh,Nehemiah,,NEH
+Esth,Esther,,EST
+Job,Job,,JOB
+Ps,Psalms,,PSA
+Prov,Proverbs,,PRO
+Eccl,Ecclesiastes,Qohelet,ECC
+Song,Song of Solomon,Canticle of Canticles,SNG
+Isa,Isaiah,,ISA
+Jer,Jeremiah,,JER
+Lam,Lamentations,,LAM
+Ezek,Ezekiel,,EZK
+Dan,Daniel,,DAN
+Hos,Hosea,,HOS
+Joel,Joel,,JOL
+Amos,Amos,,AMO
+Obad,Obadiah,,OBA
+Jonah,Jonah,,JON
+Mic,Micah,,MIC
+Nah,Nahum,,NAM
+Hab,Habakkuk,,HAB
+Zeph,Zephaniah,,ZEP
+Hag,Haggai,,HAG
+Zech,Zechariah,,ZEC
+Mal,Malachi,,MAL
+,,,
+,,,
+Matt,Matthew,,MAT
+Mark,Mark,,MRK
+Luke,Luke,,LUK
+John,John,,JHN
+Acts,Acts,,ACT
+Rom,Romans,,ROM
+1Cor,1 Corinthians,,1CO
+2Cor,2 Corinthians,,2CO
+Gal,Galatians,,GAL
+Eph,Ephesians,,EPH
+Phil,Philippians,,PHP
+Col,Colossians,,COL
+1Thess,1 Thessalonians,,1TH
+2Thess,2 Thessalonians,,2TH
+1Tim,1 Timothy,,1TI
+2Tim,2 Timothy,,2TI
+Titus,Titus,,TIT
+Phlm,Philemon,,PHM
+Heb,Hebrews,,HEB
+Jas,James,,JAS
+1Pet,1 Peter,,1PE
+2Pet,2 Peter,,2PE
+1John,1 John,,1JN
+2John,2 John,,2JN
+3John,3 John,,3JN
+Jude,Jude,,JUD
+Rev,Revelation,,REV
+,,,
+,,,
+Tob,Tobit,,TOB
+Jdt,Judith,,JDT
+EsthGr,Greek Esther,,ESG
+AddEsth,Additions to Esther,,ADE
+Wis,Wisdom,Wisdom of Solomon,WIS
+SirP,Sirach Prologue,,
+Sir,Sirach,Ecclesiasticus,SIR
+Bar,Baruch,,BAR
+EpJer,Letter of Jeremiah,,LJE
+DanGr,Greek Daniel,,DAG
+AddDan,Additions to Daniel,,
+PrAzar,Prayer of Azariah,Song of the Three Children,S3Y
+Sus,Susanna,,SUS
+Bel,Bel and the Dragon,,BEL
+1Macc,1 Maccabees,,1MA
+2Macc,2 Maccabees,,2MA
+3Macc,3 Maccabees,,3MA
+4Macc,4 Maccabees,,4MA
+PrMan,Prayer of Manasseh,,MAN
+1Esd,1 Esdras,,1ES
+2Esd,2 Esdras,,2ES
+AddPs,Psalm 151,,PS2
+,,,
+,,,
+Odes,Odes,,ODA
+PssSol,Psalms of Solomon,,PSS
+,,,
+,,,
+JoshA,Joshua A,,JSA
+JudgB,Judges B,,JDB
+TobS,Tobit S,,TBS
+SusTh,Susanna θ,,SST
+DanTh,Daniel θ,,DNT
+BelTh,Bel and the Dragon θ,,BLT
+,,,
+,,,
+EpLao,Epistle to the Laodiceans,,LAO
+5Ezra,5 Ezra,,5EZ
+4Ezra,4 Ezra,,EZA
+6Ezra,6 Ezra,,6EZ
+PrSol,Prayer of Solomon,,PSO
+PrJer,Prayer of Jeremiah,,PJE
+,,,
+,,,
+1En,1 Enoch,Ethiopic (Apocalypse of) Enoch,ENO
+Jub,Jubilees,,JUB
+4Bar,4 Baruch,Paraleipomena Jeremiou,4BA
+1Meq,1 Meqabyan,,1MQ
+2Meq,2 Meqabyan,,2MQ
+3Meq,3 Meqabyan,,3MQ
+Rep,Reproof,,REP
+AddJer,Additions to Jeremiah,,
+PsJos,Pseudo-Josephus,,
+,,,
+,,,
+EpCorPaul,Epistle of the Corinthians to Paul,,COP
+3Cor,3 Corinthians,,3CO
+WSir,Words of Sirach,,WSI
+PrEuth,Prayer of Euthalius,,EUT
+DormJohn,Dormition of John,,DOJ
+JosAsen,Joseph and Asenath,,
+T12Patr,Testaments of the Twelve Patriarchs (composed of:),,
+T12Patr.TAsh,Testament of Asher,,
+T12Patr.TBenj,Testament of Benjamin,,
+T12Patr.TDan,Testament of Dan,,
+T12Patr.TGad,Testament of Gad,,
+T12Patr.TIss,Testament of Issachar,,
+T12Patr.TJos,Testament of Joseph,,
+T12Patr.TJud,Testament of Judah,,
+T12Patr.TLevi,Testament of Levi,,
+T12Patr.TNaph,Testament of Naphtali,,
+T12Patr.TReu,Testament of Reuben,,
+T12Patr.TSim,Testament of Simeon,,
+T12Patr.TZeb,Testament of Zebulun,,
+,,,
+,,,
+2Bar,2 Baruch,(Syriac) Apocalypse of Baruch,2BA
+EpBar,Letter of Baruch,,LBA
+5ApocSyrPss,Additional Syriac Psalms,5 Apocryphal Syriac Psalms,PS3
+JosephusJWvi,Josephus' Jewish War VI,,
+,,,
+,,,
+1Clem,1 Clement,,1CL
+2Clem,2 Clement,,2CL
+IgnEph,Ignatius to the Ephesians,,
+IgnMagn,Ignatius to the Magnesians,,
+IgnTrall,Ignatius to the Trallians,,
+IgnRom,Ignatius to the Romans,,
+IgnPhld,Ignatius to the Philadelphians,,
+IgnSmyrn,Ignatius to the Smyrnaeans,,
+IgnPol,Ignatius to Polycarp,,
+PolPhil,Polycarp to the Philippians,,
+MartPol,Martyrdom of Polycarp,,
+Did,Didache,,DID
+Barn,Barnabas,,LBA
+Herm,Shepherd of Hermas (comprised of:),,SHE
+Herm.Mand,"Shepherd of Hermas, Mandates",,
+Herm.Sim,"Shepherd of Hermas, Similitudes",,
+Herm.Vis,"Shepherd of Hermas, Visions",,
+Diogn,Diognetus,,
+AposCreed,Apostles' Creed,,
+PapFrag,Fragments of Papias,,
+RelElders,Reliques of the Elders,,
+QuadFrag,Fragment of Quadratus,,
+,,,
+,,,
+TatDiat,Diatessaron,Tatian's Diatessaron/Tatian,
+PsMet,Metrical Psalms,,PSB

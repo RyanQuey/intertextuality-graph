@@ -116,7 +116,7 @@ class IArcDiagram extends React.Component {
       getPathsForRef(book, chapter, verse),
     ])
 
-    console.log("got data", {edges, vertices})
+    console.log("got data for edges and vertices", {edges, vertices})
     this.setState({edges, vertices})
   }
 
@@ -150,6 +150,7 @@ class IArcDiagram extends React.Component {
     const startingBook = startingBookFromOsis(sourceOsisData)
     const startingChapter = startingChapterFromOsis(sourceOsisData)
 
+    console.log("changed source; setting diagram to ", startingBook)
     this.selectStartingBook({value: startingBook, label: startingBook})
     this.selectStartingChapter({value: startingChapter, label: startingChapter})
   }

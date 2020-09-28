@@ -70,15 +70,22 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       .valueMap() 
       .toList()
 
-    val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse)
-      .valueMap() 
-      .toList()
+    // be sure not to continue if size is 0. just return an empty array as our dummy json. Note that passing in null as vertices in g.V(null) will mean get all...
+    if (textsWithValues.size == 0) {
+      Ok("[]")
 
-    // combine the two java lists
-    textsWithValues.addAll(connectionsWithFields)
-    val outputJson = json_mapper.writeValueAsString(textsWithValues)
+    } else {
+      val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse)
+        .valueMap() 
+        .toList()
 
-    Ok(outputJson)
+      println(s"Returning sources with alluding texts - source texts: (${textsWithValues.size}); alluding texts: (${connectionsWithFields.size})");
+      // combine the two java lists
+      textsWithValues.addAll(connectionsWithFields)
+      val outputJson = json_mapper.writeValueAsString(textsWithValues)
+
+      Ok(outputJson)
+    }
   }
 
 
@@ -89,19 +96,21 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     Ok(_outputAllValuesForTraversal(texts))
   }
 
-
-
   // gets paths for edges
   def findPathsForSourcesForRef(book : String, chapter : Option[Int], verse : Option[Int]) = Action { implicit request: Request[AnyContent] =>
     val texts = _getTextTraversal(book, chapter, verse)
       .toList()
 
-    val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse)
+    if (texts.size == 0) {
+      Ok("[]")
+    } else {
+      val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse)
 
-    val paths = _findPathsForTraversal(connectionsWithFields).toList
-    val output = json_mapper.writeValueAsString(paths)
+      val paths = _findPathsForTraversal(connectionsWithFields).toList
+      val output = json_mapper.writeValueAsString(paths)
 
-    Ok(output)
+      Ok(output)
+    }
   }
 
 
@@ -118,14 +127,20 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    */
 
   def _findAllSourcesForRef (book : String, chapter : Option[Int], verse : Option[Int])  = {
-    val texts = _getTextTraversal(book, chapter, verse)
-      .toList()
-
     val g : GraphTraversalSource = CassandraDb.graph
-    val connectionsWithFields = g.V(texts).                
-			repeat(out("intertextual_connection")).times(1)
+    val texts = _getTextTraversal(book, chapter, verse).toList()
 
-    connectionsWithFields
+    // be sure not to continue if size is 0. just return an empty traversal if empty. Since doing g.V([]) will return all vertices...
+    if (texts.size == 0) {
+      // this is hacky, but just a sure fire way to return a traversal with no results, so what we return matches type that this method is expected to return
+      _getTextTraversal(book, chapter, verse)
+
+    } else {
+      val connectionsWithFields = g.V(texts).                
+        repeat(out("intertextual_connection")).times(1)
+
+      connectionsWithFields
+    }
   }
 
 
@@ -139,7 +154,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    *
    */
   def _getTextTraversal (book : String, chapter : Option[Int], verse : Option[Int]) = {
-    println("getting text");
+    println("getting texts");
     val traversal = chapter match {
       case Some(c) if verse.isDefined => _fetchTextByStartingVerse(book, c, verse.get)
       case Some(c) => _fetchTextByStartingChapter(book, c)
@@ -151,7 +166,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
   // NOTE returns traversal, doesn't actually hit the db yet until something is called on it
   def _fetchTextByStartingVerse (book : String, chapter : Int, verse : Int)  = {
-    println("getting by starting verse");
+    println(s"getting by starting chapter: $book $chapter:$verse");
     val g : GraphTraversalSource = CassandraDb.graph
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)
@@ -165,7 +180,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    * not using overloaded functions for now, since I think there might be distinctive enough behavior for these different queries down the road, so just make them separate
    */
   def _fetchTextByStartingChapter (book : String, chapter : Int)  = {
-    println("getting by starting chapter");
+    println(s"getting by starting chapter: $book $chapter");
     val g : GraphTraversalSource = CassandraDb.graph
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)
@@ -175,7 +190,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   }
 
   def _fetchTextByStartingBook (book : String)  = {
-    println("getting by starting book");
+    println(s"getting by starting book: $book");
     val g : GraphTraversalSource = CassandraDb.graph
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)

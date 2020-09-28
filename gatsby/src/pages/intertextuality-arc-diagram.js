@@ -28,6 +28,16 @@ import Select from '../components/shared/groups/Select';
 
 import AddConnectionForm from '../components/AddConnectionForm';
 import books from '../data/books';
+import {
+  osisDataValue, 
+  osisDataIsValid,
+  startingBookFromOsis,
+  startingChapterFromOsis,
+  startingVerseFromOsis,
+  endingBookFromOsis,
+  endingChapterFromOsis,
+  endingVerseFromOsis,
+} from '../helpers/text-helpers'
 import classes from './scss/arc-diagram.scss'
 
 function handleHover(...args){
@@ -69,6 +79,7 @@ class IArcDiagram extends React.Component {
     this.fetchVerticesAndEdges = this.fetchVerticesAndEdges.bind(this)
     this.refreshData = this.refreshData.bind(this)
     this.refreshDataWithCurrentState = this.refreshDataWithCurrentState.bind(this)
+    this.triggerChangeSource = this.triggerChangeSource.bind(this)
   }
 
   componentDidMount () {
@@ -130,6 +141,19 @@ class IArcDiagram extends React.Component {
     this.refreshData(this.state.startingBook.value, chapter)
   }
 
+  /*
+   * take osis data (full parsed object) of source text that is being added and show current
+   * allusions to it
+   *
+   */ 
+  triggerChangeSource (sourceOsisData) {
+    const startingBook = startingBookFromOsis(sourceOsisData)
+    const startingChapter = startingChapterFromOsis(sourceOsisData)
+
+    this.selectStartingBook({value: startingBook, label: startingBook})
+    this.selectStartingChapter({value: startingChapter, label: startingChapter})
+  }
+
   render () {
     const { startingBook, startingChapter, startingBookData, startingChapterData, edges, vertices  } = this.state
 
@@ -148,7 +172,10 @@ class IArcDiagram extends React.Component {
       <Layout>
         <SEO title="Intertextuality Arc Diagram" />
           <div>
-            <AddConnectionForm triggerUpdateDiagram={this.refreshDataWithCurrentState}/>
+            <AddConnectionForm 
+              triggerUpdateDiagram={this.refreshDataWithCurrentState}
+              onChangeSource={this.triggerChangeSource}
+            />
           </div>
 
 

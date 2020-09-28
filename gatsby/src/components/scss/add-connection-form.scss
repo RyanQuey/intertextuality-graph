@@ -6,6 +6,11 @@
     display: flex;
     .connection-form-field-ctn {
       width: 50%;
+
+
+      .input-wrapper {
+        margin: 5px;
+      }
     }
   }
 }

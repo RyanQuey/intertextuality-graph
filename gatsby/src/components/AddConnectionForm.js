@@ -80,12 +80,17 @@ class AddConnectionForm extends React.Component {
     }
 
     const parsed = parser.parse(value).parsed_entities() 
+    const isValid = osisDataIsValid(parsed)
     const sourceText = {
       referenceData: parsed,
-      valid: osisDataIsValid(parsed),
+      valid: isValid,
       osis: osisDataValue(parsed),
     }
     this.setState({sourceText, formResult: false})
+
+    if (isValid) {
+      this.props.onChangeSource(parsed)
+    }
   }
 
   submit (e) {
@@ -121,7 +126,8 @@ class AddConnectionForm extends React.Component {
       
 
     }).catch(err => {
-      this.setState({formResult: {message: err}})
+      console.log("failed to create new connection", err.message)
+      this.setState({formResult: {message: err && err.message || "Error"}})
     })
 
 	}
@@ -141,24 +147,25 @@ class AddConnectionForm extends React.Component {
           <h4>{message}</h4>
 
           <div className="connection-form-fields">
-            <div className="connection-form-field-ctn">
-              Alluding Text: ({alludingText.valid ? alludingText.osis : "invalid"})
-              <div>
-                <Input
-                  onChange={this.changeAlludingText}
-                />
-              </div>
-              <iframe src={`https://www.stepbible.org/?q=version=OHB|reference=${alludingText.osis}&options=NUVGH`} height="400" width="450"  title="Iframe Example"></iframe>
-            </div>
 
             <div className="connection-form-field-ctn">
               Source text: ({sourceText.valid ? sourceText.osis : "invalid"}): 
-              <div>
+              <div className="input-wrapper">
                 <Input
                   onChange={this.changeSourceText}
                 />
               </div>
               <iframe src={`https://www.stepbible.org/?q=version=OHB|reference=${sourceText.osis}&options=NUVGH`} height="400" width="450" title="Iframe Example"></iframe>
+            </div>
+
+            <div className="connection-form-field-ctn">
+              Alluding Text: ({alludingText.valid ? alludingText.osis : "invalid"})
+              <div className="input-wrapper">
+                <Input
+                  onChange={this.changeAlludingText}
+                />
+              </div>
+              <iframe src={`https://www.stepbible.org/?q=version=OHB|reference=${alludingText.osis}&options=NUVGH`} height="400" width="450"  title="Iframe Example"></iframe>
             </div>
           </div>
           <Button

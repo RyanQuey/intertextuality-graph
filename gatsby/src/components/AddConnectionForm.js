@@ -27,6 +27,8 @@ import books from '../data/books';
 import { bcv_parser as eng_bcv_parser } from "bible-passage-reference-parser/js/en_bcv_parser"
 import { bcv_parser as heb_bcv_parser } from "bible-passage-reference-parser/js/he_bcv_parser"
 
+import classes from './scss/add-connection-form.scss'
+
 // TODO note that this might actually only change the language of the book names, might not impact
 // versification at all
 var eng_bcv = new eng_bcv_parser;
@@ -134,22 +136,30 @@ class AddConnectionForm extends React.Component {
 
     return (
       <div>
-        <Form onSubmit={this.submit}>
+        <Form onSubmit={this.submit} className="add-connection-form">
           <h3>Connect Two Texts</h3>
           <h4>{message}</h4>
 
-          Alluding Text: ({alludingText.valid ? alludingText.osis : "invalid"})
-          <div>
-            <Input
-              onChange={this.changeAlludingText}
-            />
-          </div>
+          <div className="connection-form-fields">
+            <div className="connection-form-field-ctn">
+              Alluding Text: ({alludingText.valid ? alludingText.osis : "invalid"})
+              <div>
+                <Input
+                  onChange={this.changeAlludingText}
+                />
+              </div>
+              <iframe src={`https://www.stepbible.org/?q=version=OHB|reference=${alludingText.osis}&options=NUVGH`} height="400" width="450"  title="Iframe Example"></iframe>
+            </div>
 
-          Source text: ({sourceText.valid ? sourceText.osis : "invalid"}): 
-          <div>
-            <Input
-              onChange={this.changeSourceText}
-            />
+            <div className="connection-form-field-ctn">
+              Source text: ({sourceText.valid ? sourceText.osis : "invalid"}): 
+              <div>
+                <Input
+                  onChange={this.changeSourceText}
+                />
+              </div>
+              <iframe src={`https://www.stepbible.org/?q=version=OHB|reference=${sourceText.osis}&options=NUVGH`} height="400" width="450" title="Iframe Example"></iframe>
+            </div>
           </div>
           <Button
             onClick={this.submit}

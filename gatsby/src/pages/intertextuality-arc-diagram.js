@@ -147,9 +147,12 @@ class IArcDiagram extends React.Component {
     return (
       <Layout>
         <SEO title="Intertextuality Arc Diagram" />
+          <div>
+            <AddConnectionForm triggerUpdateDiagram={this.refreshDataWithCurrentState}/>
+          </div>
+
 
         <div className={"configForm"}>
-
           <Form>
             <h2>Now showing:</h2>
             <div>
@@ -171,9 +174,6 @@ class IArcDiagram extends React.Component {
             </div>
 
           </Form>
-          <div>
-            <AddConnectionForm triggerUpdateDiagram={this.refreshDataWithCurrentState}/>
-          </div>
 
         </div>
         <Vega 

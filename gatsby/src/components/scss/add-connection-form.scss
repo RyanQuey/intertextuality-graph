@@ -1,0 +1,11 @@
+.add-connection-form {
+  display: flex;
+  flex-direction: column;
+
+  .connection-form-fields {
+    display: flex;
+    .connection-form-field-ctn {
+      width: 50%;
+    }
+  }
+}

@@ -56,15 +56,17 @@ class BooksController @Inject()(cc: ControllerComponents) extends AbstractContro
   def findOne(bookName : String) = Action { implicit request: Request[AnyContent] =>
 
     // retrieve one from the database
-    val book = BookRecord.dao().findOne(bookName)
+    val book = Option(BookRecord.dao().findOne(bookName))
     val mapper : ObjectMapper = new ObjectMapper();
     println(s"got data for book $bookName: " + book)
     // NOTE if null, make sure to run ./etl-tools/scripts/import-theographic-data.sh so that data gets imported into the db
-    //
-    val bookJson = mapper.writeValueAsString(book)
 
-
-    Ok(bookJson)
+    book match {
+      // return as json
+      case Some(b) => Ok(mapper.writeValueAsString(b))
+      // book was null, findOne did not find a record
+      case None => InternalServerError(s"Could not find data for book '$bookName'")
+    }
   }
 
 

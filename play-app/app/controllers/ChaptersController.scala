@@ -59,14 +59,33 @@ class ChaptersController @Inject()(cc: ControllerComponents) extends AbstractCon
   def findOne(bookName : String, number : Int) = Action { implicit request: Request[AnyContent] =>
 
     // retrieve one from the database
-    val chapter = ChapterRecord.dao().findOne(bookName, number)
+    // make an option, since sometimes returns null
+    val book = Option(BookRecord.dao().findOne(bookName))
+
+    // for now, chapter's 'book' field is actually osis. Probably good to switch from that eventually...
+    // but in the meantime, get that osis first (requires typecasting serializable as string)
+    val bookOsis = book match {
+      // return as json
+      case Some(b) => b.getOsisAbbreviation()
+      // book was null, findOne did not find a record
+      case None => ""
+    }
+
+    if (bookOsis == "") {
+      InternalServerError(s"Could not find data for book '$bookName' when searching for chapter '$number'")
+    }
+
+
+    val chapter = Option(ChapterRecord.dao().findOne(bookOsis, number))
     val mapper : ObjectMapper = new ObjectMapper();
     // NOTE if null, make sure to run ./etl-tools/scripts/import-theographic-data.sh so that data gets imported into the db
-    //
-    val chapterJson = mapper.writeValueAsString(chapter)
 
-
-    Ok(chapterJson)
+    chapter match {
+      // return as json
+      case Some(c) => Ok(mapper.writeValueAsString(c))
+      // book was null, findOne did not find a record
+      case None => InternalServerError(s"Could not find data for book '$bookName' chapter '$number'")
+    }
   }
 
 

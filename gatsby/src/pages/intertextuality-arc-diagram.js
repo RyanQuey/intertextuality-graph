@@ -61,6 +61,12 @@ const bookOptions = books.map(b => ({
   value: b}
 ))
 
+// allow between 1 and 4 hops
+const hopsCountOptions = [...Array(4).keys()].map(hopCount => ({
+  label: hopCount + 1, 
+  value: hopCount + 1}
+))
+
 const initialChapterOption = {label: 1, value: 1}
 
 class IArcDiagram extends React.Component {
@@ -71,15 +77,20 @@ class IArcDiagram extends React.Component {
       // Genesis
       startingBook: bookOptions[0],
       startingChapter: initialChapterOption,
+      startingVerse: null,
       refreshCounter: 0,
+      hopsCount: hopsCountOptions[0],
     }
 
     this.selectStartingBook = this.selectStartingBook.bind(this)
     this.selectStartingChapter = this.selectStartingChapter.bind(this)
+    this.selectStartingChapter = this.selectStartingChapter.bind(this)
+    this.selectStartingVerse = this.selectStartingVerse.bind(this)
     this.fetchVerticesAndEdges = this.fetchVerticesAndEdges.bind(this)
     this.refreshData = this.refreshData.bind(this)
     this.refreshDataWithCurrentState = this.refreshDataWithCurrentState.bind(this)
     this.triggerChangeSource = this.triggerChangeSource.bind(this)
+    this.changeHopsCount = this.changeHopsCount.bind(this)
   }
 
   componentDidMount () {
@@ -88,35 +99,56 @@ class IArcDiagram extends React.Component {
 
   // TODO maybe always just use current state?
   refreshDataWithCurrentState () {
-    const { startingBook, startingChapter} = this.state
-    this.refreshData(startingBook.value, startingChapter.value) 
+    const { startingBook, startingChapter, startingVerse, hopsCount } = this.state
+    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value) 
   }
 
   // TODO not yet passing in verse
-  refreshData (book, chapter, verse) {
+  refreshData (book, chapter, verse, hopsCount) {
+    this.setState({chapterOptions: false, verseOptions: false})
+
     getBookData(book)
-      .then((result) => {
-        this.setState({startingBookData: result})
+    .then((startingBookData) => {
+      // range from 0 -> amount of chapters in this book
+      const chapterList = [...Array(startingBookData.chapterCount).keys()]
+      // make option for each
+      const chapterOptions = chapterList.map(c => ({
+        label: c + 1, 
+        value: c + 1}
+      ))
+
+      this.setState({
+        startingBookData,
+        chapterOptions,
       })
+    })
 
     if (chapter) {
       getChapterData(book, chapter)
-        .then((result) => {
-          this.setState({startingChapterData: result})
-        })
+      .then((startingChapterData) => {
+      // range from 0 -> amount of verses in this chapter
+      const verseList = [...Array(startingChapterData.verseCount).keys()]
+      // make option for each
+        const verseOptions = verseList.map(v => ({
+          label: v + 1, 
+          value: v + 1}
+        ))
+
+        this.setState({startingChapterData, verseOptions})
+      })
     }
 
     // get edges and vertices one-time
-    this.fetchVerticesAndEdges(book, chapter, verse)
+    this.fetchVerticesAndEdges(book, chapter, verse, hopsCount)
   }
 
-  async fetchVerticesAndEdges (book, chapter, verse) {
+  async fetchVerticesAndEdges (book, chapter, verse, hopsCount) {
     const [vertices, edges] = await Promise.all([
-      getVerticesForRef(book, chapter, verse),
-      getPathsForRef(book, chapter, verse),
+      getVerticesForRef(book, chapter, verse, hopsCount),
+      getPathsForRef(book, chapter, verse, hopsCount),
     ])
 
-    console.log("got data for edges and vertices", {edges, vertices})
+    console.log("got data for ref", book, chapter, verse, "hopsCount:", hopsCount, "edges and vertices", {edges, vertices})
     this.setState({edges, vertices})
   }
 
@@ -128,8 +160,9 @@ class IArcDiagram extends React.Component {
       startingChapter: initialChapterOption,
     })
 
-    const book = option.value
-    this.refreshData(book, this.state.startingChapter.value)
+    const { startingChapter, startingVerse, hopsCount } = this.state
+    const startingBook = option
+    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value)
   }
 
   selectStartingChapter (option) {
@@ -137,8 +170,31 @@ class IArcDiagram extends React.Component {
       startingChapter: option
     })
 
-    const chapter = option.value
-    this.refreshData(this.state.startingBook.value, chapter)
+    const { startingBook, startingVerse, hopsCount } = this.state
+    const startingChapter = option
+    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value)
+  }
+
+  selectStartingVerse (option) {
+    this.setState({
+      startingVerse: option
+    })
+    const { startingBook, startingChapter, hopsCount } = this.state
+    const startingVerse = option
+    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value)
+  }
+
+  /*
+   * change number of times to go "out" on a connection edge
+   */ 
+  changeHopsCount (option) {
+    this.setState({
+      hopsCount: option
+    })
+
+    const { startingBook, startingChapter, startingVerse} = this.state
+    const hopsCount = option
+    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value)
   }
 
   /*
@@ -149,25 +205,20 @@ class IArcDiagram extends React.Component {
   triggerChangeSource (sourceOsisData) {
     const startingBook = startingBookFromOsis(sourceOsisData)
     const startingChapter = startingChapterFromOsis(sourceOsisData)
+    const startingVerse = startingVerseFromOsis(sourceOsisData)
 
     console.log("changed source; setting diagram to ", startingBook)
     this.selectStartingBook({value: startingBook, label: startingBook})
     this.selectStartingChapter({value: startingChapter, label: startingChapter})
+    this.selectStartingVerse({value: startingVerse, label: startingVerse})
   }
 
   render () {
-    const { startingBook, startingChapter, startingBookData, startingChapterData, edges, vertices  } = this.state
+    const { startingBook, startingChapter, startingVerse, hopsCount, startingBookData, startingChapterData, edges, vertices, chapterOptions, verseOptions  } = this.state
 
     const spec = specBuilder({edges, nodes: vertices, books})
 
-    let chapterOptions
-    if (startingBookData) {
-      const chapterList = [...Array(startingBookData.chapterCount).keys()]
-      chapterOptions = chapterList.map(c => ({
-        label: c + 1, 
-        value: c + 1}
-      ))
-    }
+    
 
     return (
       <Layout>
@@ -182,22 +233,41 @@ class IArcDiagram extends React.Component {
 
         <div className={"configForm"}>
           <Form>
-            <h2>Now showing:</h2>
-            <div className="diagram-config-fields">
-              Texts that allude to &nbsp;
-              <Select 
-                options={bookOptions}
-                onChange={this.selectStartingBook}
-                currentOption={startingBook}
-              />
-
-              {chapterOptions && (
+            <div className="ref-selects-configs">
+              <h2>Now showing:</h2>
+              <div className="ref-selects">
+                <div>
+                  Texts that allude to &nbsp;
+                </div>
                 <Select 
-                  options={chapterOptions}
-                  onChange={this.selectStartingChapter}
-                  currentOption={startingChapter}
+                  options={bookOptions}
+                  onChange={this.selectStartingBook}
+                  currentOption={startingBook}
                 />
-              )}
+
+                {chapterOptions && (
+                  <Select 
+                    options={chapterOptions}
+                    onChange={this.selectStartingChapter}
+                    currentOption={startingChapter}
+                  />
+                )}
+                {verseOptions && (
+                  <Select 
+                    options={verseOptions}
+                    onChange={this.selectStartingVerse}
+                    currentOption={startingVerse}
+                  />
+                )}
+              </div>
+            </div>
+            <div className="other-configs">
+              Hops:
+                <Select 
+                  options={hopsCountOptions}
+                  onChange={this.selectHopsCount}
+                  currentOption={hopsCount}
+                />
             </div>
 
           </Form>

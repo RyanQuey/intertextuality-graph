@@ -2,5 +2,13 @@
   display: flex;
   justify-content: space-around;
 
+  .diagram-config-fields {
+    display: flex;
+    justify-content: space-around;
+    input {
+      min-width: 50px;
+    }
+
+  }
 }
 

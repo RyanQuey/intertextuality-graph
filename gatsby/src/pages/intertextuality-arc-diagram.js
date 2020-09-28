@@ -183,15 +183,14 @@ class IArcDiagram extends React.Component {
         <div className={"configForm"}>
           <Form>
             <h2>Now showing:</h2>
-            <div>
-              Texts that allude to {startingBook.label} {startingChapter.label}
+            <div className="diagram-config-fields">
+              Texts that allude to &nbsp;
               <Select 
                 options={bookOptions}
                 onChange={this.selectStartingBook}
                 currentOption={startingBook}
               />
 
-              Chapter: ({startingChapter.label})
               {chapterOptions && (
                 <Select 
                   options={chapterOptions}

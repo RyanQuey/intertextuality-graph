@@ -121,8 +121,9 @@ class AddConnectionForm extends React.Component {
       confidenceLevel: 70.0,
     }).then(r => {
       console.log("saved to db: ", r)
-      this.setState({formResult: {message: "Success!"}})
-      setTimeout(this.props.triggerUpdateDiagram, 1000);
+      this.setState({formResult: {message: `Successfully connected ${sourceText.osis} and ${alludingText.osis}!`}})
+      // this is bad...sometimes 1000 is too fast...
+      setTimeout(this.props.triggerUpdateDiagram, 2000);
 
       
 

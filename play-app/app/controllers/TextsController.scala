@@ -16,6 +16,9 @@ import java.util.{UUID, Collection};
 import scala.jdk.CollectionConverters._
 import com.google.common.collect.{ImmutableList, Lists}
 
+
+// import gremlin.scala._
+
 import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
 
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
@@ -50,6 +53,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * This controller creates an `Action` to handle HTTP requests to the
  * application's home page.
+ *
+ * TODO I hate how I did all of this, once I can successfully switch over to new route, just throw away all the old ones, just getting too messy. Then rename helpers, either always by Gremlin terminology, or from a high level what I'm doing, but make it clear
  */
 class TextsController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
@@ -57,14 +62,14 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   // only get one
   // By "source" I'm referring to a source text, since the assumption is that a given inter-textual connection is from an alluding text to a source text. 
   // Unfortunately, this is kind of confusing since it means that relative to graph terminology, the alluding text is the source node, and the source text is the target node.
-  def findSourcesForRef(book : String, chapter : Option[Int], verse : Option[Int]) = Action { implicit request: Request[AnyContent] =>
-    val sourceTexts = _findAllSourcesForRef(book, chapter, verse)
+  def findSourcesForRef(book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
+    val sourceTexts = _findAllSourcesForRef(book, chapter, verse, hopsCount)
 
     Ok(_outputAllValuesForTraversal(sourceTexts))
   }
 
 
-  def findSourcesForRefWithAlludingTexts(book : String, chapter : Option[Int], verse : Option[Int]) = Action { implicit request: Request[AnyContent] =>
+  def findSourcesForRefWithAlludingTexts(book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
 
     val textsWithValues = _getTextTraversal(book, chapter, verse)
       .valueMap() 
@@ -75,7 +80,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       Ok("[]")
 
     } else {
-      val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse)
+      val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse, hopsCount)
         .valueMap() 
         .toList()
 
@@ -97,17 +102,49 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   }
 
   // gets paths for edges
-  def findPathsForSourcesForRef(book : String, chapter : Option[Int], verse : Option[Int]) = Action { implicit request: Request[AnyContent] =>
+  // returns only "id", "split_passages", "starting_book" (as specified by _findPathsForTraversal)
+  def findPathsForSourcesForRef(book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
     val texts = _getTextTraversal(book, chapter, verse)
       .toList()
 
     if (texts.size == 0) {
       Ok("[]")
     } else {
-      val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse)
+      val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse, hopsCount)
 
-      val paths = _findPathsForTraversal(connectionsWithFields).toList
+      val valuesToReturn = Seq("id", "split_passages", "starting_book")
+      val paths = _findPathsForTraversal(connectionsWithFields, valuesToReturn).toList
+      // turn into json
       val output = json_mapper.writeValueAsString(paths)
+
+      Ok(output)
+    }
+  }
+
+  // gets all values for all vertices along path
+  def findAllValuesAlongPathForRef(book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
+    // TODO I think this is redundant, since _findAllSourcesForRef checks also
+    val texts = _getTextTraversal(book, chapter, verse)
+      .toList()
+
+    if (texts.size == 0) {
+      Ok("[]")
+    } else {
+
+      val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse, hopsCount)
+
+      // passing in no args for 
+      val pathsWithValues = _findPathsForTraversal(connectionsWithFields, Seq()).toList
+
+      // now we have gremlin output, that is roughly a list of lists of maps, and each map is a vertex with all values attached. 
+      // we want to return this as two data items for use with our chart, one for nodes, one for edges
+      // TODO convert stuff using scala; for now just sending to frontend and converting using js
+      // possibly use gremlin-scala?
+      pathsWithValues.asScala.foreach{ pathWithValues => {
+        println(pathWithValues.getClass)
+      }}
+
+      val output = json_mapper.writeValueAsString(pathsWithValues)
 
       Ok(output)
     }
@@ -124,20 +161,22 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    * TODO might move the gremlin queries themselves to the etl-tools model-helpers
    *
    * https://docs.datastax.com/en/developer/java-driver/4.9/manual/core/dse/graph/
+   *
+   * @param hopsCount how many times to go out on the intertextual_connection edge
    */
 
-  def _findAllSourcesForRef (book : String, chapter : Option[Int], verse : Option[Int])  = {
+  def _findAllSourcesForRef (book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int)  = {
     val g : GraphTraversalSource = CassandraDb.graph
     val texts = _getTextTraversal(book, chapter, verse).toList()
 
     // be sure not to continue if size is 0. just return an empty traversal if empty. Since doing g.V([]) will return all vertices...
     if (texts.size == 0) {
-      // this is hacky, but just a sure fire way to return a traversal with no results, so what we return matches type that this method is expected to return
-      _getTextTraversal(book, chapter, verse)
+      // this is hacky, but just a sure fire way to return a traversal (for the sake of type casting) with no results, so what we return matches type that this method is expected to return TODO better implementation
+      _getEmptyTraversal()
 
     } else {
       val connectionsWithFields = g.V(texts).                
-        repeat(out("intertextual_connection")).times(1)
+        repeat(out("intertextual_connection")).times(hopsCount)
 
       connectionsWithFields
     }
@@ -202,6 +241,8 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
   //////////////////////////////////////////////////
   // output helpers
+
+  // takes Java list of graph traversals or other graph class instances and converts to json
   val json_mapper = GraphSONMapper.
                 build().
                 version(GraphSONVersion.V1_0).
@@ -229,13 +270,18 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
   /*
    * NOTE make sure the traversal has a "out" called on it
-   *
+   * @param valuesToReturn sequence of properties on the vertices to return. Pass in empty Seq() to return all (calls valueMap())
    */
-  def _findPathsForTraversal (traversal : GraphTraversal[Vertex, Vertex]) = {
+  def _findPathsForTraversal (traversal : GraphTraversal[Vertex, Vertex], valuesToReturn : Seq[String]) = {
     // get values from source and target vertices
-    traversal.path().by(valueMap("id", "split_passages", "starting_book"))
+    // destructure the arg to valueMap, will be like e.g., valueMap("id", "split_passages", "starting_book")
+    // https://stackoverflow.com/a/1832288/6952495
+    traversal.path().by(valueMap(valuesToReturn:_*))
   }
 
   ///////////////////////////////
   // helpers
+  def _getEmptyTraversal() = {
+    _getTextTraversal("not-a-book", Some(99), Some(99))
+  }
 }

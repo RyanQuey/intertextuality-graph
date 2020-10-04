@@ -35,20 +35,22 @@ GET     /books/:bookName/chapters/:chapterNumber           controllers.ChaptersC
 #########################
 #  Connections
 #########################
-
+# NOTE also creates vertices along with it, if they don't exist already
 POST     /connections           controllers.ConnectionsController.create()
 
 #########################
 # texts 
 #########################
-GET     /texts-starting-with-ref           controllers.TextsController.findTextsByStartingRef(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
+GET     /texts/texts-starting-with-ref           controllers.TextsController.findTextsByStartingRef(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
 
 # if you just want the source texts
-GET     /sources-for-ref           controllers.TextsController.findSourcesForRef(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
+GET     /texts/sources-for-ref           controllers.TextsController.findSourcesForRef(book : String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None, hopsCount : Int ?= 1)
 # if you also want the texts that start with the ref
-GET     /sources-for-ref-with-alluding-texts           controllers.TextsController.findSourcesForRefWithAlludingTexts(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
+GET     /texts/sources-for-ref-with-alluding-texts           controllers.TextsController.findSourcesForRefWithAlludingTexts(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None, hopsCount : Int ?= 1)
 
-GET     /paths-for-sources-starting-with-ref           controllers.TextsController.findPathsForSourcesForRef(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
+GET     /texts/paths-for-sources-starting-with-ref           controllers.TextsController.findPathsForSourcesForRef(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None, hopsCount : Int ?= 1)
+
+GET     /texts/all-values-along-path-for-ref           controllers.TextsController.findAllValuesAlongPathForRef(book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None, hopsCount : Int ?= 1)
 
 
 #########################

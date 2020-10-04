@@ -20,7 +20,7 @@ import allVerticesData from '../data/intertextuality-all-vertices.json';
 */
 import {getBookData} from '../helpers/book-helpers'
 import {getChapterData} from '../helpers/chapter-helpers'
-import {getVerticesForRef, getPathsForRef} from '../helpers/connection-helpers'
+import {getVerticesForRef, getPathsForRef, getPathsWithValuesForRef, extractNodesAndEdgesFromPaths} from '../helpers/connection-helpers'
 
 import Form from '../components/shared/elements/Form';
 import Button from '../components/shared/elements/Button';
@@ -67,7 +67,10 @@ const hopsCountOptions = [...Array(4).keys()].map(hopCount => ({
   value: hopCount + 1}
 ))
 
-const initialChapterOption = {label: 1, value: 1}
+// make these functions, so even if the option list changes, these will stay the same. Advantages of
+// immutable stuff
+const initialChapterOption = () => ({label: 1, value: 1})
+const initialVerseOption = () => ({label: 1, value: 1})
 
 class IArcDiagram extends React.Component {
   constructor (props) {
@@ -76,14 +79,13 @@ class IArcDiagram extends React.Component {
     this.state = {
       // Genesis
       startingBook: bookOptions[0],
-      startingChapter: initialChapterOption,
-      startingVerse: null,
+      startingChapter: initialChapterOption(),
+      startingVerse: initialVerseOption(),
       refreshCounter: 0,
       hopsCount: hopsCountOptions[0],
     }
 
     this.selectStartingBook = this.selectStartingBook.bind(this)
-    this.selectStartingChapter = this.selectStartingChapter.bind(this)
     this.selectStartingChapter = this.selectStartingChapter.bind(this)
     this.selectStartingVerse = this.selectStartingVerse.bind(this)
     this.fetchVerticesAndEdges = this.fetchVerticesAndEdges.bind(this)
@@ -143,11 +145,14 @@ class IArcDiagram extends React.Component {
   }
 
   async fetchVerticesAndEdges (book, chapter, verse, hopsCount) {
-    const [vertices, edges] = await Promise.all([
-      getVerticesForRef(book, chapter, verse, hopsCount),
-      getPathsForRef(book, chapter, verse, hopsCount),
+    // const [vertices, edges, pathsWithValues] = await Promise.all([
+    const [pathsWithValues] = await Promise.all([
+      // getVerticesForRef(book, chapter, verse, hopsCount),
+      // getPathsForRef(book, chapter, verse, hopsCount),
+      getPathsWithValuesForRef(book, chapter, verse, hopsCount),
     ])
 
+    const [ edges, vertices ] = extractNodesAndEdgesFromPaths(pathsWithValues)
     console.log("got data for ref", book, chapter, verse, "hopsCount:", hopsCount, "edges and vertices", {edges, vertices})
     this.setState({edges, vertices})
   }
@@ -157,7 +162,9 @@ class IArcDiagram extends React.Component {
       startingBook: option,
       // restart the chapter as well, since this book probably does not have the same count as the
       // previous one
-      startingChapter: initialChapterOption,
+      startingChapter: initialChapterOption(),
+      // don't know the chapter, so no verse 
+      startingVerse: initialVerseOption(),
     })
 
     const { startingChapter, startingVerse, hopsCount } = this.state
@@ -167,7 +174,8 @@ class IArcDiagram extends React.Component {
 
   selectStartingChapter (option) {
     this.setState({
-      startingChapter: option
+      startingChapter: option,
+      startingVerse: initialVerseOption(),
     })
 
     const { startingBook, startingVerse, hopsCount } = this.state
@@ -241,6 +249,7 @@ class IArcDiagram extends React.Component {
                 </div>
                 <Select 
                   options={bookOptions}
+                  className="book-select"
                   onChange={this.selectStartingBook}
                   currentOption={startingBook}
                 />

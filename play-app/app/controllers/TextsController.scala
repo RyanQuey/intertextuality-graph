@@ -90,7 +90,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       // TODO convert stuff using scala; for now just sending to frontend and converting using js
       // possibly use gremlin-scala?
       pathsWithValues.asScala.foreach{ pathWithValues => {
-        println(pathWithValues.getClass)
+        // println(pathWithValues.getClass)
       }}
 
       val output = json_mapper.writeValueAsString(pathsWithValues)

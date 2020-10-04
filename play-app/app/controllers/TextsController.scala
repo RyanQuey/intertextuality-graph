@@ -54,71 +54,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * This controller creates an `Action` to handle HTTP requests to the
  * application's home page.
  *
- * TODO I hate how I did all of this, once I can successfully switch over to new route, just throw away all the old ones, just getting too messy. Then rename helpers, either always by Gremlin terminology, or from a high level what I'm doing, but make it clear
  */
 class TextsController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
-
-
-  // only get one
-  // By "source" I'm referring to a source text, since the assumption is that a given inter-textual connection is from an alluding text to a source text. 
-  // Unfortunately, this is kind of confusing since it means that relative to graph terminology, the alluding text is the source node, and the source text is the target node.
-  def findSourcesForRef(book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
-    val sourceTexts = _findAllSourcesForRef(book, chapter, verse, hopsCount)
-
-    Ok(_outputAllValuesForTraversal(sourceTexts))
-  }
-
-
-  def findSourcesForRefWithAlludingTexts(book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
-
-    val textsWithValues = _getTextTraversal(book, chapter, verse)
-      .valueMap() 
-      .toList()
-
-    // be sure not to continue if size is 0. just return an empty array as our dummy json. Note that passing in null as vertices in g.V(null) will mean get all...
-    if (textsWithValues.size == 0) {
-      Ok("[]")
-
-    } else {
-      val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse, hopsCount)
-        .valueMap() 
-        .toList()
-
-      println(s"Returning sources with alluding texts - source texts: (${textsWithValues.size}); alluding texts: (${connectionsWithFields.size})");
-      // combine the two java lists
-      textsWithValues.addAll(connectionsWithFields)
-      val outputJson = json_mapper.writeValueAsString(textsWithValues)
-
-      Ok(outputJson)
-    }
-  }
 
 
   // for now requiring a separate API call, but maybe later we'll just merge these into the target vertices as well
   def findTextsByStartingRef(book : String, chapter : Option[Int], verse : Option[Int]) = Action { implicit request: Request[AnyContent] =>
     val texts = _getTextTraversal(book, chapter, verse)
-
-    Ok(_outputAllValuesForTraversal(texts))
-  }
-
-  // gets paths for edges
-  // returns only "id", "split_passages", "starting_book" (as specified by _findPathsForTraversal)
-  def findPathsForSourcesForRef(book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
-    val texts = _getTextTraversal(book, chapter, verse)
+      .valueMap() 
       .toList()
 
-    if (texts.size == 0) {
-      Ok("[]")
-    } else {
-      val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse, hopsCount)
+    val outputJson = json_mapper.writeValueAsString(texts)
 
-      val valuesToReturn = Seq("id", "split_passages", "starting_book")
-      val paths = _findPathsForTraversal(connectionsWithFields, valuesToReturn).toList
-      // turn into json
-      val output = json_mapper.writeValueAsString(paths)
-
-      Ok(output)
-    }
+    Ok(outputJson)
   }
 
   // gets all values for all vertices along path
@@ -131,7 +79,8 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       Ok("[]")
     } else {
 
-      val connectionsWithFields = _findAllSourcesForRef(book, chapter, verse, hopsCount)
+      // TODO NOTE I'm actually not sure if this finds the source text or alluding text...
+      val connectionsWithFields = _findTextAndSourceTextsForRef(book, chapter, verse, hopsCount)
 
       // passing in no args for 
       val pathsWithValues = _findPathsForTraversal(connectionsWithFields, Seq()).toList
@@ -162,10 +111,11 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    *
    * https://docs.datastax.com/en/developer/java-driver/4.9/manual/core/dse/graph/
    *
+      // TODO NOTE I'm actually not sure if this finds the source text or alluding text...
    * @param hopsCount how many times to go out on the intertextual_connection edge
    */
 
-  def _findAllSourcesForRef (book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int)  = {
+  def _findTextAndSourceTextsForRef (book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int)  = {
     val g : GraphTraversalSource = CassandraDb.graph
     val texts = _getTextTraversal(book, chapter, verse).toList()
 
@@ -249,24 +199,6 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
                 create().
                 createMapper()
 
-
-  /*
-   * Note that you don't always want to use this, often you'll want to specify what values you want
-   * This returns all the values
-   *
-   *
-   * Note that `Any` is probably too broad. So far, Vertex or Path
-   */ 
-
-  def _outputAllValuesForTraversal (traversal : GraphTraversal[_, _]) : String = {
-    val hitsList = traversal
-      .valueMap() 
-      .toList()
-
-    val outputJson = json_mapper.writeValueAsString(hitsList)
-
-    outputJson
-  }
 
   /*
    * NOTE make sure the traversal has a "out" called on it

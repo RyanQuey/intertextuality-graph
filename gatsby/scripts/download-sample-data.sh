@@ -11,8 +11,4 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 . $parent_path/../../scripts/config/env-vars.sh
 
 cd $INTERTEXTUALITY_GRAPH_GATSBY_DIR && \
-  #curl "http://localhost:9000/texts/sources-for-refi?book=Genesis&chapter=1" > ./src/data/intertextuality-vertices.json && \
-  curl "http://localhost:9000/texts/paths-for-sources-starting-with-ref?book=Genesis&chapter=1" > ./src/data/intertextuality-edges.json && \
-  #curl "http://localhost:9000/texts/texts-starting-with-ref?book=Genesis&chapter=1" > ./src/data/intertextuality-source-vertices.json && \
-  # target and source vertices
-  curl "http://localhost:9000/texts/sources-for-ref-with-alluding-texts?book=Genesis&chapter=1" > ./src/data/intertextuality-all-vertices.json
+  curl "http://localhost:9000/texts/all-values-along-path-for-ref?book=Genesis&chapter=1&verse=1&hopsCount=1" > ./src/data/intertextuality-all-vertices-2Peter.json

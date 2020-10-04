@@ -28,39 +28,6 @@ export async function getPathsWithValuesForRef (book, chapter, verse, hopsCount)
     throw err
   }
 }
-export async function getPathsForRef (book, chapter, verse, hopsCount) { 
-  try {
-    // filter out parts that don't exist
-    const queryParts = _.pickBy({book, chapter, verse, hopsCount})
-    // const query = `book=${startingBook}&chapter=1&verse=1&hopsCount=2`
-    const qs = Helpers.toQueryString(queryParts)
-
-    const result = await axios.get(`${pathsUrlBase}?${qs}`)
-    return result.data
-
-  } catch (err) {
-    console.error(err)
-    throw err
-  }
-}
-/*
- * gets both nodes that start with this ref and goes out one edge
- */ 
-export async function getVerticesForRef (book, chapter, verse, hopsCount) { 
-  try {
-    // filter out parts that don't exist
-    const queryParts = _.pickBy({book, chapter, verse, hopsCount})
-    const qs = Helpers.toQueryString(queryParts)
-
-    const result = await axios.get(`${verticesUrlBase}?${qs}`)
-    return result.data
-
-  } catch (err) {
-    console.error(err)
-    throw err
-  }
-}
-
 export async function createConnection (connectionData) { 
   try {
     const result = await axios.post(`${apiUrl}/connections`, connectionData)

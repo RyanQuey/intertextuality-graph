@@ -274,7 +274,7 @@ class IArcDiagram extends React.Component {
               Hops:
                 <Select 
                   options={hopsCountOptions}
-                  onChange={this.selectHopsCount}
+                  onChange={this.changeHopsCount}
                   currentOption={hopsCount}
                 />
             </div>

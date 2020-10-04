@@ -82,12 +82,25 @@ export function extractNodesAndEdgesFromPaths (pathsWithValues) {
   // nodes in hte chart (a text)
   const vertices = []
   // edges between the nodes in teh chart
-  const edges = pathsWithValues
+  const edges = []
 
   pathsWithValues.forEach((path) => {
     // drill into objects
-    path.objects.forEach((vertex, vertexIndex) => {
+    const verticesInPath = path.objects
+    verticesInPath.forEach((vertex, vertexIndex) => {
+      // add each vertex as a node in teh chart
+      // TODO maybe dedupe here? 
       vertices.push(vertex)
+
+      // break apart each chain in the path, so each has only two segments
+      const nextVInPath = verticesInPath[vertexIndex + 1]
+      // if there's another Vertex in the past after this:
+      if (nextVInPath) {
+        // currently just replicating what we received before, since our Vega config is expecting in
+        // handling it that way
+        const newEdge = {labels: [], objects: [vertex, nextVInPath]}
+        edges.push(newEdge)
+      }
     })
   })
 

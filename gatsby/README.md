@@ -56,3 +56,7 @@ A quick look at the top-level files and directories you'll see in a Gatsby proje
 
 # Why port 8080?
 I am developing on cloud9, and by default they only expose 8080 (and maybe 8081 or something). Using hot reload and having all of the data pass back and forth through localserver eats up a lot of bandwidth and uses lots of networking IO, whereas opening the preview app feature in cloud9 means it can all remain in cloud9 besides just what is literally displayed in the browser
+
+# Credits
+- Les Mes dataset and visualization based on https://vega.github.io/vega/examples/arc-diagram; all I added was additional interactivity.
+- Includes iframes of [STEP Bible](https://github.com/tyndale/step).

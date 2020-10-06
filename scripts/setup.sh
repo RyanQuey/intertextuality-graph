@@ -30,7 +30,7 @@ git submodule update --init --recursive
 ###########################
 # Run migrations
 ##########################
-$INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/scripts/run_migrations.sh
+$INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/run_migrations.sh
 
 
 #################################################
@@ -40,7 +40,12 @@ $INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/scripts/run_migrations.sh
 # fire everything up in one docker-compose statement
 # Note that if it is in one docker-compose statement like this, it allows the separate services to talk to one another even though they have separate docker-compose yml files
 
+################################################
+# download and install janus-graph
+################################################
 
+# TODO add in when ready
+# $INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/startup/_setup-janus.sh
 
 
 

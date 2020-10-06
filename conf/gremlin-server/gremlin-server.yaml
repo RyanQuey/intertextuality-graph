@@ -1,0 +1,4 @@
+# TODO
+# build this out more, use instead the default config built into the binary. 
+# will copy this into the installation's conf folder, make it namespaced with igraph, and then point scripts in this app to that config
+# For now though, it is fine just use the default janusgraph-cql-es.properties

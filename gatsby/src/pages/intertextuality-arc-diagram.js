@@ -20,7 +20,8 @@ import allVerticesData from '../data/intertextuality-all-vertices.json';
 */
 import {getBookData} from '../helpers/book-helpers'
 import {getChapterData} from '../helpers/chapter-helpers'
-import {getVerticesForRef, getPathsForRef, getPathsWithValuesForRef, extractNodesAndEdgesFromPaths} from '../helpers/connection-helpers'
+import {getVerticesForRef, getPathsForRef, getPathsWithValuesForRef, extractNodesAndEdgesFromPaths, extractNodesAndEdgesFromMixedPaths} from '../helpers/connection-helpers'
+import {downloadAsCSV} from '../helpers/file-io-helpers'
 
 import Form from '../components/shared/elements/Form';
 import Button from '../components/shared/elements/Button';
@@ -152,7 +153,8 @@ class IArcDiagram extends React.Component {
       getPathsWithValuesForRef(book, chapter, verse, hopsCount),
     ])
 
-    const [ edges, vertices ] = extractNodesAndEdgesFromPaths(pathsWithValues)
+    const [ edges, vertices ] = extractNodesAndEdgesFromMixedPaths(pathsWithValues)
+
     console.log("got data for ref", book, chapter, verse, "hopsCount:", hopsCount, "edges and vertices", {edges, vertices})
     this.setState({edges, vertices})
   }
@@ -238,6 +240,9 @@ class IArcDiagram extends React.Component {
             />
           </div>
 
+        <Button onClick={downloadAsCSV}>
+          Download as CSV
+        </Button>
 
         <div className={"configForm"}>
           <Form>

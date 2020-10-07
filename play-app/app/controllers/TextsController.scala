@@ -108,11 +108,13 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    *
    * so far just making this for a single reference, but eventually will probably make another one for if there is a starting and ending reference
    * TODO might move the gremlin queries themselves to the etl-tools model-helpers
+   * TODO I wonder if happening two separate gremlin traversals, one to get all vertices, and then another to do all edges, and returning both separately, would be more performant??? Not sure either way
    *
    * https://docs.datastax.com/en/developer/java-driver/4.9/manual/core/dse/graph/
    *
       // TODO NOTE I'm actually not sure if this finds the source text or alluding text...
    * @param hopsCount how many times to go out on the intertextual_connection edge
+   *
    */
 
   def _findTextAndSourceTextsForRef (book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int)  = {
@@ -126,7 +128,11 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
     } else {
       val connectionsWithFields = g.V(texts).                
-        repeat(out("intertextual_connection")).times(hopsCount)
+        // this doesn't return any of the info about the connection itself
+        // repeat(out("intertextual_connection")).times(hopsCount)
+        
+        // This returns an entry about the edge between each vertex
+        repeat(outE().hasLabel("intertextual_connection").inV().hasLabel("text")).times(hopsCount)
 
       connectionsWithFields
     }

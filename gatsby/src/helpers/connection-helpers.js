@@ -41,6 +41,9 @@ export async function createConnection (connectionData) {
 
 /*
  * takes raw graphson and converts to nodes and edges data that we can hand to vega
+ * - assumes that each item in the objects array is a VERTEX (not mixed, if mixed vertices and edges
+ *   use extractNodesAndEdgesFromMixedPaths
+ *
  * TODO eventually will want to improve performance of this kind of iteration, first of all by doing
  * more logic in the backend, second of all by how we're doing dedup stuff
  */
@@ -71,6 +74,58 @@ export function extractNodesAndEdgesFromPaths (pathsWithValues) {
     })
   })
 
+
+  // dedupe by id
+  const dedupedVertices = _.uniqBy(vertices, function (e) {
+    return e.id[0];
+  });
+
+  return [edges, dedupedVertices]
+}
+
+/*
+ * takes raw graphson and converts to nodes and edges data that we can hand to vega
+ * - assumes that each item in the objects array is alternating: one vertex and edge and vertex and
+ *   edge. 
+ *   - if only vertices, use extractNodesAndEdgesFromMixedPaths
+ */
+export function extractNodesAndEdgesFromMixedPaths (pathsWithValues) {
+  console.log("pathsWithValues", pathsWithValues)
+  // nodes in hte chart (a text)
+  const vertices = []
+  // edges between the nodes in teh chart
+  const edges = []
+
+  pathsWithValues.forEach((path) => {
+    // drill into objects
+    const itemsInPath = path.objects
+    let finished = false
+
+    // increment by two, to skip the edge
+    for (let i = 0; i < itemsInPath.length; i += 2) {
+      let vertex = itemsInPath[i]
+
+      vertices.push(vertex)
+
+      // next item, if exists, is an edge
+      const edge = itemsInPath[i + 1]
+      // next vertex. Don't add for now though, will do on next iteration
+      const nextVInPath = itemsInPath[i + 2]
+
+      if (edge && !nextVInPath) {
+        // something didn't work!!!!
+        throw new Error("had edge but no 2nd vertex...", edge, nextVInPath)
+      } else if (edge) {
+        // currently just replicating what we received before, since our Vega config is expecting in
+        // handling it that way
+        console.log("edge is:", edge)
+        const newEdge = {labels: [], objects: [vertex, nextVInPath]}
+        edges.push(newEdge)
+      }
+
+      // skip the edge and continue
+    }
+  })
 
   // dedupe by id
   const dedupedVertices = _.uniqBy(vertices, function (e) {

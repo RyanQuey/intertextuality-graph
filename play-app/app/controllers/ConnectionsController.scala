@@ -20,7 +20,7 @@ import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
 
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 // the case class
-import com.ryanquey.intertextualitygraph.modelhelpers.IntertextualConnection
+import com.ryanquey.intertextualitygraph.graphmodels.IntertextualConnectionEdge
 import com.ryanquey.intertextualitygraph.modelhelpers.IntertextualConnectionsHelpers
 import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers.{getBookByOsis}
 import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
@@ -58,7 +58,7 @@ import org.apache.tinkerpop.gremlin.structure.io.graphson.{GraphSONMapper, Graph
 class ConnectionsController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
   /*
-   * Define implicit conversions from Text / InterTextualConnection case class to json
+   * Define implicit conversions from Text / InterTextualConnectionEdge case class to json
    *
    * TODO 
    * - find a way to reuse the same implicit conversion throughout the different controllers
@@ -71,7 +71,7 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
   implicit val placeWrites: Writes[Place] =
     (JsPath \ "name").write[String].and((JsPath \ "location").write[Location])(unlift(Place.unapply))
 
-  implicit val connectionWrites: Writes[IntertextualConnection] = (JsPath \ "sourceTextStartingBook").write[String].and(
+  implicit val connectionWrites: Writes[IntertextualConnectionEdge] = (JsPath \ "sourceTextStartingBook").write[String].and(
     (JsPath \ "sourceTextId").write[UUID]).and(
     (JsPath \ "alludingTextStartingBook").write[String]).and(
     (JsPath \ "alludingTextId").write[UUID]).and(
@@ -84,7 +84,7 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
     (JsPath \ "connectionSignificance").write[Option[String]]).and(
     (JsPath \ "comments").write[Option[String]]).and(
     (JsPath \ "sourceVersion").write[Option[String]]).and(
-    (JsPath \ "sourceLanguage").write[Option[String]])(unlift(IntertextualConnection.unapply))
+    (JsPath \ "sourceLanguage").write[Option[String]])(unlift(IntertextualConnectionEdge.unapply))
 
    */
 
@@ -131,7 +131,7 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
 
     val connectionConfidenceLevel = connectionData("confidenceLevel").as[Float]
 
-    val connection : IntertextualConnection = IntertextualConnectionsHelpers.connectTexts(sourceText, alludingText, "user-created", connectionConfidenceLevel)
+    val connection : IntertextualConnectionEdge = IntertextualConnectionsHelpers.connectTexts(sourceText, alludingText, "user-created", connectionConfidenceLevel)
     // https://www.playframework.com/documentation/2.8.x/ScalaJson#JsValue-to-a-model
 
     // find or create edge

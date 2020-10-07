@@ -1,0 +1,3 @@
+These classes are for interaction with Cassandra Models AND whatever other db I want to support.
+
+Import them both in and try to make it work, ideally...

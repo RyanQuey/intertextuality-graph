@@ -25,7 +25,7 @@ object ImportTheographicData {
       println(s"now importing file $filename into table $tablename")
       val dataFile = new TheographicDataFile(tablename, filename);
 
-      dataFile.parseFile()
+      dataFile.parseFileAndPersist()
     }
   }
 }

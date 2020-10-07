@@ -21,7 +21,7 @@ import allVerticesData from '../data/intertextuality-all-vertices.json';
 import {getBookData} from '../helpers/book-helpers'
 import {getChapterData} from '../helpers/chapter-helpers'
 import {getVerticesForRef, getPathsForRef, getPathsWithValuesForRef, extractNodesAndEdgesFromPaths, extractNodesAndEdgesFromMixedPaths} from '../helpers/connection-helpers'
-import {downloadAsCSV} from '../helpers/file-io-helpers'
+import {downloadAsCSV, downloadGraphDataAsCSV} from '../helpers/file-io-helpers'
 
 import Form from '../components/shared/elements/Form';
 import Button from '../components/shared/elements/Button';
@@ -94,11 +94,18 @@ class IArcDiagram extends React.Component {
     this.refreshDataWithCurrentState = this.refreshDataWithCurrentState.bind(this)
     this.triggerChangeSource = this.triggerChangeSource.bind(this)
     this.changeHopsCount = this.changeHopsCount.bind(this)
+    this.downloadAsCSV = this.downloadAsCSV.bind(this)
   }
 
   componentDidMount () {
     this.refreshDataWithCurrentState()
   }
+
+
+  downloadAsCSV () {
+    downloadGraphDataAsCSV(this.state.edges, this.state.vertices)
+  }
+
 
   // TODO maybe always just use current state?
   refreshDataWithCurrentState () {
@@ -240,7 +247,7 @@ class IArcDiagram extends React.Component {
             />
           </div>
 
-        <Button onClick={downloadAsCSV}>
+        <Button onClick={this.downloadAsCSV}>
           Download as CSV
         </Button>
 

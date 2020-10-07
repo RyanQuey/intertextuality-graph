@@ -118,8 +118,7 @@ export function extractNodesAndEdgesFromMixedPaths (pathsWithValues) {
       } else if (edge) {
         // currently just replicating what we received before, since our Vega config is expecting in
         // handling it that way
-        console.log("edge is:", edge)
-        const newEdge = {labels: [], objects: [vertex, nextVInPath]}
+        const newEdge = Object.assign(edge, {sourceText: vertex, alludingText: nextVInPath})
         edges.push(newEdge)
       }
 

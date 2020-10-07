@@ -31,12 +31,12 @@ export default (data) => ({
         {
           "type": "project", 
           fields: [
-            "objects[0].id[0]", 
-            "objects[0].split_passages[0]", 
-            "objects[0].starting_book[0]", 
-            "objects[1].id[0]", 
-            "objects[1].split_passages[0]",
-            "objects[1].starting_book[0]", 
+            "sourceText.id[0]", 
+            "sourceText.split_passages[0]", 
+            "sourceText.starting_book[0]", 
+            "alludingText.id[0]", 
+            "alludingText.split_passages[0]",
+            "alludingText.starting_book[0]", 
           ], 
           as: ["sourceId", "sourceSplitPassages", "sourceStartingBookName", "targetId", "targetSplitPassages", "targetStartingBookName"], 
         },
@@ -74,6 +74,11 @@ export default (data) => ({
     },
     {
       // aka vertices
+      //
+      // TODO note that I could probably do away with having a separate data.nodes field on the data
+      // object, and just take all data from the edges to make nodes. But, I am already deduping the
+      // nodes elsewhere, so leave it alone for now unless it becomes a performance issue and it is
+      // determined that this would help
       "name": "nodes",
       values: data.nodes,
       "format": {"type": "json"}, // "property": "nodes"},

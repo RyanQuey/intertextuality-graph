@@ -4,6 +4,9 @@
 // VEGA REPL and also easier to match up what is happening in React with Vega's main api
 // TODO this could potentially have memory issues if we repeat the data, so better to not use
 // property in data.format, but just only set the data we want on that key.
+//
+// Currently does not work with our endpoints anymore NOTE
+// TODO probably just remove...for now leaving is a reference for how to implement using url
 export default (edgesUrl, verticesUrl, books) => ({
 
   "$schema": "https://vega.github.io/schema/vega/v5.json",

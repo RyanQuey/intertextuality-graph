@@ -263,7 +263,7 @@ export default (data) => ({
         enter: {
           "tooltip": {
             signal: [
-              "{title: 'Connection', 'Source Node': '- ' + datum.sourceSplitPassages, 'Alluding Node': '- ' + datum.alludingSplitPassages + datum.alludingId}", 
+              "{title: 'Connection', 'Source Node': '- ' + datum.sourceSplitPassages, 'Alluding Node': '- ' + datum.alludingSplitPassages}", 
             ]
           },
         },

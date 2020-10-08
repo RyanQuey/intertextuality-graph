@@ -38,7 +38,7 @@ export default (data) => ({
             "alludingText.split_passages[0]",
             "alludingText.starting_book[0]", 
           ], 
-          as: ["sourceId", "sourceSplitPassages", "sourceStartingBookName", "targetId", "targetSplitPassages", "targetStartingBookName"], 
+          as: ["sourceId", "sourceSplitPassages", "sourceStartingBookName", "alludingId", "alludingSplitPassages", "alludingStartingBookName"], 
         },
         {
 					"type": "lookup",
@@ -51,8 +51,8 @@ export default (data) => ({
 					"type": "lookup",
           "from": "books",
           "key": "data",
-          "fields": ["targetStartingBookName"], 
-          "as": ["targetStartingBookData"],
+          "fields": ["alludingStartingBookName"], 
+          "as": ["alludingStartingBookData"],
 				},
         {"type": "identifier", "as": "id"},
       ],
@@ -66,10 +66,10 @@ export default (data) => ({
       ]
     },
     {
-      "name": "targetDegree",
+      "name": "alludingDegree",
       "source": "edges",
       "transform": [
-        {"type": "aggregate", "groupby": ["targetId"]}
+        {"type": "aggregate", "groupby": ["alludingId"]}
       ]
     },
     {
@@ -130,20 +130,20 @@ export default (data) => ({
           // start count at 0
           "default": {"count": 0}
         },
-        // count how many times this node is a target and set as "targetDegree"
+        // count how many times this node is a alluding and set as "alludingDegree"
         {
           "type": "lookup", 
-          "from": "targetDegree", 
+          "from": "alludingDegree", 
           // foreign key
-          "key": "targetId",
+          "key": "alludingId",
           // primary key of the node (?)
           "fields": ["id"], 
-          "as": ["targetDegree"],
+          "as": ["alludingDegree"],
           "default": {"count": 0}
         },
         {
           "type": "formula", "as": "degree",
-          "expr": "datum.sourceDegree.count + datum.targetDegree.count"
+          "expr": "datum.sourceDegree.count + datum.alludingDegree.count"
         },
       ]
     },
@@ -233,8 +233,8 @@ export default (data) => ({
             {"test": "indata('selectedNodes', 'value', datum.id)", "value": 600},
             // make it bolder if edge is selected and this node's id is the sourceId
             {"test": "indata('selectedEdges', 'sourceId', datum.id)", "value": 600},
-            // make it bolder if edge is selected and this node's id is the targetId
-            {"test": "indata('selectedEdges', 'targetId', datum.id)", "value": 600},
+            // make it bolder if edge is selected and this node's id is the alludingId
+            {"test": "indata('selectedEdges', 'alludingId', datum.id)", "value": 600},
             {"value": 200},
           ],
           "baseline": {"value": "middle"},
@@ -263,7 +263,7 @@ export default (data) => ({
         enter: {
           "tooltip": {
             signal: [
-              "{title: 'Connection', 'Source Node': '- ' + datum.sourceSplitPassages, 'Target Node': '- ' + datum.targetSplitPassages + datum.targetId}", 
+              "{title: 'Connection', 'Source Node': '- ' + datum.sourceSplitPassages, 'Alluding Node': '- ' + datum.alludingSplitPassages + datum.alludingId}", 
             ]
           },
         },
@@ -271,12 +271,12 @@ export default (data) => ({
           // refers to the scale we defined called "color"
           //This works, but boring since for now all starting books are the same
           //"stroke": {"scale": "color", "field": "sourceStartingBookData.bookOrder"},
-          "stroke": {"scale": "color", "field": "targetStartingBookData.bookOrder"},
+          "stroke": {"scale": "color", "field": "alludingStartingBookData.bookOrder"},
           "strokeOpacity": [
             // if nothing selected, everythign has medium opacity
             {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 0.2},
-            // if this edge's id is in selected-edges data, or the source or target is selected, make this bolder and everything else lighter
-            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.sourceId) || indata('selectedNodes', 'value', datum.targetId) ", "value": 0.6},
+            // if this edge's id is in selected-edges data, or the source or alluding is selected, make this bolder and everything else lighter
+            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.sourceId) || indata('selectedNodes', 'value', datum.alludingId) ", "value": 0.6},
             // array values means defaults to last value
             {"value": 0.1},
           ],
@@ -295,18 +295,18 @@ export default (data) => ({
           // each layout datum takes its fields from nodes, so has an id that corresponds to a node,
           // with the same id as that node
           "key": "datum.id",
-          // take source (which is source id) and target (which is target id) from this edge and map
-          // them to the id on the layout to set sourceNode and targetNode here on the edge band's
+          // take source (which is source id) and alluding (which is alluding id) from this edge and map
+          // them to the id on the layout to set sourceNode and alludingNode here on the edge band's
           // fields
-          "fields": ["datum.sourceId", "datum.targetId"],
-          "as": ["sourceNode", "targetNode"]
+          "fields": ["datum.sourceId", "datum.alludingId"],
+          "as": ["sourceNode", "alludingNode"]
         },
         {
           "type": "linkpath",
-          // goes FROM the minimum between the x value of the source and the target
-          "sourceX": {"expr": "min(datum.sourceNode.x, datum.targetNode.x)"},
-          // goes TO the maximum between the x value of the source and the target
-          "targetX": {"expr": "max(datum.sourceNode.x, datum.targetNode.x)"},
+          // goes FROM the minimum between the x value of the source and the alluding
+          "sourceX": {"expr": "min(datum.sourceNode.x, datum.alludingNode.x)"},
+          // goes TO the maximum between the x value of the source and the alluding
+          "targetX": {"expr": "max(datum.sourceNode.x, datum.alludingNode.x)"},
           // always ends at 0 (ie, bands go up into an arc then end back at the x axis)
           "sourceY": {"expr": "0"},
           "targetY": {"expr": "0"},
@@ -337,7 +337,7 @@ export default (data) => ({
 					// when an edgeLabel is clicked, adds this edge id to whatever listens to this signal (since the edgeLabel has id that corresponds to edge)
           "events": "@edgeLabel:click",
 					// corresponds to the edge)
-          "update": "{value: datum.id, sourceId: datum.sourceId, targetId: datum.targetId}",
+          "update": "{value: datum.id, sourceId: datum.sourceId, alludingId: datum.alludingId}",
           "force":  true
         },
       ]

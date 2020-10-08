@@ -1,7 +1,7 @@
 package com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers
 import java.nio.file.{Path, Paths, Files}
 import java.io.{File, Reader, FileReader, InputStreamReader, FileInputStream}
-import java.util.{List, ArrayList, Arrays}
+import java.util.{Arrays}
 import org.apache.commons.io.input.BOMInputStream
 import scalaj.http._
 import scala.io.Source
@@ -83,6 +83,7 @@ class TSKDataFile (table : String, filename : String) {
         val alludingText = new Text()
 
         val bookNum = csvRecord.get("book").toInt
+        // at == alludingText
         val atBook = BookHelpers.bookNumToName(bookNum)
         val atChapter = csvRecord.get("chapter").toInt
         val atVerse = csvRecord.get("verse").toInt
@@ -98,7 +99,8 @@ class TSKDataFile (table : String, filename : String) {
         alludingText.setUpdatedBy("treasury-of-scripture-knowledge")
         
         // make sur eto set type as Java string, or you will get Scala array back which doesn't convert to list the same way
-        val splitPassages = allRefsStr.split(";").toList.asJava
+        val atOsisBookName = BookHelpers.bookNumToOsisName(bookNum)
+        val splitPassages = List(s"$atOsisBookName.$atChapter.$atVerse").asJava
         
         alludingText.setSplitPassages(splitPassages)
 

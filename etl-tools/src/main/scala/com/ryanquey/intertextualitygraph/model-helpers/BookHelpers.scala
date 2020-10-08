@@ -27,6 +27,10 @@ object BookHelpers {
     books.find((b) => b.getOsisAbbreviation() == osisName).get
   }
 
+  def bookNumToOsisName (bookNum : Int) : String = {
+    BookHelpers.getBookByNum(bookNum).getOsisAbbreviation()
+  }
+
   def osisNameToName (osisName : String ) : String = {
     BookHelpers.getBookByOsis(osisName).getName()
   }

@@ -45,87 +45,93 @@ class TSKDataFile (table : String, filename : String) {
 	  // https://stackoverflow.com/a/61815006/6952495
 	  // http://commons.apache.org/proper/commons-csv/user-guide.html#Handling_Byte_Order_Marks
 	  val csvDataReader : Reader = new InputStreamReader(new BOMInputStream(csvDataFile), "UTF-8");
-    // cannot just split by comma, since many fields have multiples (so commas separate) or commas inside fields
-		val csvRecords = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(csvDataReader);
+	  try {
+      // cannot just split by comma, since many fields have multiples (so commas separate) or commas inside fields
+      val csvRecords = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(csvDataReader);
 
-	 	for (csvRecord : CSVRecord <- csvRecords.asScala) {
-	 	  // iterate over our mapping to get what fields we want into the db columns that they map to
+      for (csvRecord : CSVRecord <- csvRecords.asScala) {
+        // iterate over our mapping to get what fields we want into the db columns that they map to
 
-      // first, instantiate a record of our model
-      // need to typecast (https://alvinalexander.com/scala/how-to-cast-objects-class-instance-in-scala-asinstanceof/) since these models implement Model interface
-    
-      val allRefsStr : String = csvRecord.get("refs") 
+        // first, instantiate a record of our model
+        // need to typecast (https://alvinalexander.com/scala/how-to-cast-objects-class-instance-in-scala-asinstanceof/) since these models implement Model interface
+      
+        val allRefsStr : String = csvRecord.get("refs") 
 
-      // unfortunately this will create multiple records for something like jhn.1.1, jhn.1.3-5, even though really it should only be one edge. It's fine for now though
-      println("allRefsStr: " + allRefsStr)
-      val sourceTexts : Array[Text] = allRefsStr.split(";").map((osisRange : String) => {
+        // unfortunately this will create multiple records for something like jhn.1.1, jhn.1.3-5, even though really it should only be one edge. It's fine for now though
+        println("allRefsStr: " + allRefsStr)
+        val sourceTexts : Array[Text] = allRefsStr.split(";").map((osisRange : String) => {
+          // examples: 
+          // ps.95.5
+          // ps.104.3;ps.104.5-ps.104.9
+          
+          // sometimes there are typos, and you ahve two semicolons together. In that case, just skip
+          
+          val srcText = new Text()
+          if (osisRange != "") {
+            TextHelpers.populateFieldsfromOsis(osisRange, srcText)
+          }
+          srcText.setCreatedBy("treasury-of-scripture-knowledge")
+          srcText.setUpdatedBy("treasury-of-scripture-knowledge")
+
+          srcText
+        })
+
         // examples: 
         // ps.95.5
         // ps.104.3;ps.104.5-ps.104.9
+        val alludingText = new Text()
+
+        val bookNum = csvRecord.get("book").toInt
+        val atBook = BookHelpers.bookNumToName(bookNum)
+        val atChapter = csvRecord.get("chapter").toInt
+        val atVerse = csvRecord.get("verse").toInt
+        alludingText.setStartingBook(atBook)
+        alludingText.setStartingChapter(atChapter)
+        alludingText.setStartingVerse(atVerse)
+        // start and end are the same here
+        alludingText.setEndingBook(atBook)
+        alludingText.setEndingChapter(atChapter)
+        alludingText.setEndingVerse(atVerse)
+
+        alludingText.setCreatedBy("treasury-of-scripture-knowledge")
+        alludingText.setUpdatedBy("treasury-of-scripture-knowledge")
         
-        // sometimes there are typos, and you ahve two semicolons together. In that case, just skip
+        // make sur eto set type as Java string, or you will get Scala array back which doesn't convert to list the same way
+        val splitPassages = allRefsStr.split(";").toList.asJava
         
-        val srcText = new Text()
-        if (osisRange != "") {
-          TextHelpers.populateFieldsfromOsis(osisRange, srcText)
+        alludingText.setSplitPassages(splitPassages)
+
+        // don't want dupes, so find or create
+        println(s"Persisting alludingText ${alludingText} if not exists")
+        TextHelpers.updateOrCreateByRef(alludingText)
+        
+        for (srcText <- sourceTexts) {
+          breakable {
+            println(s"Persisting sourceText ${srcText} if not exists")
+            // if ref was a blank string, skip it
+            if (srcText.getStartingBook() == null) {
+              // continue
+              break
+            }
+            
+            // don't want dupes, so find or create
+            TextHelpers.updateOrCreateByRef(srcText)
+            println(s"---- Connecting text... ----")
+            IntertextualConnectionsHelpers.connectTexts(srcText, alludingText, "from-generic-list", 30.toFloat)
+          }
         }
-        srcText.setCreatedBy("treasury-of-scripture-knowledge")
-        srcText.setUpdatedBy("treasury-of-scripture-knowledge")
 
-        srcText
-      })
+        println(s"---- Persisted!! ----")
 
-      // examples: 
-      // ps.95.5
-      // ps.104.3;ps.104.5-ps.104.9
-      val alludingText = new Text()
-
-      val bookNum = csvRecord.get("book").toInt
-      val atBook = BookHelpers.bookNumToName(bookNum)
-      val atChapter = csvRecord.get("chapter").toInt
-      val atVerse = csvRecord.get("verse").toInt
-      alludingText.setStartingBook(atBook)
-      alludingText.setStartingChapter(atChapter)
-      alludingText.setStartingVerse(atVerse)
-      // start and end are the same here
-      alludingText.setEndingBook(atBook)
-      alludingText.setEndingChapter(atChapter)
-      alludingText.setEndingVerse(atVerse)
-
-      alludingText.setCreatedBy("treasury-of-scripture-knowledge")
-      alludingText.setUpdatedBy("treasury-of-scripture-knowledge")
-      
-      // make sur eto set type as Java string, or you will get Scala array back which doesn't convert to list the same way
-      val splitPassages = allRefsStr.split(";").toList.asJava
-      
-      alludingText.setSplitPassages(splitPassages)
-
-      // don't want dupes, so find or create
-			println(s"Persisting alludingText ${alludingText} if not exists")
-      TextHelpers.updateOrCreateByRef(alludingText)
-      
-      for (srcText <- sourceTexts) {
-        breakable {
-  			  println(s"Persisting sourceText ${srcText} if not exists")
-  			  // if ref was a blank string, skip it
-  			  if (srcText.getStartingBook() == null) {
-  			    // continue
-  			    break
-  			  }
-  			  
-  			  // don't want dupes, so find or create
-          TextHelpers.updateOrCreateByRef(srcText)
-          println(s"---- Connecting text... ----")
-          IntertextualConnectionsHelpers.connectTexts(srcText, alludingText, "from-generic-list", 30.toFloat)
-        }
+        println(s"---- Continuing to next ----")
       }
 
-			println(s"---- Persisted!! ----")
-
-			println(s"---- Continuing to next ----")
+    } catch {
+      case e: Exception => throw e
+    } finally {
+      // TODO I just added this, need to test
+      csvDataFile.close() 
     }
-
-    // TODO I think it does not stop itself because it opened a file and did not close it (?)
   }
 
 }

@@ -11,17 +11,27 @@ const bcv = new bcv_parser;
   * - can then easily split by "," then by "-"
   */
 
-// whether or not this file is our tsk file 
-const isTsk = process.argv[1] == "tsk-true"
-
+// 0 is path to node binary, 1 is the path to this .js script
 // absolute filepath to the csv file
-const filepath = process.argv[0]
+const filepath = process.argv[2]
+// whether or not this file is our tsk file 
+const isTsk = process.argv[3] == "tsk-true"
+
 const formattedFilepath = isTsk ? filepath.replace(".txt", "-formatted.csv") : filepath.replace(".csv", "-formatted.csv")
 
 const parseRef = (rawRef) => {
   return bcv.parse(rawRef).osis()
 }
 
+/*
+ * @param rawRecord 
+ * takes a single rawRecord (received from the npm lib "csv"), so should have each header as a key
+ * and values being the value for this row
+ *
+ * adds: 
+ *  - key "ref" which has source refs on it, parsed
+ * Returns 
+ */
 function parseRecord (rawRecord) {
   if (isTsk) {
     return parseTSKRecord(rawRecord)
@@ -30,18 +40,22 @@ function parseRecord (rawRecord) {
   // currently assuming a user's csv file. Note that they might not have a super standard format,
   // but do have to follow our header guidelines
   // "source_texts", "alluding_text", "confidence_level",  "volume_level", "description", "comments",  "connection_type", "source_version",  "beale_categories",
-  console.log("rawRecord: ", Object.keys(rawRecord))
-  const rawSourceRefs = rawRecord.source_texts.split(";")
 
-  const formattedRefs = rawRefs.map(parseRef)
-  const parsedRecord = Object.assign(rawRecord)
-  parsedRecord.refs = formattedRefs
+  // source_texts is from split_texts of db record, which is a LIST in C*, so is comma separated.
+  // I'm not changing that currently, so will remain an comma separated for now.
+  // osis parser also by default separates refs by comma NOT semi-colon
+  rawRecord.source_texts = rawRecord.source_texts.split(",").map(parseRef)
 
-  return parsedRecord
+  // should only be one text... If there's semi colons or commas, assume that all passages belong
+  // together regardless as a single passage
+  rawRecord.alluding_text = parseRef(rawRecord.alluding_text)
+
+  return rawRecord
 }
 
 function parseTSKRecord (rawRecord) {
   
+  // this tsk file separates by semicolon, so split by semicolon!
   const rawRefs = rawRecord.refs.split(";")
   const formattedRefs = rawRefs.map(parseRef)
   const parsedRecord = Object.assign(rawRecord)
@@ -62,8 +76,8 @@ const readParseWriteFile = async () => {
   // Following this example:
   // https://csv.js.org/parse/recipies/file_interaction/#file-system-interaction
   console.log("== reading file ==")
+  console.log("file path: ", filepath)
   const content = await fs.readFile(filepath)
-  console.log(content)
 
   // so far only TSK uses tab delimited csv files
   const delimiter = isTsk ? "\t" : ","

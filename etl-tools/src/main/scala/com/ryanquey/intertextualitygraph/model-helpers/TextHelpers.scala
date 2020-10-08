@@ -17,15 +17,22 @@ import com.datastax.oss.driver.api.core.cql._;
 // avoiding 
 
 object TextHelpers {
-  // NOTE could be a range, but osisRange could also be a single ref. You won't know until you parse
+  // NOTE could be a range (ps.1.1-ps.1.6), but osisRangeList could also be a single ref (ps.1.1) or list of refs (ps.1.1-ps.1.3,ps.1.4). You won't know until you parse
   // main use case for this one though is building a text model instance
-  def populateFieldsfromOsis (osisRange : String, text : Text) { 
-    println(s"osisRange is: $osisRange")
-    val refs = osisRange.split("-")
+  // For now, at least assuming that the list of refs are in order...we did make it a LIST after all in C* not a SET! Let's have some order here!
+  def populateFieldsfromOsis (osisRangeList : String, text : Text) { 
+    println(s"osisRangeList is: $osisRangeList")
+    val allRefs : Array[String] = osisRangeList.split(",")
+    val startingRange : String = allRefs(0)
+    // NOTE might be same as startingRange. Note that it might not be a range, but we're treating it as such
+    val endingRange = allRefs.last
 
-    val startingRef = refs(0)
-    // NOTE might be the same as the starting ref, if there was no - 
-    val endingRef = refs.last
+
+    // get it down to two single refs. E.g,. From Gen.1.1-Gen.10.1,Gen.11.1 to: startingRef is Gen.1.1 and endingRef is Gen.11.1
+    // in this starting range
+    val startingRef : String = startingRange.split("-")(0)
+    // NOTE might be the same as the starting ref, if there was no commas (,) AND no dash (-)
+    val endingRef : String = endingRange.split("-").last
 
     // parse startingRef
     val startingRefData = startingRef.split("\\.")
@@ -33,7 +40,10 @@ object TextHelpers {
     val startingBookOsis = startingRefData(0)
     
     val startingBookName = BookHelpers.osisNameToName(startingBookOsis)
+
+    println(s"starting book is: $startingBookName")
     text.setStartingBook(startingBookName)
+    println(s"starting ch is: ${startingRefData(1).toInt}")
     val startingChapter = startingRefData(1).toInt
     text.setStartingChapter(startingChapter)
     if (startingRefData.length > 2) {
@@ -57,7 +67,7 @@ object TextHelpers {
     }
     
     // NOTE for TSK data at least, should not have any semicolon at this point, so will just be a single split passage.
-    val splitPassages = osisRange.split(";").toList.asJava
+    val splitPassages = osisRangeList.split(";").toList.asJava
     text.setSplitPassages(splitPassages)
   }
 

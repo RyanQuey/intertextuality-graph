@@ -68,16 +68,18 @@ export function convertPathsWithValuesForCSV(edges, vertices) {
   edges.forEach((edge) => {
     // map them out in same order as headers
     rows.push([
-      // this one often has commas, so add quotes. Also making all of these semicolons anyways. Probably eventually just have it write as semicolon in the first place
-      `"${edge.sourceText.split_passages.replace(",", ";")}"`, 
-      `"${edge.alludingText.split_passages.replace(",", ";")}"`, 
+      // this one often has commas, so add quotes. 
+      // It's pretty futile trying to make everything in semicolons, since DB lists in C* return as
+      // comma separated, and osis parsers separate by comma too.
+      `"${edge.sourceText.split_passages}"`, 
+      `"${edge.alludingText.split_passages}"`, 
       edge.confidence_level, 
       edge.volume_level, 
-      edge.description, 
-      edge.comments, 
+      `"${edge.description}"`, 
+      `"${edge.comments}"`, 
       edge.connection_type, 
       edge.source_version, 
-      edge.beale_categories, 
+      `"${edge.beale_categories}"`, 
     ])
   })
 

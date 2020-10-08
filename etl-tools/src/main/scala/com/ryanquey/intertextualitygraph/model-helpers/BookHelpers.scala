@@ -8,7 +8,7 @@ import com.ryanquey.intertextualitygraph.models.texts.Text
 import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers.TheographicDataFile
 
 object BookHelpers {
-  // no reason to pull from the database, just load from csv
+  // no reason to pull from the database, just load from csv one time and be done
   val dataFile = new TheographicDataFile("books", "books-Grid view.csv");
   val books : Iterable[Book] = dataFile.getModelInstances().asInstanceOf[Iterable[Book]]
 

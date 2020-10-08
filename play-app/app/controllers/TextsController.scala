@@ -59,8 +59,8 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
 
   // for now requiring a separate API call, but maybe later we'll just merge these into the target vertices as well
-  def findTextsByStartingRef(book : String, chapter : Option[Int], verse : Option[Int]) = Action { implicit request: Request[AnyContent] =>
-    val texts = _getTextTraversal(book, chapter, verse)
+  def findTextsByStartingRef(dataSet : String, book : String, chapter : Option[Int], verse : Option[Int]) = Action { implicit request: Request[AnyContent] =>
+    val texts = _getTextTraversal(dataSet, book, chapter, verse)
       .valueMap() 
       .toList()
 
@@ -70,9 +70,9 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   }
 
   // gets all values for all vertices along path
-  def findAllValuesAlongPathForRef(book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
+  def findAllValuesAlongPathForRef(dataSet : String, book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
     // TODO I think this is redundant, since _findAllSourcesForRef checks also
-    val texts = _getTextTraversal(book, chapter, verse)
+    val texts = _getTextTraversal(dataSet, book, chapter, verse)
       .toList()
 
     if (texts.size == 0) {
@@ -80,7 +80,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     } else {
 
       // TODO NOTE I'm actually not sure if this finds the source text or alluding text...
-      val connectionsWithFields = _findTextAndSourceTextsForRef(book, chapter, verse, hopsCount)
+      val connectionsWithFields = _findTextAndSourceTextsForRef(dataSet, book, chapter, verse, hopsCount)
 
       // passing in no args for 
       val pathsWithValues = _findPathsForTraversal(connectionsWithFields, Seq()).toList
@@ -117,9 +117,9 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    *
    */
 
-  def _findTextAndSourceTextsForRef (book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int)  = {
+  def _findTextAndSourceTextsForRef (dataSet : String, book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int)  = {
     val g : GraphTraversalSource = CassandraDb.graph
-    val texts = _getTextTraversal(book, chapter, verse).toList()
+    val texts = _getTextTraversal(dataSet, book, chapter, verse).toList()
 
     // be sure not to continue if size is 0. just return an empty traversal if empty. Since doing g.V([]) will return all vertices...
     if (texts.size == 0) {
@@ -148,14 +148,27 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    * Does not allow verse without chapter
    *
    */
-  def _getTextTraversal (book : String, chapter : Option[Int], verse : Option[Int]) = {
+  def _getTextTraversal (dataSet : String, book : String, chapter : Option[Int], verse : Option[Int]) = {
     println("getting texts");
-    val traversal = chapter match {
+    var traversal = chapter match {
       case Some(c) if verse.isDefined => _fetchTextByStartingVerse(book, c, verse.get)
       case Some(c) => _fetchTextByStartingChapter(book, c)
       case None => _fetchTextByStartingBook(book)
     }
 
+    // filter by dataSet (which is currently just filtering by created_by)
+    println(s"returning dataset: $dataSet")
+
+    if (dataSet == "all") {
+      println("returning  all!")
+
+    } else if (dataSet == "treasury-of-scripture-knowledge") {
+      // this is for now just tsk
+      traversal = traversal.has("updated_by", "treasury-of-scripture-knowledge")
+    } else if (dataSet == "user") {
+      val userTypes = java.util.Arrays.asList("user-upload", "api-endpoint")
+      traversal = traversal.has("updated_by", within(userTypes))
+    }
     traversal
   }
 
@@ -187,6 +200,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   def _fetchTextByStartingBook (book : String)  = {
     println(s"getting by starting book: $book");
     val g : GraphTraversalSource = CassandraDb.graph
+
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)
 
@@ -220,6 +234,6 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   ///////////////////////////////
   // helpers
   def _getEmptyTraversal() = {
-    _getTextTraversal("not-a-book", Some(99), Some(99))
+    _getTextTraversal("non-dataset", "not-a-book", Some(99), Some(99))
   }
 }

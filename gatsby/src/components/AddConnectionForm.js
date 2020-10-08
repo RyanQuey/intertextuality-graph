@@ -122,8 +122,9 @@ class AddConnectionForm extends React.Component {
     }).then(r => {
       console.log("saved to db: ", r)
       this.setState({formResult: {message: `Successfully connected ${sourceText.osis} and ${alludingText.osis}!`}})
-      // this is bad...sometimes 1000 is too fast...
-      setTimeout(this.props.triggerUpdateDiagram, 2000);
+      // this is bad...sometimes 1000 is too fast...or even 2000. 
+      // I'm guessing it has to index in Solr first???
+      setTimeout(this.props.triggerUpdateDiagram, 3000);
 
       
 

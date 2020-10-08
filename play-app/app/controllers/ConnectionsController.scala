@@ -11,7 +11,7 @@ import constants.DatasetMetadata._
 // import models.Connection._
 import java.time.Instant;
 import java.util.{UUID, Collection};
-import java.nio.file.Paths
+import java.nio.file.{Paths, Files}
 
 // they don't like after 2.12
 // import collection.JavaConverters._
@@ -28,6 +28,7 @@ import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers.{getBookByOsis
 import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
 import com.ryanquey.intertextualitygraph.models.texts.Text
 import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers.UserCSVFile
+import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers.Helpers
 
 
 // way overkill, but just trying to find what works for method "out"
@@ -163,17 +164,21 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
       val fileSize    = userCSVFile.fileSize
       val contentType = userCSVFile.contentType
 
-      userCSVFile.ref.copyTo(Paths.get(s"/tmp/intertextuality-graph/user-uploads/$filename"), replace = true)
+      println("so what is this anyways?" + filename)
+      // will end up copying to /tmp/intertextuality-graph/user-uploads/$filename
+      val tmpFilePath = s"/tmp/intertextuality-graph/user-uploads/$filename"
+      userCSVFile.ref.copyTo(Paths.get(tmpFilePath), replace = true)
 
       // run the job
-      val dataFile = new UserCSVFile(filepath);
+      // For some reason
+      val dataFile = new UserCSVFile(tmpFilePath);
 
       dataFile.parseFile()
 
 
-      // delete the file (though hopefully our temp file reaper would get it eventually anyways)
-
-
+      // delete the file
+      Files.delete(Paths.get(tmpFilePath))
+      Files.delete(Paths.get(Helpers.getFormattedCSVFilePath(tmpFilePath)))
 
 			Ok(Json.obj("message" -> ("Play API received '" + parse)))
     }

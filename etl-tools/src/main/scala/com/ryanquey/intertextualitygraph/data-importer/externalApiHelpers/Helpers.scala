@@ -124,6 +124,10 @@ object Helpers {
     value
   }
 
+  def getFormattedCSVFilePath (filepath : String) : String = {
+    val formattedFilePath = filepath.replaceFirst(".csv", "-formatted.csv") 
+    formattedFilePath
+  }
   
   // def alludingTextsFieldsConverter (rawValue : String, csvField : String, field : String, fieldType : String) = {
   //   val value = csvField match {

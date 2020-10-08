@@ -10,7 +10,9 @@ export async function getBookData (bookName) {
     return result.data
 
   } catch (err) {
-    console.error(err)
+    console.error("FAILED TO GET BOOK", err)
+    // TODO probably better to have diff error, but for now throw it
+    throw err
   }
 }
 

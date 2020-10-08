@@ -13,10 +13,10 @@ const pathsWithValuesUrlBase = apiUrl + "/texts/all-values-along-path-for-ref"
  * corresponding to our db fields, but in camelcase
  *
  */
-export async function getPathsWithValuesForRef (book, chapter, verse, hopsCount) { 
+export async function getPathsWithValuesForRef (book, chapter, verse, hopsCount, dataSet) { 
   try {
     // filter out parts that don't exist
-    const queryParts = _.pickBy({book, chapter, verse, hopsCount})
+    const queryParts = _.pickBy({book, chapter, verse, hopsCount, dataSet})
     // const query = `book=${startingBook}&chapter=1&verse=1&hopsCount=2`
     const qs = Helpers.toQueryString(queryParts)
 

@@ -7,5 +7,8 @@ export async function getChapterData (bookName, chapter) {
     const result = await axios.get(`${apiUrl}/books/${bookName}/chapters/${chapter}`)
     console.log("chapter data for chapter " + chapter, result)
     return result.data
-  } catch (err) {console.error(err)}
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
 }

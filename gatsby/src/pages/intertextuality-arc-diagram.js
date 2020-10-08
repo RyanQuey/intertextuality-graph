@@ -62,6 +62,23 @@ const bookOptions = books.map(b => ({
   value: b}
 ))
 
+// for now, just user data or TSK data
+const dataSetOptions = [
+  // includes uploads and through the form
+  {
+    label: "User Data", 
+    value: "user",
+  },
+  {
+    label: "Treasury of Scripture Knowledge", 
+    value: "treasury-of-scripture-knowledge",
+  },
+  {
+    label: "All", 
+    value: "all",
+  },
+]
+
 // allow between 1 and 4 hops
 const hopsCountOptions = [...Array(4).keys()].map(hopCount => ({
   label: hopCount + 1, 
@@ -84,6 +101,7 @@ class IArcDiagram extends React.Component {
       startingVerse: initialVerseOption(),
       refreshCounter: 0,
       hopsCount: hopsCountOptions[0],
+      dataSet: dataSetOptions[0],
       loadingBookData: false,
       loadingChapterData: false,
       loadingEdges: false,
@@ -92,6 +110,7 @@ class IArcDiagram extends React.Component {
     this.selectStartingBook = this.selectStartingBook.bind(this)
     this.selectStartingChapter = this.selectStartingChapter.bind(this)
     this.selectStartingVerse = this.selectStartingVerse.bind(this)
+    this.selectDataSet = this.selectDataSet.bind(this)
     this.fetchVerticesAndEdges = this.fetchVerticesAndEdges.bind(this)
     this.refreshData = this.refreshData.bind(this)
     this.refreshDataWithCurrentState = this.refreshDataWithCurrentState.bind(this)
@@ -114,16 +133,18 @@ class IArcDiagram extends React.Component {
 
   // TODO maybe always just use current state?
   refreshDataWithCurrentState () {
-    const { startingBook, startingChapter, startingVerse, hopsCount } = this.state
-    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value) 
+    const { startingBook, startingChapter, startingVerse, hopsCount, dataSet } = this.state
+    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value) 
   }
 
   // TODO not yet passing in verse
-  refreshData (book, chapter, verse, hopsCount) {
+  refreshData (book, chapter, verse, hopsCount, dataSet) {
     this.setState({
       loadingBookData: true, 
       loadingChapterData: true, 
-      chapterOptions: false, verseOptions: false})
+      chapterOptions: false, 
+      verseOptions: false
+    })
 
     getBookData(book)
     .then((startingBookData) => {
@@ -168,17 +189,17 @@ class IArcDiagram extends React.Component {
     }
 
     // get edges and vertices one-time
-    this.fetchVerticesAndEdges(book, chapter, verse, hopsCount)
+    this.fetchVerticesAndEdges(book, chapter, verse, hopsCount, dataSet)
   }
 
-  async fetchVerticesAndEdges (book, chapter, verse, hopsCount) {
+  async fetchVerticesAndEdges (book, chapter, verse, hopsCount, dataSet) {
     this.setState({loadingEdges: true})
 
     // const [vertices, edges, pathsWithValues] = await Promise.all([
     const [pathsWithValues] = await Promise.all([
       // getVerticesForRef(book, chapter, verse, hopsCount),
       // getPathsForRef(book, chapter, verse, hopsCount),
-      getPathsWithValuesForRef(book, chapter, verse, hopsCount),
+      getPathsWithValuesForRef(book, chapter, verse, hopsCount, dataSet),
     ])
 
     const [ edges, vertices ] = extractNodesAndEdgesFromMixedPaths(pathsWithValues)
@@ -201,9 +222,9 @@ class IArcDiagram extends React.Component {
       startingVerse: initialVerseOption(),
     })
 
-    const { startingChapter, startingVerse, hopsCount } = this.state
+    const { startingChapter, startingVerse, hopsCount, dataSet } = this.state
     const startingBook = option
-    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value)
+    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
   }
 
   selectStartingChapter (option) {
@@ -212,18 +233,18 @@ class IArcDiagram extends React.Component {
       startingVerse: initialVerseOption(),
     })
 
-    const { startingBook, startingVerse, hopsCount } = this.state
+    const { startingBook, startingVerse, hopsCount, dataSet } = this.state
     const startingChapter = option
-    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value)
+    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
   }
 
   selectStartingVerse (option) {
     this.setState({
       startingVerse: option
     })
-    const { startingBook, startingChapter, hopsCount } = this.state
+    const { startingBook, startingChapter, hopsCount, dataSet } = this.state
     const startingVerse = option
-    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value)
+    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
   }
 
   /*
@@ -234,9 +255,19 @@ class IArcDiagram extends React.Component {
       hopsCount: option
     })
 
-    const { startingBook, startingChapter, startingVerse} = this.state
+    const { startingBook, startingChapter, startingVerse, dataSet} = this.state
     const hopsCount = option
-    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value)
+    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
+  }
+
+  selectDataSet (option) {
+    this.setState({
+      dataSet: option
+    })
+
+    const { startingBook, startingChapter, startingVerse, hopsCount} = this.state
+    const dataSet = option
+    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
   }
 
   /*
@@ -256,7 +287,7 @@ class IArcDiagram extends React.Component {
   }
 
   render () {
-    const { startingBook, startingChapter, startingVerse, hopsCount, startingBookData, startingChapterData, edges, vertices, chapterOptions, verseOptions, loadingBookData, loadingChapterData, loadingEdges  } = this.state
+    const { dataSet, startingBook, startingChapter, startingVerse, hopsCount, startingBookData, startingChapterData, edges, vertices, chapterOptions, verseOptions, loadingBookData, loadingChapterData, loadingEdges  } = this.state
 
     const spec = specBuilder({edges, nodes: vertices, books})
     const loading = loadingBookData || loadingChapterData || loadingEdges
@@ -267,7 +298,9 @@ class IArcDiagram extends React.Component {
       <Layout>
         <SEO title="Intertextuality Arc Diagram" />
           <div>
-            <UploadCSVForm />
+            <UploadCSVForm 
+              triggerUpdateDiagram={this.refreshDataWithCurrentState}
+            />
             <AddConnectionForm 
               triggerUpdateDiagram={this.refreshDataWithCurrentState}
               onChangeSource={this.triggerChangeSource}
@@ -306,12 +339,23 @@ class IArcDiagram extends React.Component {
               </div>
             </div>
             <div className="other-configs">
-              Hops:
+              <div>
+                Hops:
                 <Select 
                   options={hopsCountOptions}
                   onChange={this.changeHopsCount}
                   currentOption={hopsCount}
                 />
+              </div>
+              <div>
+                Data Set
+                <Select 
+                  options={dataSetOptions}
+                  onChange={this.selectDataSet}
+                  currentOption={dataSet}
+                />
+              </div>
+
             </div>
             <Button onClick={this.downloadAsCSV} disabled={loadingEdges}>
               Download {startingBook.value} {startingChapter.value}:{startingVerse.value} as CSV

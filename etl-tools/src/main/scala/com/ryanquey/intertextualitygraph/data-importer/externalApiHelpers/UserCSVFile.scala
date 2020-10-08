@@ -36,12 +36,11 @@ import com.ryanquey.datautils.helpers.StringHelpers.{snakeToCamel, snakeToUpperC
 import com.ryanquey.datautils.models.{Model, Record}
 
 // currently, actually doing openbible.info's TSK data only
-class UserCSVFile (filename : String) {
-  val filePath = s"/tmp/intertextuality-graph/user-uploads/$filename"
+class UserCSVFile (filePath : String) {
   var headers : Array[String] = _;
 
   def parseFile() = {
-    println(s"parsing $filename")
+    println(s"parsing $filePath")
 
 
     // convert file references using our node job. Since there's no lib doing it in java/scala that I know of yet...
@@ -58,7 +57,7 @@ class UserCSVFile (filename : String) {
 
     // there should now be a file written to formattedFilePath
 
-    val formattedFilePath = s"$filePath".replaceFirst(".csv", "-formatted.csv")
+    val formattedFilePath = getFormattedCSVFilePath(filePath)
     println("formatted file path", formattedFilePath)
 
     val fullPath : Path = Paths.get(formattedFilePath)

@@ -37,6 +37,8 @@ class UploadCSVForm extends React.Component {
 
   onSuccess (e) {
     this.setState({message: "Successfully uploaded csv!"})
+    // see notes on AddConnectionForm. Needs to be slow...
+    setTimeout(this.props.triggerUpdateDiagram, 3000);
 	}
 
   componentDidMount () {

@@ -12,6 +12,10 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 printf "\n\n== converting our csv to have parsed references ==\n" && \
 
 cd $parent_path/js
-node convert-references.js
+
+tsk_file_path="${INTERTEXTUALITY_GRAPH_RAW_DATA_DIR}/treasury-of-scripture-knowledge/tsk-cli.txt"
+tsk="tsk-true"
+
+node convert-references.js $tsk_file_path $tsk
 
 

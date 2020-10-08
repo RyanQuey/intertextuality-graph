@@ -125,7 +125,7 @@ let Helpers = {
   },
 
   timestamp: () => moment.utc().format("YYYYMMDDTHHmmss[Z]"),
-
+  datestamp: () => moment.utc().format("YYYYMMDD"),
 }
 
 // for adding more helper files to this one

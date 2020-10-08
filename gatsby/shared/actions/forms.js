@@ -36,19 +36,6 @@ const sendAsBase64 = true
 const sendAsFormData = false
 const sendAsJSON = true
 
-// TODO remove this and get the uploadFile function back where it was, so it works for images
-const _getData = (file) => {
-  return new Promise((resolve, reject) => {
-    let data
-    if (sendAsBase64) {
-    } else {
-      let namedFile = new File([file], file.name, {type: file.type})
-      data = namedFile
-    }
-
-    return resolve(data); 
-  })
-}
 
 export const uploadAudioFile = (file, cb, onFailure, onStartUploading) => {
   // TODO move the async stuff to saga, make thsi cleaner probabl
@@ -61,45 +48,6 @@ export const uploadAudioFile = (file, cb, onFailure, onStartUploading) => {
   })
 }
 
-export const uploadFile = (file) => {
-  return new Promise((resolve, reject) => {
-    //rename to ensure unique path, and will work as link AND for background image
-    //some of the regex is overkill...but whatever
-    //NOTE: using the File API might make incompatibility with old IE11, Edge 16, old android
-
-
-    _getData(file)
-    .then((data) => {
-      let payload
-      if (sendAsFormData) {
-        const formData = new FormData()
-        formData.append("file", data)
-        payload = formData
-      } else if (sendAsJSON) {
-        payload = {base64: data}
-      } else {
-        payload = data
-        console.log("send as string no form data")
-      }
-
-      return axios.post("/upload-audio", payload, {
-        headers: {
-          'Content-Type': sendAsJSON ? 'application/json' : 'x-www-form-urlencoded',
-        }
-      })
-    })
-    .then((result) => {
-      const uploadedFile = result.data
-
-      return resolve(uploadedFile)
-    })
-    .catch((err) => {
-      console.log("fail to upload");
-      console.error(err);
-      return reject(err)
-    })
-  })
-}
 
 // workaround for when using Heroku Hobby dyno, to wake it up when we're about to hit it
 export const pingHobbyServer = () => {

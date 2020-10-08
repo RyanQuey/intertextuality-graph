@@ -48,6 +48,12 @@ $INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/scripts/run_migrations.sh
 $parent_path/startup/start-every-compose.sh
 
 ###########################
+# Prepare the play framework API
+##########################
+# currently uploading files here, so make this directory
+mkdir -p /tmp/intertextuality-graph/user-uploads/
+
+###########################
 # Prepare the gatsby / react frontend
 ##########################
 # NOTE TODO only necessary for development, will deploy to CDN for prod

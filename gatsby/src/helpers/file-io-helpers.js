@@ -1,3 +1,7 @@
+import axios from 'axios'
+import Helpers from './base-helpers'
+const apiUrl = process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
+
 /*
  * take an array of array of strings and turn into json
  * https://stackoverflow.com/a/14966131/6952495
@@ -10,20 +14,19 @@
   downloadAsCSV(rows)
  *
  */
-
-export function downloadAsCSV(rows) {
+export function downloadAsCSV(rows, filename) {
 
   let csvContent = "data:text/csv;charset=utf-8,";
 
   rows.forEach(function(rowArray) {
-        let row = rowArray.join(",");
-        csvContent += row + "\r\n";
+    let row = rowArray.join(",");
+    csvContent += row + "\r\n";
   });
 
   var encodedUri = encodeURI(csvContent);
   var link = document.createElement("a");
   link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "my_data.csv");
+  link.setAttribute("download", filename);
   document.body.appendChild(link); // Required for FF
 
   link.click();
@@ -65,9 +68,9 @@ export function convertPathsWithValuesForCSV(edges, vertices) {
   edges.forEach((edge) => {
     // map them out in same order as headers
     rows.push([
-      // this one often has commas, so add quotes
-      `"${edge.sourceText.split_passages}"`, 
-      `"${edge.alludingText.split_passages}"`, 
+      // this one often has commas, so add quotes. Also making all of these semicolons anyways. Probably eventually just have it write as semicolon in the first place
+      `"${edge.sourceText.split_passages.replace(",", ";")}"`, 
+      `"${edge.alludingText.split_passages.replace(",", ";")}"`, 
       edge.confidence_level, 
       edge.volume_level, 
       edge.description, 
@@ -81,8 +84,48 @@ export function convertPathsWithValuesForCSV(edges, vertices) {
   return rows
 }
 
-export function downloadGraphDataAsCSV(edges, vertices) {
+export function downloadGraphDataAsCSV(edges, vertices, refString) {
   const rows = convertPathsWithValuesForCSV(edges, vertices)
+  const filename = `i-graph-${refString}-${Helpers.timestamp()}-export.csv`
   
-  downloadAsCSV(rows)
+  downloadAsCSV(rows, filename)
+}
+
+// TODO remove this and get the uploadFile function back where it was, so it works for images
+const _getData = (file) => {
+  return new Promise((resolve, reject) => {
+    let namedFile = new File([file], file.name, {type: file.type})
+
+    return resolve(namedFile); 
+  })
+}
+
+export const uploadCSVFile = (file) => {
+  return new Promise((resolve, reject) => {
+    const formData = new FormData()
+    //rename to ensure unique path, and will work as link AND for background image
+    //some of the regex is overkill...but whatever
+    let newName = `${file.name.replace(/\(,|\/|\\|\s|\?|:|@|&|=|\+|#\)+/g, "_").replace(".csv", "")}-${Helpers.timestamp()}.csv`
+    //NOTE: using the File API might make incompatibility with old IE11, Edge 16, old android
+    let namedFile = new File([file], newName, {type: file.type})
+
+    formData.append("userCSVFile", namedFile)
+    // formData.append("user", store.getState().user)
+    axios.post(`${apiUrl}/upload-csv`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    })
+    .then((result) => {
+      const uploadedFile = result.data
+
+      return resolve(uploadedFile)
+    })
+    .catch((err) => {
+      console.log("fail to upload");
+      console.error(err);
+      return reject(err)
+    })
+
+  })
 }

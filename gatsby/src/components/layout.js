@@ -38,7 +38,7 @@ const Layout = ({ children }) => {
         <footer>
           © {new Date().getFullYear()} See the source code at
           {` `}
-          <a href="https://github.com/RyanQuey/">My Github</a>
+          <a href="https://github.com/RyanQuey/intertextuality-graph">My Github</a>
         </footer>
       </div>
     </>

@@ -5,6 +5,8 @@ if [ "$BASH" != "/bin/bash" ]; then
   exit 1
 fi
 
+# TODO not using right now
+
 # always base everything relative to this file to make it simple
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 

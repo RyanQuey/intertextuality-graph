@@ -5,7 +5,6 @@ import Layout from "../components/layout"
 import Image from "../components/image"
 import SEO from "../components/seo"
 
-
 import { Vega } from 'react-vega';
 // TODO for some reason changing this file does not really get updated by webpack hot reload
 //import specBuilder from '../configs/intertextual-arc-spec';
@@ -28,6 +27,7 @@ import Button from '../components/shared/elements/Button';
 import Select from '../components/shared/groups/Select';
 
 import AddConnectionForm from '../components/AddConnectionForm';
+import UploadCSVForm from '../components/UploadCSVForm';
 import books from '../data/books';
 import {
   osisDataValue, 
@@ -84,6 +84,9 @@ class IArcDiagram extends React.Component {
       startingVerse: initialVerseOption(),
       refreshCounter: 0,
       hopsCount: hopsCountOptions[0],
+      loadingBookData: false,
+      loadingChapterData: false,
+      loadingEdges: false,
     }
 
     this.selectStartingBook = this.selectStartingBook.bind(this)
@@ -103,7 +106,9 @@ class IArcDiagram extends React.Component {
 
 
   downloadAsCSV () {
-    downloadGraphDataAsCSV(this.state.edges, this.state.vertices)
+    const { startingBook, startingChapter, startingVerse, hopsCount } = this.state
+    const refString = `${startingBook.value}.${startingChapter.value}.${startingVerse.value}-${hopsCount.value}hops`
+    downloadGraphDataAsCSV(this.state.edges, this.state.vertices, refString)
   }
 
 
@@ -115,7 +120,10 @@ class IArcDiagram extends React.Component {
 
   // TODO not yet passing in verse
   refreshData (book, chapter, verse, hopsCount) {
-    this.setState({chapterOptions: false, verseOptions: false})
+    this.setState({
+      loadingBookData: true, 
+      loadingChapterData: true, 
+      chapterOptions: false, verseOptions: false})
 
     getBookData(book)
     .then((startingBookData) => {
@@ -130,6 +138,7 @@ class IArcDiagram extends React.Component {
       this.setState({
         startingBookData,
         chapterOptions,
+        loadingBookData: false,
       })
     })
 
@@ -144,7 +153,17 @@ class IArcDiagram extends React.Component {
           value: v + 1}
         ))
 
-        this.setState({startingChapterData, verseOptions})
+        this.setState({
+          startingChapterData, 
+          verseOptions,
+          loadingChapterData: false,
+           
+        })
+      })
+
+    } else {
+      this.setState({
+        loadingChapterData: false,
       })
     }
 
@@ -153,6 +172,8 @@ class IArcDiagram extends React.Component {
   }
 
   async fetchVerticesAndEdges (book, chapter, verse, hopsCount) {
+    this.setState({loadingEdges: true})
+
     // const [vertices, edges, pathsWithValues] = await Promise.all([
     const [pathsWithValues] = await Promise.all([
       // getVerticesForRef(book, chapter, verse, hopsCount),
@@ -163,7 +184,11 @@ class IArcDiagram extends React.Component {
     const [ edges, vertices ] = extractNodesAndEdgesFromMixedPaths(pathsWithValues)
 
     console.log("got data for ref", book, chapter, verse, "hopsCount:", hopsCount, "edges and vertices", {edges, vertices})
-    this.setState({edges, vertices})
+    this.setState({
+      loadingEdges: false,
+      edges, 
+      vertices,
+    })
   }
 
   selectStartingBook (option) {
@@ -231,9 +256,10 @@ class IArcDiagram extends React.Component {
   }
 
   render () {
-    const { startingBook, startingChapter, startingVerse, hopsCount, startingBookData, startingChapterData, edges, vertices, chapterOptions, verseOptions  } = this.state
+    const { startingBook, startingChapter, startingVerse, hopsCount, startingBookData, startingChapterData, edges, vertices, chapterOptions, verseOptions, loadingBookData, loadingChapterData, loadingEdges  } = this.state
 
     const spec = specBuilder({edges, nodes: vertices, books})
+    const loading = loadingBookData || loadingChapterData || loadingEdges
 
     
 
@@ -241,15 +267,12 @@ class IArcDiagram extends React.Component {
       <Layout>
         <SEO title="Intertextuality Arc Diagram" />
           <div>
+            <UploadCSVForm />
             <AddConnectionForm 
               triggerUpdateDiagram={this.refreshDataWithCurrentState}
               onChangeSource={this.triggerChangeSource}
             />
           </div>
-
-        <Button onClick={this.downloadAsCSV}>
-          Download as CSV
-        </Button>
 
         <div className={"configForm"}>
           <Form>
@@ -290,6 +313,10 @@ class IArcDiagram extends React.Component {
                   currentOption={hopsCount}
                 />
             </div>
+            <Button onClick={this.downloadAsCSV} disabled={loadingEdges}>
+              Download {startingBook.value} {startingChapter.value}:{startingVerse.value} as CSV
+            </Button>
+
 
           </Form>
 

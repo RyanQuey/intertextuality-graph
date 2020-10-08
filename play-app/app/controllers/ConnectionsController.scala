@@ -11,6 +11,8 @@ import constants.DatasetMetadata._
 // import models.Connection._
 import java.time.Instant;
 import java.util.{UUID, Collection};
+import java.nio.file.Paths
+
 // they don't like after 2.12
 // import collection.JavaConverters._
 import scala.jdk.CollectionConverters._
@@ -25,6 +27,7 @@ import com.ryanquey.intertextualitygraph.modelhelpers.IntertextualConnectionsHel
 import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers.{getBookByOsis}
 import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
 import com.ryanquey.intertextualitygraph.models.texts.Text
+import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers.UserCSVFile
 
 
 // way overkill, but just trying to find what works for method "out"
@@ -138,9 +141,6 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
 		Ok(Json.obj("message" -> (" '" + connection + "' saved.")))
   }
 
-
-
-
   // return payload back
   //
   def test() = Action(parse.json) { request =>
@@ -149,4 +149,36 @@ class ConnectionsController @Inject()(cc: ControllerComponents) extends Abstract
 		Ok(Json.obj("message" -> ("Play API received '" + connectionData)))
   }
 
+  // https://www.playframework.com/documentation/2.8.x/ScalaFileUpload
+  def createFromCSV() = Action(parse.multipartFormData) { request =>
+    println(request.body);
+
+		request.body
+    .file("userCSVFile")
+    .map { userCSVFile =>
+      // only get the last part of the filename
+      // otherwise someone can send a path like ../../home/foo/bar.txt to write to other files on the system
+      val filepath    = userCSVFile.filename
+      val filename    = Paths.get(filepath).getFileName
+      val fileSize    = userCSVFile.fileSize
+      val contentType = userCSVFile.contentType
+
+      userCSVFile.ref.copyTo(Paths.get(s"/tmp/intertextuality-graph/user-uploads/$filename"), replace = true)
+
+      // run the job
+      val dataFile = new UserCSVFile(filepath);
+
+      dataFile.parseFile()
+
+
+      // delete the file (though hopefully our temp file reaper would get it eventually anyways)
+
+
+
+			Ok(Json.obj("message" -> ("Play API received '" + parse)))
+    }
+    .getOrElse {
+			Ok(Json.obj("message" -> ("Didn't get it..." + parse)))
+    }
+  }
 }

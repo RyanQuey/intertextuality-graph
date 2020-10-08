@@ -37,6 +37,7 @@ GET     /books/:bookName/chapters/:chapterNumber           controllers.ChaptersC
 #########################
 # NOTE also creates vertices along with it, if they don't exist already
 POST     /connections           controllers.ConnectionsController.create()
+POST     /upload-csv           controllers.ConnectionsController.createFromCSV()
 
 #########################
 # texts 

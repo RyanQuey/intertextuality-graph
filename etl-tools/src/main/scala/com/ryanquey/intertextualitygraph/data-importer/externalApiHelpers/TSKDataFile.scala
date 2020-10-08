@@ -55,9 +55,10 @@ class TSKDataFile (table : String, filename : String) {
         // first, instantiate a record of our model
         // need to typecast (https://alvinalexander.com/scala/how-to-cast-objects-class-instance-in-scala-asinstanceof/) since these models implement Model interface
       
+        // counting refs as source texts. Why not....and the original passage that TSK indexed these by is going to be the alluding passage
         val allRefsStr : String = csvRecord.get("refs") 
 
-        // unfortunately this will create multiple records for something like jhn.1.1, jhn.1.3-5, even though really it should only be one edge. It's fine for now though
+        // unfortunately this will create multiple records for something like jhn.1.1; jhn.1.3-5, even though really it should only be one edge. It's fine for now though
         println("allRefsStr: " + allRefsStr)
         val sourceTexts : Array[Text] = allRefsStr.split(";").map((osisRange : String) => {
           // examples: 
@@ -77,8 +78,8 @@ class TSKDataFile (table : String, filename : String) {
         })
 
         // examples: 
-        // ps.95.5
-        // ps.104.3;ps.104.5-ps.104.9
+        // 1 1 1 (for Gen 1.1)
+        // no ranges possible here
         val alludingText = new Text()
 
         val bookNum = csvRecord.get("book").toInt
@@ -131,6 +132,7 @@ class TSKDataFile (table : String, filename : String) {
     } finally {
       // TODO I just added this, need to test
       csvDataFile.close() 
+      bufferedSource.close() 
     }
   }
 

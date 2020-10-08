@@ -213,28 +213,32 @@ class IArcDiagram extends React.Component {
   }
 
   selectStartingBook (option) {
+    const startingBook = option
+    const startingChapter = initialChapterOption()
+    const startingVerse = initialVerseOption()
+
     this.setState({
-      startingBook: option,
+      startingBook,
       // restart the chapter as well, since this book probably does not have the same count as the
       // previous one
-      startingChapter: initialChapterOption(),
+      startingChapter,
       // don't know the chapter, so no verse 
-      startingVerse: initialVerseOption(),
+      startingVerse,
     })
 
-    const { startingChapter, startingVerse, hopsCount, dataSet } = this.state
-    const startingBook = option
+    const { hopsCount, dataSet } = this.state
     this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
   }
 
   selectStartingChapter (option) {
+    const startingChapter = option
+    const startingVerse = initialVerseOption()
     this.setState({
-      startingChapter: option,
-      startingVerse: initialVerseOption(),
+      startingChapter,
+      startingVerse,
     })
 
-    const { startingBook, startingVerse, hopsCount, dataSet } = this.state
-    const startingChapter = option
+    const { startingBook, hopsCount, dataSet } = this.state
     this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
   }
 

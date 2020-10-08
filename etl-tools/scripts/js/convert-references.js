@@ -20,6 +20,7 @@ const isTsk = process.argv[3] == "tsk-true"
 const formattedFilepath = isTsk ? filepath.replace(".txt", "-formatted.csv") : filepath.replace(".csv", "-formatted.csv")
 
 const parseRef = (rawRef) => {
+  // for whatever reason, is returning semi-colon separated passages for tsk at least
   return bcv.parse(rawRef).osis()
 }
 
@@ -33,6 +34,7 @@ const parseRef = (rawRef) => {
  * Returns 
  */
 function parseRecord (rawRecord) {
+  // if is from tsk file, use special parser
   if (isTsk) {
     return parseTSKRecord(rawRecord)
   } 

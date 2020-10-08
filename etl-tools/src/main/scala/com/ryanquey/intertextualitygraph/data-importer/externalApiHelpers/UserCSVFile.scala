@@ -144,6 +144,7 @@ class UserCSVFile (filePath : String) {
       case e: Exception => throw e
     } finally {
       csvDataFile.close() 
+      bufferedSource.close() 
     }
 
     // TODO I think it does not stop itself because it opened a file and did not close it (?)

@@ -73,13 +73,13 @@ export function convertPathsWithValuesForCSV(edges, vertices) {
       // comma separated, and osis parsers separate by comma too.
       `"${edge.sourceText.split_passages}"`, 
       `"${edge.alludingText.split_passages}"`, 
-      edge.confidence_level, 
-      edge.volume_level, 
-      `"${edge.description}"`, 
-      `"${edge.comments}"`, 
-      edge.connection_type, 
-      edge.source_version, 
-      `"${edge.beale_categories}"`, 
+      edge.confidence_level || "", 
+      edge.volume_level || "", 
+      `"${edge.description || ''}"`, 
+      `"${edge.comments || ''}"`, 
+      edge.connection_type || "", 
+      edge.source_version || "", 
+      `"${edge.beale_categories || ''}"`, 
     ])
   })
 

@@ -116,6 +116,12 @@ export function extractNodesAndEdgesFromMixedPaths (pathsWithValues) {
         // something didn't work!!!!
         throw new Error("had edge but no 2nd vertex...", edge, nextVInPath)
       } else if (edge) {
+      console.log("======================")
+      console.log("i is now: ", i)
+      console.log("vertex is now: ", vertex)
+      console.log("edge is now: ", edge)
+      console.log("target is now: ", nextVInPath)
+      console.log("======================")
         // currently just replicating what we received before, since our Vega config is expecting in
         // handling it that way
         const newEdge = Object.assign(edge, {sourceText: vertex, alludingText: nextVInPath})

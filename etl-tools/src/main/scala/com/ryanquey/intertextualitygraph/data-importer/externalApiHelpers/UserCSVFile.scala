@@ -12,6 +12,7 @@ import util.control.Breaks._
 import scala.Array
 import sys.process._
 import scala.language.postfixOps
+import java.util.UUID
 
 import java.nio.charset.StandardCharsets
 import org.apache.commons.csv.{CSVParser, CSVRecord, CSVFormat}
@@ -63,6 +64,7 @@ class UserCSVFile (filePath : String) {
     val fullPath : Path = Paths.get(formattedFilePath)
     val bufferedSource = Source.fromFile(fullPath.toString)
 	  val csvDataFile : FileInputStream = new FileInputStream(fullPath.toString);
+	  val createdBy = "user-upload"
 
     try {
       // need to handle first bytes which mess up first column
@@ -80,49 +82,29 @@ class UserCSVFile (filePath : String) {
         // need to typecast (https://alvinalexander.com/scala/how-to-cast-objects-class-instance-in-scala-asinstanceof/) since these models implement Model interface
       
         val allSrcRefsStr : String = csvRecord.get("source_texts") 
+        val srcTextId : String = csvRecord.get("source_text_id") 
 
         // unfortunately this will create multiple records for something like jhn.1.1, jhn.1.3-5, even though really it should only be one edge. It's fine for now though
         println("allRefsStr: " + allSrcRefsStr)
-        val sourceTexts : Array[Text] = allSrcRefsStr.split(";").map((osisRange : String) => {
-          // examples: 
-          // ps.95.5
-          // ps.104.3,ps.104.5-ps.104.9
-          
-          // sometimes there are typos, and you ahve two semicolons together. In that case, just skip
-          
-          val srcText = new Text()
-          if (osisRange != "") {
-            TextHelpers.populateFieldsfromOsis(osisRange, srcText)
-          }
-
-          // TODO probably eventually, make these userId??? Or is that just going to be on separate field "user_id"?
-          srcText.setCreatedBy("user-upload")
-          srcText.setUpdatedBy("user-upload")
-
-          srcText
-        })
+        val sourceTexts : Array[Text] = makeSourceTexts(srcTextId, allSrcRefsStr, createdBy)
 
         // examples: 
         // ps.95.5-9,lev.1.1
         // ps 1.1
         val alludinOsisRange : String = csvRecord.get("alluding_text") 
-        val alludingText = new Text()
-
-        if (alludinOsisRange != "") {
-          TextHelpers.populateFieldsfromOsis(alludinOsisRange, alludingText)
-        }
+        // might be empty string...
+        val alludingTextId : String = csvRecord.get("alluding_text_id") 
+        val alludingText = makeTextInstance(alludingTextId, alludinOsisRange, createdBy)
 
         // TODO probably eventually, make these userId??? Or is that just going to be on separate field "user_id"?
-        alludingText.setCreatedBy("user-upload")
-        alludingText.setUpdatedBy("user-upload")
 
         // don't want dupes, so find or create
-        println(s"Persisting alludingText ${alludingText} if not exists")
-        TextHelpers.updateOrCreateByRef(alludingText)
+        println(s"update or create ${alludingText}")
+        alludingText.persist()
         
         for (srcText <- sourceTexts) {
           breakable {
-            println(s"Persisting sourceText ${srcText} if not exists")
+            println(s"update or create sourceText ${srcText}")
             // if ref was a blank string, skip it
             if (srcText.getStartingBook() == null) {
               // continue
@@ -130,7 +112,8 @@ class UserCSVFile (filePath : String) {
             }
             
             // don't want dupes, so find or create
-            TextHelpers.updateOrCreateByRef(srcText)
+            srcText.persist()
+
             println(s"---- Connecting text... ----")
             val connectionType = csvRecord.get("connection_type")
             val confidenceLevelStr = csvRecord.get("confidence_level")
@@ -148,6 +131,7 @@ class UserCSVFile (filePath : String) {
             // TODO oops! forgot to put this in the CSV
             // but actually, maybe we want to derive dynamically from the version instead in our api, ratheer than having that come from csv
             //val sourceLanguage = csvRecord.get("source_language")
+
             IntertextualConnectionsHelpers.connectTexts(
               srcText, 
               alludingText, 
@@ -159,7 +143,8 @@ class UserCSVFile (filePath : String) {
               // connection significance
               Some(""), 
               Some(comments), 
-              Some(sourceVersion))
+              Some(sourceVersion)
+            )
           }
         }
 
@@ -177,4 +162,47 @@ class UserCSVFile (filePath : String) {
     // TODO I think it does not stop itself because it opened a file and did not close it (?)
   }
 
+  def makeTextInstance (id : String, osisRange : String, createdBy : String) : Text = {
+    val text = new Text()
+    if (osisRange != "") {
+      TextHelpers.populateFieldsfromOsis(osisRange, text)
+    }
+
+    text.setCreatedBy(createdBy)
+    text.setUpdatedBy(createdBy)
+    if (id != "") {
+      val idUUID : UUID = UUID.fromString(id)
+      text.setId(idUUID)
+    }
+
+    text
+  }
+
+  // TODO use for TSK importing also
+  def makeSourceTexts (srcTextId : String, allSrcRefsStr : String, createdBy : String) = {
+    if (srcTextId == "") {
+      // use the references each as a separate source text
+      // all other fields ALL apply to ALL source texts
+      allSrcRefsStr.split(";").map((osisRange : String) => {
+        // examples: 
+        // ps.95.5
+        // ps.104.3,ps.104.5-ps.104.9
+        
+        // sometimes there are typos, and you ahve two semicolons together. In that case, just skip
+        
+        val srcText = makeTextInstance("", osisRange, createdBy)
+
+        srcText
+      })
+
+    } else {
+      // references are all for the one source text they're updating
+      // all other fields apply to this one source text
+      val osisRange = allSrcRefsStr
+      val srcText = makeTextInstance(srcTextId, osisRange, createdBy)
+
+      // make array to match expected return value
+      Array(srcText)
+    }
+  }
 }

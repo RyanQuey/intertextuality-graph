@@ -44,6 +44,7 @@ case class IntertextualConnectionEdge(
   // not just different languages. E.g., can be Theodotian vs other LXX versions
   sourceVersion : Option[String] = None,
   sourceLanguage : Option[String] = None,
+  id : Option[UUID] = None,
   )
 
 

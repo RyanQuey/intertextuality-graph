@@ -58,7 +58,7 @@ export function downloadAsCSV(rows, filename) {
  */
 export function convertPathsWithValuesForCSV(edges, vertices) {
   const headers = [
-    "source_texts", "alluding_text", "confidence_level",  "volume_level", "description", "comments",  "connection_type", "source_version",  "beale_categories",
+    "source_text_id", "source_texts", "alluding_text_id", "alluding_text", "confidence_level",  "volume_level", "description", "comments",  "connection_type", "source_version",  "beale_categories",
   ]
 
   const rows = [
@@ -71,7 +71,9 @@ export function convertPathsWithValuesForCSV(edges, vertices) {
       // this one often has commas, so add quotes. 
       // It's pretty futile trying to make everything in semicolons, since DB lists in C* return as
       // comma separated, and osis parsers separate by comma too.
+      edge.sourceText.id, 
       `"${edge.sourceText.split_passages}"`, 
+      edge.alludingText.id, 
       `"${edge.alludingText.split_passages}"`, 
       edge.confidence_level || "", 
       edge.volume_level || "", 

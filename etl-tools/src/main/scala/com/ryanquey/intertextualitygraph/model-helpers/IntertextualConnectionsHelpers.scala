@@ -71,11 +71,13 @@ object IntertextualConnectionsHelpers {
     *
     * note that query builder makes immutable objects, so adding any value creates new obj
     * TODO this creates a lot of tombstones, since will have a lot of null values
+    *   - actually, this might have been fixed already
+    * NOTE tsk importer is not idempotent, will create new connectins since no ids are in tsk csv
     */
 
 
    // first set values we definitely have and have to have
-   // TODO make idempotent, use update
+   // in this case using insert as an upsert, so don't have to set primary key anywhere, but if I do set it will update
     var query = insertInto("intertextual_connections")
       .value("confidence_level", literal(ic.confidenceLevel))
       .value("source_text_id", literal(ic.sourceTextId))
@@ -86,6 +88,7 @@ object IntertextualConnectionsHelpers {
       .value("updated_at", literal(ic.updatedAt)) 
 
       // small helper to set more fields on this query builder that we're going to send to C* db
+      // TODO move these out of this function
     def setField (col : String, field : Option[Any]) = field match {
       // convert to java list
       // call .get to convert from option to something
@@ -111,8 +114,14 @@ object IntertextualConnectionsHelpers {
     setField("source_version", ic.sourceVersion)
     setField("source_language", ic.sourceLanguage)
 
+    // make teh wher clause by id if ID is passed in
+    ic.id match {
+      case Some(_) => query = query.value("id", literal(ic.id))
+      case None =>
+    }
+
     println(s"Executing string to create connection: $query")
-    val result = CassandraDb.execute(query.toString);
+    val result = CassandraDb.execute(s"$query ;");
     println(s"result from creating connection: $result");
   }
 }

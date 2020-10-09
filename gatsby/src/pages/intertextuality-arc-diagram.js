@@ -7,8 +7,9 @@ import SEO from "../components/seo"
 
 import { Vega } from 'react-vega';
 // TODO for some reason changing this file does not really get updated by webpack hot reload
-//import specBuilder from '../configs/intertextual-arc-spec';
-import specBuilder from '../configs/intertextual-arc-spec-data-supplied';
+//import specBuilder from '../configs/intertextual-arc-spec-data-url';
+//import specBuilder from '../configs/intertextual-arc-spec-data-supplied';
+import specBuilder from '../configs/intertextual-arc-spec-data-assumed';
 import { Handler } from 'vega-tooltip';
 
 /*
@@ -41,11 +42,6 @@ import {
 } from '../helpers/text-helpers'
 import classes from './scss/arc-diagram.scss'
 
-function handleHover(...args){
-  console.log(args);
-}
-
-const signalListeners = { hover: handleHover };
 const tooltipOptions = {
   theme: "dark"
 }
@@ -54,9 +50,12 @@ const tooltip = new Handler(tooltipOptions).call
 const apiUrl =  process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
 
 
+// if using intertextual-arc-spec-data-url
 // const verticesUrlBase = apiUrl + "/sources-for-ref-with-alluding-texts"
 // const edgesUrlBase = apiUrl + "/paths-for-sources-starting-with-ref"
 
+// if using intertextual-arc-spec-data-assumed
+const spec = specBuilder({books})
 const bookOptions = books.map(b => ({
   label: b, 
   value: b}
@@ -66,16 +65,16 @@ const bookOptions = books.map(b => ({
 const dataSetOptions = [
   // includes uploads and through the form
   {
+    label: "All", 
+    value: "all",
+  },
+  {
     label: "User Data", 
     value: "user",
   },
   {
     label: "Treasury of Scripture Knowledge", 
     value: "treasury-of-scripture-knowledge",
-  },
-  {
-    label: "All", 
-    value: "all",
   },
 ]
 
@@ -117,6 +116,10 @@ class IArcDiagram extends React.Component {
     this.triggerChangeSource = this.triggerChangeSource.bind(this)
     this.changeHopsCount = this.changeHopsCount.bind(this)
     this.downloadAsCSV = this.downloadAsCSV.bind(this)
+
+    this.handleHover = this.handleHover.bind(this)
+    this.onParseError = this.onParseError.bind(this)
+    this.onNewView = this.onNewView.bind(this)
   }
 
   componentDidMount () {
@@ -126,7 +129,9 @@ class IArcDiagram extends React.Component {
 
   downloadAsCSV () {
     const { startingBook, startingChapter, startingVerse, hopsCount } = this.state
+    // this just gets used for the file name
     const refString = `${startingBook.value}.${startingChapter.value}.${startingVerse.value}-${hopsCount.value}hops`
+
     downloadGraphDataAsCSV(this.state.edges, this.state.vertices, refString)
   }
 
@@ -290,10 +295,35 @@ class IArcDiagram extends React.Component {
     this.selectStartingVerse({value: startingVerse, label: startingVerse})
   }
 
+  /*
+   * They say that this is included in the documentation, but I have not been able to get it to work
+   * https://github.com/vega/react-vega/tree/master/packages/react-vega#event-listeners
+   * (ie Have never seen any errors return here)
+   *
+   */ 
+  onParseError(...args) {
+    console.log("any error?")
+    console.error(args);
+  }
+
+  /*
+   * I believe this is the Vega view object
+   */
+  onNewView(view) {
+    console.log("New view:", view)
+  }
+
+  handleHover(...args) {
+    console.log("anything?")
+    console.log(args);
+  }
+
+
   render () {
     const { dataSet, startingBook, startingChapter, startingVerse, hopsCount, startingBookData, startingChapterData, edges, vertices, chapterOptions, verseOptions, loadingBookData, loadingChapterData, loadingEdges  } = this.state
 
-    const spec = specBuilder({edges, nodes: vertices, books})
+    //for using intertextual-arc-spec-data-assumed
+    //const spec = specBuilder({edges, nodes: vertices, books})
     const loading = loadingBookData || loadingChapterData || loadingEdges
 
     
@@ -370,7 +400,20 @@ class IArcDiagram extends React.Component {
 
         </div>
         <Vega 
+          // note that you can pass in any of these props as well, e.g,. width="300" to set width of
+          // view as 300px 
+          // https://github.com/vega/vega-embed#options
+          // docs say so here: https://github.com/vega/react-vega/tree/master/packages/react-vega#props-from-vega-embeds-api
           spec={spec} 
+          // NOTE keys correspond to the signals defined in the spec
+          signalListeners={{ 
+            clickedNode: this.handleHover,
+            clickedEdge: this.handleHover,
+            clear: this.handleHover,
+          }}
+          onError={this.onParseError} 
+          onNewView={this.onNewView} 
+          data={{edges, nodes: vertices}}
         />
       </Layout>
     )

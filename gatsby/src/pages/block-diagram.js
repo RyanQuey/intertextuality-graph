@@ -20,11 +20,12 @@ import barData from '../data/block-diagram-sample.json';
 // https://github.com/vega/react-vega/blob/master/packages/react-vega-demo/stories/ReactVegaDemo.tsx
 
 
-function handleHover(...args){
-  console.log(args);
+function handleTooltip(...args){
+  console.log("tooltip", args);
 }
 
-const signalListeners = { hover: handleHover };
+// NOTE keys correspond to the signals defined in the spec
+const signalListeners = { tooltip: handleTooltip };
 
 const BlockDiagram = () => (
   

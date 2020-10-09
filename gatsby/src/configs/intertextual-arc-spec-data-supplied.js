@@ -4,7 +4,9 @@
 // VEGA REPL and also easier to match up what is happening in React with Vega's main api
 // TODO this could potentially have memory issues if we repeat the data, so better to not use
 // property in data.format, but just only set the data we want on that key.
+// works pretty well though, but stopped using right before I wrote this comment...
 export default (data) => ({
+/*
 
   "$schema": "https://vega.github.io/schema/vega/v5.json",
   // TODO simplifying for now, can add back in later
@@ -38,7 +40,7 @@ export default (data) => ({
             "alludingText.split_passages[0]",
             "alludingText.starting_book[0]", 
           ], 
-          as: ["sourceId", "sourceSplitPassages", "sourceStartingBookName", "alludingId", "alludingSplitPassages", "alludingStartingBookName"], 
+          as: ["sourceId", "sourceSplitPassages", "sourceStartingBookName", "alludingId", "alludingSplitPassages", "alludingStartingBookName", "bealeCategories", "comments", "connectionSignificance", "connectionType", "sourceVersion", "sourceLanguage", "confidenceLevel", "volumeLevel"], 
         },
         {
 					"type": "lookup",
@@ -353,4 +355,6 @@ export default (data) => ({
       ]
     },
 	],
+  */
 });
+

@@ -457,6 +457,14 @@ class IArcDiagram extends React.Component {
                     <div>{selectedEdge.edgeData.description}</div>
                   </div>
                   <div className="selected-item-field-container">
+                    <div>Source version:</div>
+                    <div>{selectedEdge.edgeData.sourceVersion}</div>
+                  </div>
+                  <div className="selected-item-field-container">
+                    <div>Beale Categories:</div>
+                    <div>{selectedEdge.edgeData.bealeCategories}</div>
+                  </div>
+                  <div className="selected-item-field-container">
                     <div>Comments:</div>
                     <div>{selectedEdge.edgeData.comments}</div>
                   </div>

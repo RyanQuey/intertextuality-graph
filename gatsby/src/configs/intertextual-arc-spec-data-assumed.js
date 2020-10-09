@@ -90,17 +90,34 @@ export default (data) => ({
         
         {
           "type": "formula",
-          // basically a ternary. They have ternary syntax I wasn't able to get it to work. If not an
-          // array, means it is nothing. For some reason, just passing in datum.starting_verse does
-          // not seem to be truthy enough for vega
+          // basically a ternary. They have ternary syntax I wasn't able to get it to work. If not
+          // valid, means it is nothing. 
           expr: "if(isValid(datum.starting_verse), datum.starting_verse, null)",
           //expr: "true ? datum.starting_verse : 1",
           as: "flatStartingVerse",
+          // This might have made the difference. Also, don't mutate values to same key, mutation
+          // messes stuff up and it might do some sort of loop
+          initonly: true,
+        },
+        {
+          "type": "formula",
+          // basically a ternary. They have ternary syntax I wasn't able to get it to work. If not
+          // valid, means it is nothing. 
+          expr: "if(isValid(datum.comments), datum.comments, null)",
+          as: "flatComments",
+          initonly: true,
+        },
+        {
+          "type": "formula",
+          // basically a ternary. They have ternary syntax I wasn't able to get it to work. If not
+          // valid, means it is nothing. 
+          expr: "if(isValid(datum.comments), datum.comments, null)",
+          as: "flatDescription",
           initonly: true,
         },
         {
           "type": "project", 
-          fields: ["id[0]", "split_passages[0]", "starting_book[0]", "starting_chapter[0]", "flatStartingVerse", "description", "comments"], 
+          fields: ["id[0]", "split_passages[0]", "starting_book[0]", "starting_chapter[0]", "flatStartingVerse", "flatDescription", "flatComments"], 
           // NOTE descripton and comments are not required...so if need to use, make sure to do
           // comments[0] for example
           as: ["id", "split_passages", "starting_book", "starting_chapter", "starting_verse", "description", "comments"], 
@@ -292,10 +309,10 @@ export default (data) => ({
           ],
           // could just put value 2, but I'm testing the mult thing
           "strokeWidth": [
-            {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 2},
+            {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 3},
             // if this edge's id is in selected-edges data, or the source or alluding is selected, make this bolder and everything else lighter
             {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.sourceId) || indata('selectedNodes', 'value', datum.alludingId) ", "value": 6},
-            {"value": 1, "mult": 2}
+            {"value": 1, "mult": 3}
           ],
         },
         // on hover, increase opacity of strokes for this edge to .6 (make darker)

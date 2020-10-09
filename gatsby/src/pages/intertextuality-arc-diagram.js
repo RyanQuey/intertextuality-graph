@@ -40,7 +40,8 @@ import {
   endingChapterFromOsis,
   endingVerseFromOsis,
 } from '../helpers/text-helpers'
-import classes from './scss/arc-diagram.scss'
+import './scss/arc-diagram.scss'
+import './scss/selected-item-info.scss'
 
 const tooltipOptions = {
   theme: "dark"
@@ -104,6 +105,8 @@ class IArcDiagram extends React.Component {
       loadingBookData: false,
       loadingChapterData: false,
       loadingEdges: false,
+      selectedNode: null,
+      selectedEdge: null,
     }
 
     this.selectStartingBook = this.selectStartingBook.bind(this)
@@ -139,6 +142,7 @@ class IArcDiagram extends React.Component {
 
 
   // TODO maybe always just use current state?
+  // No, It doesn't work, status update fast enough sometimes
   refreshDataWithCurrentState () {
     const { startingBook, startingChapter, startingVerse, hopsCount, dataSet } = this.state
     this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value) 
@@ -317,19 +321,31 @@ class IArcDiagram extends React.Component {
 
   handleClickNode(signalName, value) {
     console.log(signalName, value);
+    this.setState({
+      selectedNode: value,
+      selectedEdge: null,
+    })
   }
 
   handleClickEdge(signalName, value) {
     console.log(signalName, value);
+    this.setState({
+      selectedNode: null,
+      selectedEdge: value,
+    })
   }
 
   handleClearDiagram(signalName, value) {
     console.log("clear selected nodes/edges", value);
+    this.setState({
+      selectedNode: null,
+      selectedEdge: null,
+    })
   }
 
 
   render () {
-    const { dataSet, startingBook, startingChapter, startingVerse, hopsCount, startingBookData, startingChapterData, edges, vertices, chapterOptions, verseOptions, loadingBookData, loadingChapterData, loadingEdges  } = this.state
+    const { dataSet, startingBook, startingChapter, startingVerse, hopsCount, startingBookData, startingChapterData, edges, vertices, chapterOptions, verseOptions, loadingBookData, loadingChapterData, loadingEdges, selectedNode, selectedEdge  } = this.state
 
     //for using intertextual-arc-spec-data-assumed
     //const spec = specBuilder({edges, nodes: vertices, books})
@@ -350,63 +366,125 @@ class IArcDiagram extends React.Component {
             />
           </div>
 
-        <div className={"configForm"}>
-          <Form>
-            <div className="ref-selects-configs">
-              <h2>Now showing:</h2>
-              <div className="ref-selects">
-                <div>
-                  Texts that allude to &nbsp;
+        <div className={"diagram-header"}>
+          <div className={"configForm"}>
+            <Form>
+              <div className="ref-selects-configs">
+                <h2>Now showing:</h2>
+                <div className="ref-selects">
+                  <div>
+                    Texts that allude to &nbsp;
+                  </div>
+                  <Select 
+                    options={bookOptions}
+                    className="book-select"
+                    onChange={this.selectStartingBook}
+                    currentOption={startingBook}
+                  />
+
+                  {chapterOptions && (
+                    <Select 
+                      options={chapterOptions}
+                      onChange={this.selectStartingChapter}
+                      currentOption={startingChapter}
+                    />
+                  )}
+                  {verseOptions && (
+                    <Select 
+                      options={verseOptions}
+                      onChange={this.selectStartingVerse}
+                      currentOption={startingVerse}
+                    />
+                  )}
                 </div>
-                <Select 
-                  options={bookOptions}
-                  className="book-select"
-                  onChange={this.selectStartingBook}
-                  currentOption={startingBook}
-                />
-
-                {chapterOptions && (
+              </div>
+              <div className="other-configs">
+                <div>
+                  Hops:
                   <Select 
-                    options={chapterOptions}
-                    onChange={this.selectStartingChapter}
-                    currentOption={startingChapter}
+                    options={hopsCountOptions}
+                    onChange={this.changeHopsCount}
+                    currentOption={hopsCount}
                   />
-                )}
-                {verseOptions && (
+                </div>
+                <div>
+                  Data Set
                   <Select 
-                    options={verseOptions}
-                    onChange={this.selectStartingVerse}
-                    currentOption={startingVerse}
+                    options={dataSetOptions}
+                    onChange={this.selectDataSet}
+                    currentOption={dataSet}
                   />
-                )}
+                </div>
+
               </div>
-            </div>
-            <div className="other-configs">
-              <div>
-                Hops:
-                <Select 
-                  options={hopsCountOptions}
-                  onChange={this.changeHopsCount}
-                  currentOption={hopsCount}
-                />
+              <Button onClick={this.downloadAsCSV} disabled={loadingEdges}>
+                Download {startingBook.value} {startingChapter.value}:{startingVerse.value} as CSV
+              </Button>
+
+
+            </Form>
+
+          </div>
+          <div id="selected-item-info">
+            {selectedEdge && (
+              <div className="selected-item-container">
+                <h2 className="selected-item-header">
+                  Selected Connection
+                </h2>
+                <div className="selected-item-fields">
+                  <div className="selected-item-field-container">
+                    <div>Source Text:</div>
+                    <div>{selectedEdge.edgeData.sourceSplitPassages[0]}</div>
+                  </div>
+                  <div className="selected-item-field-container">
+                    <div>Alluding Text:</div>
+                    <div>{selectedEdge.edgeData.alludingSplitPassages[0]}</div>
+                  </div>
+                  <div className="selected-item-field-container">
+                    <div>Connection type:</div>
+                    <div>{selectedEdge.edgeData.connectionType}</div>
+                  </div>
+                  <div className="selected-item-field-container">
+                    <div>Confidence level:</div>
+                    <div>{selectedEdge.edgeData.confidenceLevel}</div>
+                  </div>
+                  <div className="selected-item-field-container">
+                    <div>Volume level:</div>
+                    <div>{selectedEdge.edgeData.volumeLevel}</div>
+                  </div>
+                </div>
               </div>
-              <div>
-                Data Set
-                <Select 
-                  options={dataSetOptions}
-                  onChange={this.selectDataSet}
-                  currentOption={dataSet}
-                />
+            )}
+            {selectedNode && (
+              <div className="selected-item-container">
+                <h2 className="selected-item-header">
+                  Selected Text
+                </h2>
+                <div className="selected-item-fields">
+                  <div className="selected-item-field-container">
+                    <div>Passage:</div>
+                    <div> {selectedNode.nodeData.split_passages[0]}</div>
+                  </div>
+                  <div className="selected-item-field-container">
+                    <div>Is source for how many passages here:</div>
+                    <div> {selectedNode.nodeData.sourceDegree.count}</div>
+                  </div>
+                  <div className="selected-item-field-container">
+                    <div>Alludes to how many passages here:</div>
+                    <div> {selectedNode.nodeData.alludingDegree.count}</div>
+                  </div>
+                  <div className="selected-item-field-container">
+                    <div>Comments:</div>
+                    <div>{selectedNode.nodeData.comments}</div>
+                  </div>
+                  <div className="selected-item-field-container">
+                    <div>Description:</div>
+                    <div>{selectedNode.nodeData.description}</div>
+                  </div>
+                </div>
               </div>
-
-            </div>
-            <Button onClick={this.downloadAsCSV} disabled={loadingEdges}>
-              Download {startingBook.value} {startingChapter.value}:{startingVerse.value} as CSV
-            </Button>
-
-
-          </Form>
-
+            )}
+          </div>
         </div>
         <Vega 
           // note that you can pass in any of these props as well, e.g,. width="300" to set width of

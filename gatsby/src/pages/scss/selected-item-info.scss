@@ -1,0 +1,23 @@
+#selected-item-info {
+  width: 350px;
+  height: 250px;
+  padding: 0 30px;
+  margin: 0 30px;
+
+  .selected-item-container {
+    display: flex;
+    justify-content: start;
+    flex-direction: column;
+
+    .selected-item-header {
+    }
+    .selected-item-fields {
+      .selected-item-field-container {
+        display: flex;
+        width: 350px;
+        justify-content: space-between;
+      }
+    }
+  }
+}
+

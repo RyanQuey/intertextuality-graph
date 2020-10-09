@@ -224,16 +224,21 @@ export default (data) => ({
         "update": {
           "x": {"scale": "position", "field": "vertexOrder"},
           "y": {"value": 7},
-          "fontSize": {"value": 9},
+          "fontSize": [
+            {"test": "indata('selectedNodes', 'value', datum.id)", "value": 11},
+            {"test": "indata('selectedEdges', 'sourceId', datum.id)", "value": 11},
+            {"test": "indata('selectedEdges', 'alludingId', datum.id)", "value": 11},
+            {"value": 9},
+          ],
           "align": {"value": "right"},
           // if don't set here, will never revert after hovering
           "fontWeight": [
             // make it bolder if selected
-            {"test": "indata('selectedNodes', 'value', datum.id)", "value": 600},
+            {"test": "indata('selectedNodes', 'value', datum.id)", "value": 700},
             // make it bolder if edge is selected and this node's id is the sourceId
-            {"test": "indata('selectedEdges', 'sourceId', datum.id)", "value": 600},
+            {"test": "indata('selectedEdges', 'sourceId', datum.id)", "value": 700},
             // make it bolder if edge is selected and this node's id is the alludingId
-            {"test": "indata('selectedEdges', 'alludingId', datum.id)", "value": 600},
+            {"test": "indata('selectedEdges', 'alludingId', datum.id)", "value": 700},
             {"value": 200},
           ],
           "baseline": {"value": "middle"},

@@ -31,6 +31,9 @@ export default (data) => ({
         {
           "type": "project", 
           fields: [
+            "connection_type",
+            "confidence_level",
+            "volume_level",
             "sourceText.id[0]", 
             "sourceText.split_passages[0]", 
             "sourceText.starting_book[0]", 
@@ -38,7 +41,7 @@ export default (data) => ({
             "alludingText.split_passages[0]",
             "alludingText.starting_book[0]", 
           ], 
-          as: ["sourceId", "sourceSplitPassages", "sourceStartingBookName", "alludingId", "alludingSplitPassages", "alludingStartingBookName"], 
+          as: ["connectionType", "confidenceLevel", "volumeLevel", "sourceId", "sourceSplitPassages", "sourceStartingBookName", "alludingId", "alludingSplitPassages", "alludingStartingBookName"], 
         },
         {
 					"type": "lookup",
@@ -84,20 +87,23 @@ export default (data) => ({
       "transform": [
         // grab only certain fields, and drill down as we do so
         
-        /*
+        
         {
           "type": "formula",
-          // basically a ternary. They have ternary syntax also but this seems less buggy. If not an
+          // basically a ternary. They have ternary syntax I wasn't able to get it to work. If not an
           // array, means it is nothing. For some reason, just passing in datum.starting_verse does
           // not seem to be truthy enough for vega
-          expr: "if(isArray(datum.starting_verse), datum.starting_verse[0], 1)", "as": "starting_verse",
-          as: "starting_verse",
+          expr: "if(isValid(datum.starting_verse), datum.starting_verse, null)",
+          //expr: "true ? datum.starting_verse : 1",
+          as: "flatStartingVerse",
+          initonly: true,
         },
-        */
         {
           "type": "project", 
-          fields: ["id[0]", "split_passages[0]", "starting_book[0]", "starting_chapter[0]", "starting_verse[0]"], 
-          as: ["id", "split_passages", "starting_book", "starting_chapter", "starting_verse"], 
+          fields: ["id[0]", "split_passages[0]", "starting_book[0]", "starting_chapter[0]", "flatStartingVerse", "description", "comments"], 
+          // NOTE descripton and comments are not required...so if need to use, make sure to do
+          // comments[0] for example
+          as: ["id", "split_passages", "starting_book", "starting_chapter", "starting_verse", "description", "comments"], 
         },
 				// sort by canonical order (eng order) 
         {
@@ -117,7 +123,7 @@ export default (data) => ({
 				},
         // convert fields using an expression
         { "type": "formula", "expr": "join(datum.split_passages, ', ')", as: "passages" },
-        { "type": "formula", "expr": "datum.starting_book + ' ' + datum.starting_chapter + ':' + datum.starting_verse", as: "startingRef" },
+        { "type": "formula", "expr": "datum.starting_book + ' ' + datum.starting_chapter + if(datum.starting_verse, ':' + datum.starting_verse, '')", as: "startingRef" },
         { "type": "window", "ops": ["rank"], "as": ["vertexOrder"] },
         // count how many times this node is a source and set as "sourceDegree"
         {
@@ -284,13 +290,21 @@ export default (data) => ({
             // array values means defaults to last value
             {"value": 0.1},
           ],
-          "strokeWidth": {"value": 1, "mult": 3},
+          // could just put value 2, but I'm testing the mult thing
+          "strokeWidth": [
+            {"test": "!length(data('selectedNodes')) && !length(data('selectedEdges'))", "value": 2},
+            // if this edge's id is in selected-edges data, or the source or alluding is selected, make this bolder and everything else lighter
+            {"test": "indata('selectedEdges', 'value', datum.id) || indata('selectedNodes', 'value', datum.sourceId) || indata('selectedNodes', 'value', datum.alludingId) ", "value": 6},
+            {"value": 1, "mult": 2}
+          ],
         },
         // on hover, increase opacity of strokes for this edge to .6 (make darker)
         "hover": {
           "stroke": {"value": "#000"},
           "strokeOpacity": {"value": 0.3},
-          "strokeWidth": {"value": 2, "mult": 5},
+          "strokeWidth": [
+            {"value": 2, "mult": 5}
+          ],
         }
       },
       "transform": [
@@ -328,7 +342,7 @@ export default (data) => ({
           // not for events. Marks get events, data does not)
           "events": "@nodeLabel:click",
 					// hopefully adds this node id to the selectedNodes list
-          "update": "{value: datum.id}",
+          "update": "{value: datum.id, nodeData: datum}",
           "force":  true
         }
       ]
@@ -341,7 +355,7 @@ export default (data) => ({
 					// when an edgeLabel is clicked, adds this edge id to whatever listens to this signal (since the edgeLabel has id that corresponds to edge)
           "events": "@edgeLabel:click",
 					// corresponds to the edge)
-          "update": "{value: datum.id, sourceId: datum.sourceId, alludingId: datum.alludingId}",
+          "update": "{value: datum.id, sourceId: datum.sourceId, alludingId: datum.alludingId, edgeData: datum}",
           "force":  true
         },
       ]
@@ -350,7 +364,8 @@ export default (data) => ({
       "name": "clear", "value": true,
       "on": [
         {
-          "events": "mouseup[!event.item]",
+          //"events": "mouseup[!event.item]",
+          "events": "mouseup",
           "update": "true",
           "force": true
         }

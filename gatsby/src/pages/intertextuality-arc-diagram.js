@@ -117,9 +117,11 @@ class IArcDiagram extends React.Component {
     this.changeHopsCount = this.changeHopsCount.bind(this)
     this.downloadAsCSV = this.downloadAsCSV.bind(this)
 
-    this.handleHover = this.handleHover.bind(this)
     this.onParseError = this.onParseError.bind(this)
     this.onNewView = this.onNewView.bind(this)
+    this.handleClearDiagram = this.handleClearDiagram.bind(this)
+    this.handleClickNode = this.handleClickNode.bind(this)
+    this.handleClickEdge = this.handleClickEdge.bind(this)
   }
 
   componentDidMount () {
@@ -313,9 +315,16 @@ class IArcDiagram extends React.Component {
     console.log("New view:", view)
   }
 
-  handleHover(...args) {
-    console.log("anything?")
-    console.log(args);
+  handleClickNode(signalName, value) {
+    console.log(signalName, value);
+  }
+
+  handleClickEdge(signalName, value) {
+    console.log(signalName, value);
+  }
+
+  handleClearDiagram(signalName, value) {
+    console.log("clear selected nodes/edges", value);
   }
 
 
@@ -407,9 +416,9 @@ class IArcDiagram extends React.Component {
           spec={spec} 
           // NOTE keys correspond to the signals defined in the spec
           signalListeners={{ 
-            clickedNode: this.handleHover,
-            clickedEdge: this.handleHover,
-            clear: this.handleHover,
+            clickedNode: this.handleClickNode,
+            clickedEdge: this.handleClickEdge,
+            clear: this.handleClearDiagram,
           }}
           onError={this.onParseError} 
           onNewView={this.onNewView} 

@@ -132,7 +132,34 @@ class UserCSVFile (filePath : String) {
             // don't want dupes, so find or create
             TextHelpers.updateOrCreateByRef(srcText)
             println(s"---- Connecting text... ----")
-            IntertextualConnectionsHelpers.connectTexts(srcText, alludingText, "from-generic-list", 30.toFloat)
+            val connectionType = csvRecord.get("connection_type")
+            val confidenceLevelStr = csvRecord.get("confidence_level")
+            val confidenceLevel = if (confidenceLevelStr == "") 0 else confidenceLevelStr.toFloat
+            val volumeLevelStr = csvRecord.get("volume_level")
+            val volumeLevel = if (volumeLevelStr == "") 0 else volumeLevelStr.toFloat
+            val userId = "" // TODO
+            val bealeCategories = csvRecord.get("beale_categories").split(";").toList
+            // TODO oops! forgot to put this in the CSV file!
+            //val connectionSignificance = csvRecord.get("connection_significance")
+            // TODO oops! forgot to put this in the db!
+            //val description = csvRecord.get("description")
+            val comments = csvRecord.get("comments")
+            val sourceVersion = csvRecord.get("source_version")
+            // TODO oops! forgot to put this in the CSV
+            // but actually, maybe we want to derive dynamically from the version instead in our api, ratheer than having that come from csv
+            //val sourceLanguage = csvRecord.get("source_language")
+            IntertextualConnectionsHelpers.connectTexts(
+              srcText, 
+              alludingText, 
+              connectionType, 
+              confidenceLevel.toFloat, 
+              Some(volumeLevel.toFloat), 
+              None, 
+              Some(bealeCategories), 
+              // connection significance
+              Some(""), 
+              Some(comments), 
+              Some(sourceVersion))
           }
         }
 

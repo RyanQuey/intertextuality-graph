@@ -39,6 +39,8 @@ case class IntertextualConnectionEdge(
   // e.g., allusion, quote, echo, etc (?). Use list of constants to validate this field
   connectionSignificance : Option[String] = None, 
   comments : Option[String] = None,
+            // TODO oops! forgot to put this in the db!
+  //description : Option[String] = None,
   // not just different languages. E.g., can be Theodotian vs other LXX versions
   sourceVersion : Option[String] = None,
   sourceLanguage : Option[String] = None,
@@ -49,6 +51,7 @@ object IntertextualConnectionEdge {
   // only allowing bare minimum fields for now
   // probably will make overloaded method for handling more params
   // TODO implement for graph backend, that doesn't have C* support already
+  /* TODO move it form helpers to here probably
   def connectTexts (srcText : Text, alludingText : Text, connectionType : String, confidenceLevel : Float) = {
 
     val connection = IntertextualConnectionEdge(srcText.getStartingBook(), srcText.getId(), alludingText.getStartingBook(), alludingText.getId(), connectionType, confidenceLevel, Instant.now())
@@ -59,6 +62,7 @@ object IntertextualConnectionEdge {
     // if works, return IntertextualConnectionEdge instance
     connection
   }
+  */
 
   def persistConnection (ic : IntertextualConnectionEdge) = {
   }

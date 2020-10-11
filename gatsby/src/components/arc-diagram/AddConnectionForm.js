@@ -1,11 +1,11 @@
 import React from "react"
 import { Link } from "gatsby"
 
-import Image from "../components/image"
+import Image from "../image"
 
 
-import {getBookData, osisToBookName} from '../helpers/book-helpers'
-import {getChapterData} from '../helpers/chapter-helpers'
+import {getBookData, osisToBookName} from '../../helpers/book-helpers'
+import {getChapterData} from '../../helpers/chapter-helpers'
 import {
   osisDataValue, 
   osisDataIsValid,
@@ -16,15 +16,15 @@ import {
   endingChapterFromOsis,
   endingVerseFromOsis, 
   osisDataToTestament,
-} from '../helpers/text-helpers'
-import {createConnection} from '../helpers/connection-helpers'
-import Helpers from '../helpers/base-helpers'
+} from '../../helpers/text-helpers'
+import {createConnection} from '../../helpers/connection-helpers'
+import Helpers from '../../helpers/base-helpers'
 
-import Form from '../components/shared/elements/Form';
-import Button from '../components/shared/elements/Button';
-import Input from '../components/shared/elements/Input';
-import Select from '../components/shared/groups/Select';
-import books from '../data/books';
+import Form from '../shared/elements/Form';
+import Button from '../shared/elements/Button';
+import Input from '../shared/elements/Input';
+import Select from '../shared/groups/Select';
+import books from '../../data/books';
 import { bcv_parser as eng_bcv_parser } from "bible-passage-reference-parser/js/en_bcv_parser"
 import { bcv_parser as heb_bcv_parser } from "bible-passage-reference-parser/js/he_bcv_parser"
 

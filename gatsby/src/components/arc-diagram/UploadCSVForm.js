@@ -1,17 +1,17 @@
 import React from "react"
 import { Link } from "gatsby"
 
-import Image from "../components/image"
+import Image from "../image"
 
-import {getBookData, osisToBookName} from '../helpers/book-helpers'
-import {getChapterData} from '../helpers/chapter-helpers'
-import Helpers from '../helpers/base-helpers'
+import {getBookData, osisToBookName} from '../../helpers/book-helpers'
+import {getChapterData} from '../../helpers/chapter-helpers'
+import Helpers from '../../helpers/base-helpers'
 
-import Form from '../components/shared/elements/Form';
-import Button from '../components/shared/elements/Button';
-import Input from '../components/shared/elements/Input';
-import Select from '../components/shared/groups/Select';
-import DropCSV from '../components/shared/groups/DropCSV';
+import Form from '../shared/elements/Form';
+import Button from '../shared/elements/Button';
+import Input from '../shared/elements/Input';
+import Select from '../shared/groups/Select';
+import DropCSV from '../shared/groups/DropCSV';
 
 import classes from './scss/add-connection-form.scss'
 

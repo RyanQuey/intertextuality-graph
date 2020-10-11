@@ -11,6 +11,13 @@ import { Vega } from 'react-vega';
 //import specBuilder from '../configs/intertextual-arc-spec-data-supplied';
 import specBuilder from '../configs/intertextual-arc-spec-data-assumed';
 import { Handler } from 'vega-tooltip';
+import {
+  initialChapterOption,
+  initialVerseOption,
+  allusionDirectionOptions,
+  hopsCountOptions,
+  dataSetOptions,
+} from '../constants/arc-diagram'
 
 /*
 import edgesData from '../data/intertextuality-edges.json';
@@ -20,16 +27,15 @@ import allVerticesData from '../data/intertextuality-all-vertices.json';
 */
 import {getBookData} from '../helpers/book-helpers'
 import {getChapterData} from '../helpers/chapter-helpers'
-import {getVerticesForRef, getPathsForRef, getTextsRefAlludesTo, getTextsAlludedToByRef, extractNodesAndEdgesFromPaths, extractNodesAndEdgesFromMixedPaths} from '../helpers/connection-helpers'
-import {downloadAsCSV, downloadGraphDataAsCSV} from '../helpers/file-io-helpers'
+import { getTextsRefAlludesTo, getTextsAlludedToByRef, extractNodesAndEdgesFromMixedPaths} from '../helpers/connection-helpers'
+import {downloadGraphDataAsCSV} from '../helpers/file-io-helpers'
 
-import Form from '../components/shared/elements/Form';
 import Button from '../components/shared/elements/Button';
-import Select from '../components/shared/groups/Select';
 
-import DiagramOptionsForm from '../components/DiagramOptionsForm';
-import AddConnectionForm from '../components/AddConnectionForm';
-import UploadCSVForm from '../components/UploadCSVForm';
+import DiagramOptionsForm from '../components/arc-diagram/DiagramOptionsForm';
+import AddConnectionForm from '../components/arc-diagram/AddConnectionForm';
+import SelectedItemInfo from '../components/arc-diagram/SelectedItemInfo';
+import UploadCSVForm from '../components/arc-diagram/UploadCSVForm';
 import bookData from '../data/books';
 
 import {
@@ -43,7 +49,6 @@ import {
   endingVerseFromOsis,
 } from '../helpers/text-helpers'
 import './scss/arc-diagram.scss'
-import './scss/selected-item-info.scss'
 
 const tooltipOptions = {
   theme: "dark"
@@ -51,16 +56,6 @@ const tooltipOptions = {
 
 const tooltip = new Handler(tooltipOptions).call
 const apiUrl =  process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
-
-
-// make these functions, so even if the option list changes, these will stay the same. Advantages of
-// immutable stuff
-const initialChapterOption = () => ({label: 1, value: 1})
-const initialVerseOption = () => ({label: 1, value: 1})
-
-// if using intertextual-arc-spec-data-url
-// const verticesUrlBase = apiUrl + "/sources-for-ref-with-alluding-texts"
-// const edgesUrlBase = apiUrl + "/paths-for-sources-starting-with-ref"
 
 // if using intertextual-arc-spec-data-assumed
 const spec = specBuilder({books: bookData})
@@ -76,16 +71,29 @@ class IArcDiagram extends React.Component {
       startingChapter: initialChapterOption(),
       // 1
       startingVerse: initialVerseOption(),
+      allusionDirection: allusionDirectionOptions[0],
+      // 1
+      hopsCount: hopsCountOptions[0],
+      // all
+      dataSet: dataSetOptions[0],
+      
       loadingBookData: false,
       loadingChapterData: false,
       loadingEdges: false,
       selectedNode: null,
       selectedEdge: null,
+      
     }
 
+    // TODO when move to redux, can put a lot of this in store and move these functions to the child components
     this.selectStartingBook = this.selectStartingBook.bind(this)
     this.selectStartingChapter = this.selectStartingChapter.bind(this)
     this.selectStartingVerse = this.selectStartingVerse.bind(this)
+    this.selectDataSet = this.selectDataSet.bind(this)
+    this.selectAllusionDirection = this.selectAllusionDirection.bind(this)
+    this.changeHopsCount = this.changeHopsCount.bind(this)
+    
+    
     this.fetchVerticesAndEdges = this.fetchVerticesAndEdges.bind(this)
     this.refreshData = this.refreshData.bind(this)
     this.triggerChangeSource = this.triggerChangeSource.bind(this)
@@ -96,6 +104,7 @@ class IArcDiagram extends React.Component {
     this.handleClearDiagram = this.handleClearDiagram.bind(this)
     this.handleClickNode = this.handleClickNode.bind(this)
     this.handleClickEdge = this.handleClickEdge.bind(this)
+    
   }
 
   componentDidMount () {
@@ -281,6 +290,33 @@ class IArcDiagram extends React.Component {
     })
   }
 
+ /*
+   * change number of times to go "out" on a connection edge
+   */ 
+  changeHopsCount (option, details, skipRefresh = false) {
+    this.setState({
+      hopsCount: option,
+    })
+
+    !skipRefresh && this.refreshData({hopsCount: option.value})
+  }
+
+  selectDataSet (option, details, skipRefresh = false) {
+    this.setState({
+      dataSet: option,
+    })
+
+    !skipRefresh && this.refreshData({dataSet: option.value})
+  }
+ 
+  selectAllusionDirection (option, details, skipRefresh = false) {
+    this.setState({
+      allusionDirection: option,
+    })
+
+    !skipRefresh && this.refreshData({allusionDirection: option.value})
+  }
+
   /*
    * They say that this is included in the documentation, but I have not been able to get it to work
    * https://github.com/vega/react-vega/tree/master/packages/react-vega#event-listeners
@@ -326,24 +362,23 @@ class IArcDiagram extends React.Component {
 
   render () {
     const { 
-      allusionDirection, 
-      dataSet, 
       startingBook, 
       startingChapter, 
       startingVerse, 
-      hopsCount, 
-      startingBookData, 
-      startingChapterData, 
       edges, 
       vertices, 
-      chapterOptions, verseOptions, loadingBookData, loadingChapterData, loadingEdges, selectedNode, selectedEdge  } = this.state
+      chapterOptions, 
+      verseOptions, 
+      loadingBookData, 
+      loadingChapterData, 
+      loadingEdges
+    } = this.state
 
     //for using intertextual-arc-spec-data-assumed
     //const spec = specBuilder({edges, nodes: vertices, books})
     const loading = loadingBookData || loadingChapterData || loadingEdges
 
     
-
     return (
       <Layout>
         <SEO title="Intertextuality Arc Diagram" />
@@ -363,6 +398,9 @@ class IArcDiagram extends React.Component {
               selectStartingBook={this.selectStartingBook}
               selectStartingChapter={this.selectStartingChapter}
               selectStartingVerse={this.selectStartingVerse}
+              selectAllusionDirection={this.selectAllusionDirection}
+              selectDataSet={this.selectDataSet}
+              changeHopsCount={this.changeHopsCount}
               startingBook={startingBook}
               startingChapter={startingChapter}
               startingVerse={startingVerse}
@@ -375,82 +413,10 @@ class IArcDiagram extends React.Component {
             </Button>
           </div>
           
-          <div id="selected-item-info">
-            {selectedEdge && (
-              <div className="selected-item-container">
-                <h2 className="selected-item-header">
-                  Selected Connection
-                </h2>
-                <div className="selected-item-fields">
-                  <div className="selected-item-field-container">
-                    <div>Source Text:</div>
-                    <div>{selectedEdge.edgeData.sourceSplitPassages[0]}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Alluding Text:</div>
-                    <div>{selectedEdge.edgeData.alludingSplitPassages[0]}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Connection type:</div>
-                    <div>{selectedEdge.edgeData.connectionType}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Confidence level:</div>
-                    <div>{selectedEdge.edgeData.confidenceLevel}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Volume level:</div>
-                    <div>{selectedEdge.edgeData.volumeLevel}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Description:</div>
-                    <div>{selectedEdge.edgeData.description}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Source version:</div>
-                    <div>{selectedEdge.edgeData.sourceVersion}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Beale Categories:</div>
-                    <div>{selectedEdge.edgeData.bealeCategories}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Comments:</div>
-                    <div>{selectedEdge.edgeData.comments}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-            {selectedNode && (
-              <div className="selected-item-container">
-                <h2 className="selected-item-header">
-                  Selected Text
-                </h2>
-                <div className="selected-item-fields">
-                  <div className="selected-item-field-container">
-                    <div>Passage:</div>
-                    <div> {selectedNode.nodeData.split_passages[0]}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Is source for how many passages here:</div>
-                    <div> {selectedNode.nodeData.sourceDegree.count}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Alludes to how many passages here:</div>
-                    <div> {selectedNode.nodeData.alludingDegree.count}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Comments:</div>
-                    <div>{selectedNode.nodeData.comments}</div>
-                  </div>
-                  <div className="selected-item-field-container">
-                    <div>Description:</div>
-                    <div>{selectedNode.nodeData.description}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          <SelectedItemInfo 
+            selectedEdge={this.state.selectedEdge}
+            selectedNode={this.state.selectedNode}
+          />
         </div>
         <Vega 
           // note that you can pass in any of these props as well, e.g,. width="300" to set width of

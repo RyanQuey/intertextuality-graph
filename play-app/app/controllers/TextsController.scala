@@ -70,14 +70,19 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   }
 
   /* 
-   * For a given starting reference (book, chapter, verse), and find all texts that refer back to texts
+   * Passed in Reference is alluding Text. Get all source texts alluded to by the passed in ref. Return paths for those texts. 
    * - go back hopsCount hops
    * - gets all values for all vertices along path
    * - For now, get all that start with this ref
    * - TODO eventually, will get all texts that include this verse, rather than all texts that start with this verse
   */ 
-  def refAlludedToByPaths(dataSet : String, book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
-    // TODO I think this is redundant, since _findAllSourcesForRef checks also
+  def getPathsForTextsRefAlludesTo(dataSet : String, book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
+
+    if (hopsCount > 4) {
+      throw new Exception("Hops count can't be more than four...and that's already pushing it")
+    }
+
+
     val sourceTexts = _getTextTraversal(dataSet, book, chapter, verse)
       .toList()
 
@@ -106,14 +111,19 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   }
   
   /* 
-   * For a given starting reference (book, chapter, verse), and find all texts that texts refer to
+   * For a given starting reference (book, chapter, verse), and find all texts that the ref alludes to. Return all paths for those texts
    * - go back hopsCount hops
    * - gets all values for all vertices along path
    * - For now, get all that start with this ref
    * - TODO eventually, will get all texts that include this verse, rather than all texts that start with this verse
   */ 
-  def refAlludesToPaths(dataSet : String, book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
-    // TODO I think this is redundant, since _findAllSourcesForRef checks also
+  def getPathsForTextsAlludedToByRef(dataSet : String, book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
+    
+    if (hopsCount > 4) {
+      throw new Exception("Hops count can't be more than four...and that's already pushing it")
+    }
+    
+    
     val alludingTexts = _getTextTraversal(dataSet, book, chapter, verse)
       .toList()
 

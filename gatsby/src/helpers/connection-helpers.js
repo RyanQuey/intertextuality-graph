@@ -4,8 +4,6 @@ import _ from 'lodash'
 
 const apiUrl = process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
 const verticesUrlBase = apiUrl + "/texts/sources-for-ref-with-alluding-texts"
-// switch to url that returns all values for all vertices along the way
-const refAlludesToPathsPath = apiUrl + "/texts/ref-alludes-to-paths"
 
 /*
  * receives a object with keys: alludingText, sourceText. Each of those keys is an object with keys
@@ -19,7 +17,7 @@ export async function getTextsRefAlludesTo (book, chapter, verse, hopsCount, dat
     // const query = `book=${startingBook}&chapter=1&verse=1&hopsCount=2`
     const qs = Helpers.toQueryString(queryParts)
 
-    const result = await axios.get(`${refAlludesToPathsPath}?${qs}`)
+    const result = await axios.get(`${apiUrl}/texts/alluded-to-by-ref/paths?${qs}`)
     return result.data
 
   } catch (err) {
@@ -27,6 +25,24 @@ export async function getTextsRefAlludesTo (book, chapter, verse, hopsCount, dat
     throw err
   }
 }
+
+export async function getTextsAlludedToByRef (book, chapter, verse, hopsCount, dataSet) { 
+  try {
+    // filter out parts that don't exist
+    const queryParts = _.pickBy({book, chapter, verse, hopsCount, dataSet})
+    // const query = `book=${startingBook}&chapter=1&verse=1&hopsCount=2`
+    const qs = Helpers.toQueryString(queryParts)
+
+    const result = await axios.get(`${apiUrl}/texts/allude-to-ref/paths?${qs}`)
+    return result.data
+
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
+}
+
+
 export async function createConnection (connectionData) { 
   try {
     const result = await axios.post(`${apiUrl}/connections`, connectionData)
@@ -115,12 +131,6 @@ export function extractNodesAndEdgesFromMixedPaths (pathsWithValues) {
         // something didn't work!!!!
         throw new Error("had edge but no 2nd vertex...", edge, nextVInPath)
       } else if (edge) {
-      console.log("======================")
-      console.log("i is now: ", i)
-      console.log("vertex is now: ", vertex)
-      console.log("edge is now: ", edge)
-      console.log("target is now: ", nextVInPath)
-      console.log("======================")
         // currently just replicating what we received before, since our Vega config is expecting in
         // handling it that way
         const newEdge = Object.assign(edge, {sourceText: vertex, alludingText: nextVInPath})

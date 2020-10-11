@@ -44,8 +44,10 @@ POST     /upload-csv           controllers.ConnectionsController.createFromCSV()
 #########################
 GET     /texts/texts-starting-with-ref           controllers.TextsController.findTextsByStartingRef(dataSet : String ?= "all", book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
 
-GET     /texts/ref-alluded-to-by-paths           controllers.TextsController.refAlludedToByPaths(dataSet : String ?= "all", book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None, hopsCount : Int ?= 1)
-GET     /texts/ref-alludes-to-paths           controllers.TextsController.refAlludesToPaths(dataSet : String ?= "all", book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None, hopsCount : Int ?= 1)
+# Passed in Reference is alluding Text. Get all source texts alluded to by the passed in ref. Return paths for those texts. 
+GET     /texts/alluded-to-by-ref/paths           controllers.TextsController.getPathsForTextsRefAlludesTo(dataSet : String ?= "all", book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None, hopsCount : Int ?= 1)
+# Passed in Reference is source text. get all texts that allude to the passed in ref. Return paths for those texts. 
+GET     /texts/allude-to-ref/paths           controllers.TextsController.getPathsForTextsAlludedToByRef(dataSet : String ?= "all", book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None, hopsCount : Int ?= 1)
 
 
 #########################

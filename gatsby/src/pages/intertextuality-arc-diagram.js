@@ -20,7 +20,7 @@ import allVerticesData from '../data/intertextuality-all-vertices.json';
 */
 import {getBookData} from '../helpers/book-helpers'
 import {getChapterData} from '../helpers/chapter-helpers'
-import {getVerticesForRef, getPathsForRef, getTextsRefAlludesTo, extractNodesAndEdgesFromPaths, extractNodesAndEdgesFromMixedPaths} from '../helpers/connection-helpers'
+import {getVerticesForRef, getPathsForRef, getTextsRefAlludesTo, getTextsAlludedToByRef, extractNodesAndEdgesFromPaths, extractNodesAndEdgesFromMixedPaths} from '../helpers/connection-helpers'
 import {downloadAsCSV, downloadGraphDataAsCSV} from '../helpers/file-io-helpers'
 
 import Form from '../components/shared/elements/Form';
@@ -79,6 +79,27 @@ const dataSetOptions = [
   },
 ]
 
+const allusionDirectionOptions = [
+  {
+    label: "Text alludes to", 
+    value: "alludes-to",
+  },
+  {
+    label: "Texts Alluded to By", 
+    value: "alluded-to-by",
+  },
+  // {
+  // // TODO might just make these "alluded-to" or something, not sure yet. Make sure to prefer precision over performance though, performance is fine
+  //// for synoptic gospels, or James > Gospels, or Hebrews > John.
+  //   label: "Shared Source", 
+  //   value: "shared-source", 
+  // },
+  // {
+  //   label: "All", 
+  //   value: "all",
+  // },
+]
+
 // allow between 1 and 4 hops
 const hopsCountOptions = [...Array(4).keys()].map(hopCount => ({
   label: hopCount + 1, 
@@ -99,6 +120,7 @@ class IArcDiagram extends React.Component {
       startingBook: bookOptions[0],
       startingChapter: initialChapterOption(),
       startingVerse: initialVerseOption(),
+      allusionDirection: allusionDirectionOptions[0],
       refreshCounter: 0,
       hopsCount: hopsCountOptions[0],
       dataSet: dataSetOptions[0],
@@ -113,9 +135,9 @@ class IArcDiagram extends React.Component {
     this.selectStartingChapter = this.selectStartingChapter.bind(this)
     this.selectStartingVerse = this.selectStartingVerse.bind(this)
     this.selectDataSet = this.selectDataSet.bind(this)
+    this.selectAllusionDirection = this.selectAllusionDirection.bind(this)
     this.fetchVerticesAndEdges = this.fetchVerticesAndEdges.bind(this)
     this.refreshData = this.refreshData.bind(this)
-    this.refreshDataWithCurrentState = this.refreshDataWithCurrentState.bind(this)
     this.triggerChangeSource = this.triggerChangeSource.bind(this)
     this.changeHopsCount = this.changeHopsCount.bind(this)
     this.downloadAsCSV = this.downloadAsCSV.bind(this)
@@ -128,7 +150,7 @@ class IArcDiagram extends React.Component {
   }
 
   componentDidMount () {
-    this.refreshDataWithCurrentState()
+    this.refreshData()
   }
 
 
@@ -140,24 +162,41 @@ class IArcDiagram extends React.Component {
     downloadGraphDataAsCSV(this.state.edges, this.state.vertices, refString)
   }
 
-
-  // TODO maybe always just use current state?
-  // No, It doesn't work, status update fast enough sometimes
-  refreshDataWithCurrentState () {
-    const { startingBook, startingChapter, startingVerse, hopsCount, dataSet } = this.state
-    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value) 
-  }
-
-  // TODO not yet passing in verse
-  refreshData (book, chapter, verse, hopsCount, dataSet) {
+  /*
+   * @param optionOverrides object to override current state
+   * TODO not yet passing in verse
+   */
+  refreshData (paramOverrides = {}) {
     this.setState({
       loadingBookData: true, 
       loadingChapterData: true, 
       chapterOptions: false, 
       verseOptions: false
     })
+    
+    // merge current state with the options that are getting passed in
+    // especially important if just barely recently setState
+    const options = Object.assign({
+      startingBook: this.state.startingBook.value, 
+      startingChapter: this.state.startingChapter.value, 
+      startingVerse: this.state.startingVerse.value, 
+      hopsCount: this.state.hopsCount.value, 
+      dataSet: this.state.dataSet.value, 
+      allusionDirection: this.state.allusionDirection.value
+    }, paramOverrides)
+    
+    // convert to format we can send to our api
+    const queryOptions = {
+      book: options.startingBook, 
+      chapter: options.startingChapter, 
+      verse: options.startingVerse, 
+      hopsCount: options.hopsCount, 
+      dataSet: options.dataSet, 
+      allusionDirection: options.allusionDirection,
+    }
 
-    getBookData(book)
+    // start hitting our api
+    getBookData(queryOptions.book)
     .then((startingBookData) => {
       // range from 0 -> amount of chapters in this book
       const chapterList = [...Array(startingBookData.chapterCount).keys()]
@@ -174,8 +213,8 @@ class IArcDiagram extends React.Component {
       })
     })
 
-    if (chapter) {
-      getChapterData(book, chapter)
+    if (queryOptions.chapter) {
+      getChapterData(queryOptions.book, queryOptions.chapter)
       .then((startingChapterData) => {
       // range from 0 -> amount of verses in this chapter
       const verseList = [...Array(startingChapterData.verseCount).keys()]
@@ -200,22 +239,25 @@ class IArcDiagram extends React.Component {
     }
 
     // get edges and vertices one-time
-    this.fetchVerticesAndEdges(book, chapter, verse, hopsCount, dataSet)
+    this.fetchVerticesAndEdges(queryOptions)
   }
 
-  async fetchVerticesAndEdges (book, chapter, verse, hopsCount, dataSet) {
+  async fetchVerticesAndEdges (queryOptions) {
+    const {book, chapter, verse, hopsCount, dataSet, allusionDirection } = queryOptions
     this.setState({loadingEdges: true})
+    
+    const fetchFunc = allusionDirection == "alludes-to" ? getTextsRefAlludesTo : getTextsAlludedToByRef
 
     // const [vertices, edges, pathsWithValues] = await Promise.all([
     const [pathsWithValues] = await Promise.all([
       // getVerticesForRef(book, chapter, verse, hopsCount),
       // getPathsForRef(book, chapter, verse, hopsCount),
-      getTextsRefAlludesTo(book, chapter, verse, hopsCount, dataSet),
+      fetchFunc(book, chapter, verse, hopsCount, dataSet),
     ])
 
     const [ edges, vertices ] = extractNodesAndEdgesFromMixedPaths(pathsWithValues)
 
-    console.log("got data for ref", book, chapter, verse, "hopsCount:", hopsCount, "edges and vertices", {edges, vertices})
+    console.log("got data for ref", book, `${chapter}:${verse}`, " with hopsCount:", hopsCount, "===== edges and vertices", {edges, vertices})
     this.setState({
       loadingEdges: false,
       edges, 
@@ -223,13 +265,12 @@ class IArcDiagram extends React.Component {
     })
   }
 
-  selectStartingBook (option) {
-    const startingBook = option
+  selectStartingBook (option, details, skipRefresh = false) {
     const startingChapter = initialChapterOption()
     const startingVerse = initialVerseOption()
 
     this.setState({
-      startingBook,
+      startingBook: option,
       // restart the chapter as well, since this book probably does not have the same count as the
       // previous one
       startingChapter,
@@ -237,52 +278,59 @@ class IArcDiagram extends React.Component {
       startingVerse,
     })
 
-    const { hopsCount, dataSet } = this.state
-    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
+    !skipRefresh && this.refreshData({
+      startingBook: option.value, 
+      startingChapter: startingChapter.value, 
+      startingVerse: startingVerse.value,
+    })
   }
 
-  selectStartingChapter (option) {
-    const startingChapter = option
+  selectStartingChapter (option, details, skipRefresh = false) {
     const startingVerse = initialVerseOption()
+
     this.setState({
-      startingChapter,
+      startingChapter: option,
       startingVerse,
     })
-
-    const { startingBook, hopsCount, dataSet } = this.state
-    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
+    
+    !skipRefresh && this.refreshData({startingVerse: startingVerse.value, startingChapter: option.value})
   }
-
-  selectStartingVerse (option) {
+  
+  selectStartingVerse (option, details, skipRefresh = false) {
     this.setState({
-      startingVerse: option
+      startingVerse: option,
     })
-    const { startingBook, startingChapter, hopsCount, dataSet } = this.state
-    const startingVerse = option
-    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
+    
+    !skipRefresh && this.refreshData({startingVerse: option.value})
   }
 
   /*
    * change number of times to go "out" on a connection edge
    */ 
-  changeHopsCount (option) {
+  changeHopsCount (option, details, skipRefresh = false) {
     this.setState({
-      hopsCount: option
+      hopsCount: option,
     })
 
-    const { startingBook, startingChapter, startingVerse, dataSet} = this.state
-    const hopsCount = option
-    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
+    !skipRefresh && this.refreshData({hopsCount: option.value})
   }
 
-  selectDataSet (option) {
+  selectDataSet (option, details, skipRefresh = false) {
     this.setState({
-      dataSet: option
+      dataSet: option,
     })
 
-    const { startingBook, startingChapter, startingVerse, hopsCount} = this.state
-    const dataSet = option
-    this.refreshData(startingBook.value, startingChapter.value, startingVerse && startingVerse.value, hopsCount.value, dataSet.value)
+    !skipRefresh && this.refreshData({dataSet: option.value})
+  }
+ 
+  selectAllusionDirection (option, details, skipRefresh = false) {
+    this.setState({
+      allusionDirection: option,
+    })
+    
+    console.log("hi there", skipRefresh)
+
+    !skipRefresh && this.refreshData({allusionDirection: option.value})
   }
 
   /*
@@ -296,9 +344,21 @@ class IArcDiagram extends React.Component {
     const startingVerse = startingVerseFromOsis(sourceOsisData)
 
     console.log("changed source; setting diagram to ", startingBook)
-    this.selectStartingBook({value: startingBook, label: startingBook})
-    this.selectStartingChapter({value: startingChapter, label: startingChapter})
-    this.selectStartingVerse({value: startingVerse, label: startingVerse})
+    // skipped the refresh in the next three, so can call manually all at once, to avoid raace conditions as well as do one instead of three queries
+    const skipRefresh = true
+    const startingBookOption = {value: startingBook, label: startingBook}
+    const startingChapterOption = {value: startingChapter, label: startingChapter}
+    const startingVerseOption = {value: startingVerse, label: startingVerse}
+    
+    this.selectStartingBook(startingBookOption, null, skipRefresh)
+    this.selectStartingChapter(startingChapterOption, null, skipRefresh)
+    this.selectStartingVerse(startingVerseOption, null, skipRefresh)
+    
+    this.refreshData({
+      startingBook,
+      startingChapter,
+      startingVerse,
+    })
   }
 
   /*
@@ -345,7 +405,7 @@ class IArcDiagram extends React.Component {
 
 
   render () {
-    const { dataSet, startingBook, startingChapter, startingVerse, hopsCount, startingBookData, startingChapterData, edges, vertices, chapterOptions, verseOptions, loadingBookData, loadingChapterData, loadingEdges, selectedNode, selectedEdge  } = this.state
+    const { allusionDirection, dataSet, startingBook, startingChapter, startingVerse, hopsCount, startingBookData, startingChapterData, edges, vertices, chapterOptions, verseOptions, loadingBookData, loadingChapterData, loadingEdges, selectedNode, selectedEdge  } = this.state
 
     //for using intertextual-arc-spec-data-assumed
     //const spec = specBuilder({edges, nodes: vertices, books})
@@ -413,6 +473,14 @@ class IArcDiagram extends React.Component {
                     options={dataSetOptions}
                     onChange={this.selectDataSet}
                     currentOption={dataSet}
+                  />
+                </div>
+                <div>
+                  Alludes or Alluded to?
+                  <Select 
+                    options={allusionDirectionOptions}
+                    onChange={this.selectAllusionDirection}
+                    currentOption={allusionDirection}
                   />
                 </div>
 

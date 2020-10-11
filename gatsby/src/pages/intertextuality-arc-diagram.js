@@ -20,7 +20,7 @@ import allVerticesData from '../data/intertextuality-all-vertices.json';
 */
 import {getBookData} from '../helpers/book-helpers'
 import {getChapterData} from '../helpers/chapter-helpers'
-import {getVerticesForRef, getPathsForRef, getPathsWithValuesForRef, extractNodesAndEdgesFromPaths, extractNodesAndEdgesFromMixedPaths} from '../helpers/connection-helpers'
+import {getVerticesForRef, getPathsForRef, getTextsRefAlludesTo, extractNodesAndEdgesFromPaths, extractNodesAndEdgesFromMixedPaths} from '../helpers/connection-helpers'
 import {downloadAsCSV, downloadGraphDataAsCSV} from '../helpers/file-io-helpers'
 
 import Form from '../components/shared/elements/Form';
@@ -210,7 +210,7 @@ class IArcDiagram extends React.Component {
     const [pathsWithValues] = await Promise.all([
       // getVerticesForRef(book, chapter, verse, hopsCount),
       // getPathsForRef(book, chapter, verse, hopsCount),
-      getPathsWithValuesForRef(book, chapter, verse, hopsCount, dataSet),
+      getTextsRefAlludesTo(book, chapter, verse, hopsCount, dataSet),
     ])
 
     const [ edges, vertices ] = extractNodesAndEdgesFromMixedPaths(pathsWithValues)

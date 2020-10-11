@@ -4,23 +4,22 @@ import _ from 'lodash'
 
 const apiUrl = process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
 const verticesUrlBase = apiUrl + "/texts/sources-for-ref-with-alluding-texts"
-const pathsUrlBase = apiUrl + "/texts/paths-for-sources-starting-with-ref"
 // switch to url that returns all values for all vertices along the way
-const pathsWithValuesUrlBase = apiUrl + "/texts/all-values-along-path-for-ref"
+const refAlludesToPathsPath = apiUrl + "/texts/ref-alludes-to-paths"
 
 /*
  * receives a object with keys: alludingText, sourceText. Each of those keys is an object with keys
  * corresponding to our db fields, but in camelcase
  *
  */
-export async function getPathsWithValuesForRef (book, chapter, verse, hopsCount, dataSet) { 
+export async function getTextsRefAlludesTo (book, chapter, verse, hopsCount, dataSet) { 
   try {
     // filter out parts that don't exist
     const queryParts = _.pickBy({book, chapter, verse, hopsCount, dataSet})
     // const query = `book=${startingBook}&chapter=1&verse=1&hopsCount=2`
     const qs = Helpers.toQueryString(queryParts)
 
-    const result = await axios.get(`${pathsWithValuesUrlBase}?${qs}`)
+    const result = await axios.get(`${refAlludesToPathsPath}?${qs}`)
     return result.data
 
   } catch (err) {

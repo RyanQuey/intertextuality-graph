@@ -10,7 +10,7 @@ import play.api.mvc._
 import constants.DatasetMetadata._
 // import models.Connection._
 import java.time.Instant;
-import java.util.{UUID, Collection};
+import java.util.{UUID, Collection, List};
 // they don't like after 2.12
 // import collection.JavaConverters._
 import scala.jdk.CollectionConverters._
@@ -69,21 +69,63 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     Ok(outputJson)
   }
 
-  // gets all values for all vertices along path
-  def findAllValuesAlongPathForRef(dataSet : String, book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
+  /* 
+   * For a given starting reference (book, chapter, verse), and find all texts that refer back to texts
+   * - go back hopsCount hops
+   * - gets all values for all vertices along path
+   * - For now, get all that start with this ref
+   * - TODO eventually, will get all texts that include this verse, rather than all texts that start with this verse
+  */ 
+  def refAlludedToByPaths(dataSet : String, book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
     // TODO I think this is redundant, since _findAllSourcesForRef checks also
-    val texts = _getTextTraversal(dataSet, book, chapter, verse)
+    val sourceTexts = _getTextTraversal(dataSet, book, chapter, verse)
       .toList()
 
-    if (texts.size == 0) {
+    if (sourceTexts.size == 0) {
+      Ok("[]")
+    } else {
+
+      // find what texts allude to the texts we found
+      val alludingTexts = _textsAlludedToBy(sourceTexts, hopsCount)
+
+      // passing in no args for getting ALL fields
+      val pathsWithValues = _findPathsForTraversal(alludingTexts, Seq()).toList
+
+      // now we have gremlin output, that is roughly a list of lists of maps, and each map is a vertex with all values attached. 
+      // we want to return this as two data items for use with our chart, one for nodes, one for edges
+      // TODO convert stuff using scala; for now just sending to frontend and converting using js
+      // possibly use gremlin-scala?
+      pathsWithValues.asScala.foreach{ pathWithValues => {
+        // println(pathWithValues.getClass)
+      }}
+
+      val output = json_mapper.writeValueAsString(pathsWithValues)
+
+      Ok(output)
+    }
+  }
+  
+  /* 
+   * For a given starting reference (book, chapter, verse), and find all texts that texts refer to
+   * - go back hopsCount hops
+   * - gets all values for all vertices along path
+   * - For now, get all that start with this ref
+   * - TODO eventually, will get all texts that include this verse, rather than all texts that start with this verse
+  */ 
+  def refAlludesToPaths(dataSet : String, book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
+    // TODO I think this is redundant, since _findAllSourcesForRef checks also
+    val alludingTexts = _getTextTraversal(dataSet, book, chapter, verse)
+      .toList()
+
+    if (alludingTexts.size == 0) {
       Ok("[]")
     } else {
 
       // TODO NOTE I'm actually not sure if this finds the source text or alluding text...
-      val connectionsWithFields = _findTextAndSourceTextsForRef(dataSet, book, chapter, verse, hopsCount)
+      val sourceTexts = _textsAlludeTo(alludingTexts, hopsCount)
 
-      // passing in no args for 
-      val pathsWithValues = _findPathsForTraversal(connectionsWithFields, Seq()).toList
+      // passing in no args for getting ALL fields
+      val pathsWithValues = _findPathsForTraversal(sourceTexts, Seq()).toList
 
       // now we have gremlin output, that is roughly a list of lists of maps, and each map is a vertex with all values attached. 
       // we want to return this as two data items for use with our chart, one for nodes, one for edges
@@ -99,7 +141,6 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     }
   }
 
-
   //////////////////////////////////////////////////
   // graph traversals
 
@@ -113,31 +154,28 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    * https://docs.datastax.com/en/developer/java-driver/4.9/manual/core/dse/graph/
    *
       // TODO NOTE I'm actually not sure if this finds the source text or alluding text...
-   * @param hopsCount how many times to go out on the intertextual_connection edge
+   * @param hopsCount how many times to go out on the alludes_to edge
    *
    */
 
-  def _findTextAndSourceTextsForRef (dataSet : String, book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int)  = {
+  
+  def _textsAlludeTo(alludingTexts : List[Vertex], hopsCount : Int)  = {
     val g : GraphTraversalSource = CassandraDb.graph
-    val texts = _getTextTraversal(dataSet, book, chapter, verse).toList()
+    // This returns an entry about the edge between each vertex
+    val sourceTexts = g.V(alludingTexts).                
+      repeat(outE().hasLabel("alludes_to").inV().hasLabel("text")).times(hopsCount)
 
-    // be sure not to continue if size is 0. just return an empty traversal if empty. Since doing g.V([]) will return all vertices...
-    if (texts.size == 0) {
-      // this is hacky, but just a sure fire way to return a traversal (for the sake of type casting) with no results, so what we return matches type that this method is expected to return TODO better implementation
-      _getEmptyTraversal()
-
-    } else {
-      val connectionsWithFields = g.V(texts).                
-        // this doesn't return any of the info about the connection itself
-        // repeat(out("intertextual_connection")).times(hopsCount)
-        
-        // This returns an entry about the edge between each vertex
-        repeat(outE().hasLabel("intertextual_connection").inV().hasLabel("text")).times(hopsCount)
-
-      connectionsWithFields
-    }
+    sourceTexts
   }
 
+  def _textsAlludedToBy(sourceTexts : List[Vertex], hopsCount : Int)  = {
+    val g : GraphTraversalSource = CassandraDb.graph
+    // This returns an entry about the edge between each vertex
+    val alludingTexts = g.V(sourceTexts).                
+      repeat(inE().hasLabel("alludes_to").outV().hasLabel("text")).times(hopsCount)
+
+    alludingTexts
+  }
 
   //////////////////////////////////////////////////
   // TODO Move all of this kind of stuff into the model

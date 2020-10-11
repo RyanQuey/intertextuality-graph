@@ -44,7 +44,8 @@ POST     /upload-csv           controllers.ConnectionsController.createFromCSV()
 #########################
 GET     /texts/texts-starting-with-ref           controllers.TextsController.findTextsByStartingRef(dataSet : String ?= "all", book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
 
-GET     /texts/all-values-along-path-for-ref           controllers.TextsController.findAllValuesAlongPathForRef(dataSet : String ?= "all", book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None, hopsCount : Int ?= 1)
+GET     /texts/ref-alluded-to-by-paths           controllers.TextsController.refAlludedToByPaths(dataSet : String ?= "all", book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None, hopsCount : Int ?= 1)
+GET     /texts/ref-alludes-to-paths           controllers.TextsController.refAlludesToPaths(dataSet : String ?= "all", book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None, hopsCount : Int ?= 1)
 
 
 #########################

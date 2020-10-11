@@ -121,7 +121,7 @@ class IArcDiagram extends React.Component {
       value = !this.state.filterByChapter
     }
     const newState = {filterByChapter: value}
-    const paramOverrides = {filterByVerse: value}
+    const paramOverrides = {filterByChapter: value}
     
     // max of 0 hops count when filtering by book
     if (!value && this.state.hopsCount.value > 1) {
@@ -255,9 +255,9 @@ class IArcDiagram extends React.Component {
     const params = {book, hopsCount, dataSet}
     if (filterByChapter) {
       params.chapter = chapter
-    }
-    if (filterByVerse) {
-      params.verse = verse
+      if (filterByVerse) {
+        params.verse = verse
+      }
     }
 
     // const [vertices, edges, pathsWithValues] = await Promise.all([
@@ -423,6 +423,8 @@ class IArcDiagram extends React.Component {
       vertices, 
       chapterOptions, 
       verseOptions, 
+      filterByChapter,
+      filterByVerse,
       loadingBookData, 
       loadingChapterData, 
       loadingEdges,
@@ -467,13 +469,13 @@ class IArcDiagram extends React.Component {
               chapterOptions={chapterOptions}
               verseOptions={verseOptions}
               refreshData={this.refreshData}
-              filterByChapter={this.state.filterByChapter}
-              filterByVerse={this.state.filterByVerse}
+              filterByChapter={filterByChapter}
+              filterByVerse={filterByVerse}
               toggleFilterByVerse={this.toggleFilterByVerse}
               toggleFilterByChapter={this.toggleFilterByChapter}
             />
             <Button onClick={this.downloadAsCSV} disabled={loadingEdges}>
-              Download {startingBook.value} {startingChapter.value}:{startingVerse.value} as CSV
+              Download {startingBook.value} {filterByChapter ? startingChapter.value : ""}{filterByChapter && filterByVerse ? `: ${startingVerse.value}` : ""} as CSV
             </Button>
           </div>
           

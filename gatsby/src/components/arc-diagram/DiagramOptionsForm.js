@@ -50,6 +50,7 @@ class DiagramOptionsForm extends React.Component {
   render () {
     const { startingBook, startingChapter, startingVerse, chapterOptions, verseOptions, allusionDirection, dataSet, hopsCount, filterByChapter, filterByVerse } = this.props
 
+    console.log("now filtering by chapter?", filterByChapter)
 
 
     return (

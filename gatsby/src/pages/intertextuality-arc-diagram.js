@@ -475,7 +475,7 @@ class IArcDiagram extends React.Component {
               toggleFilterByChapter={this.toggleFilterByChapter}
             />
             <Button onClick={this.downloadAsCSV} disabled={loadingEdges}>
-              Download {startingBook.value} {filterByChapter ? startingChapter.value : ""}{filterByChapter && filterByVerse ? `: ${startingVerse.value}` : ""} as CSV
+              Download {allusionDirection.value == "alludes-to" ? "allusions to " : "source texts for "} {startingBook.value} {filterByChapter ? startingChapter.value : ""}{filterByChapter && filterByVerse ? `: ${startingVerse.value}` : ""} as CSV
             </Button>
           </div>
           

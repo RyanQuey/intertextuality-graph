@@ -43,10 +43,14 @@ class DiagramOptionsForm extends React.Component {
         <Form>
           <div className="ref-selects-configs">
             <h2>Now showing:</h2>
+            <div>
+              <Select 
+                options={allusionDirectionOptions}
+                onChange={this.props.selectAllusionDirection}
+                currentOption={allusionDirection}
+              />
+            </div>
             <div className="ref-selects">
-              <div>
-                Texts that allude to &nbsp;
-              </div>
               <Select 
                 options={bookOptions}
                 className="book-select"
@@ -87,15 +91,6 @@ class DiagramOptionsForm extends React.Component {
                 currentOption={dataSet}
               />
             </div>
-            <div>
-              Alludes or Alluded to?
-              <Select 
-                options={allusionDirectionOptions}
-                onChange={this.props.selectAllusionDirection}
-                currentOption={allusionDirection}
-              />
-            </div>
-
           </div>
         </Form>
 

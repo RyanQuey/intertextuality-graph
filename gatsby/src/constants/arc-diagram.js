@@ -29,7 +29,7 @@ export const dataSetOptions = [
 
 export const allusionDirectionOptions = [
   {
-    label: "Text alludes to", 
+    label: "Texts that allude to", 
     value: "alludes-to",
   },
   {

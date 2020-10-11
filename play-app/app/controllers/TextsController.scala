@@ -152,6 +152,75 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   }
 
   //////////////////////////////////////////////////
+  // TODO Move all of this kind of stuff into the model
+  // graph traversal builders
+
+  /*
+   * return text traversal depending on how many args are passed in
+   * Does not allow verse without chapter
+   *
+   */
+  def _getTextTraversal (dataSet : String, book : String, chapter : Option[Int], verse : Option[Int]) = {
+    println("getting texts");
+    var traversal = chapter match {
+      case Some(c) if verse.isDefined => _fetchTextByStartingVerse(book, c, verse.get)
+      case Some(c) => _fetchTextByStartingChapter(book, c)
+      case None => _fetchTextByStartingBook(book)
+    }
+
+    // filter by dataSet (which is currently just filtering by created_by)
+    println(s"returning dataset: $dataSet")
+
+    if (dataSet == "all") {
+      println("returning  all!")
+
+    } else if (dataSet == "treasury-of-scripture-knowledge") {
+      // this is for now just tsk
+      traversal = traversal.has("updated_by", "treasury-of-scripture-knowledge")
+    } else if (dataSet == "user") {
+      val userTypes = java.util.Arrays.asList("user-upload", "api-endpoint")
+      traversal = traversal.has("updated_by", within(userTypes))
+    }
+    traversal
+  }
+
+  // NOTE returns traversal, doesn't actually hit the db yet until something is called on it
+  def _fetchTextByStartingVerse (book : String, chapter : Int, verse : Int) = {
+    println(s"getting by starting chapter: $book $chapter:$verse");
+    val g : GraphTraversalSource = CassandraDb.graph
+    val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
+      .has("starting_book", book)
+      .has("starting_chapter", chapter)
+      .has("starting_verse",  verse)
+
+    texts
+  }
+
+  /*
+   * not using overloaded functions for now, since I think there might be distinctive enough behavior for these different queries down the road, so just make them separate
+   */
+  def _fetchTextByStartingChapter (book : String, chapter : Int)  = {
+    println(s"getting by starting chapter: $book $chapter");
+    val g : GraphTraversalSource = CassandraDb.graph
+    val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
+      .has("starting_book", book)
+      .has("starting_chapter", chapter)
+
+    texts
+  }
+
+  def _fetchTextByStartingBook (book : String)  = {
+    println(s"getting by starting book: $book");
+    val g : GraphTraversalSource = CassandraDb.graph
+
+    val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
+      .has("starting_book", book)
+
+    texts
+  }
+  
+  
+  //////////////////////////////////////////////////
   // graph traversals
 
   /**
@@ -186,75 +255,6 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
     alludingTexts
   }
-
-  //////////////////////////////////////////////////
-  // TODO Move all of this kind of stuff into the model
-  // graph traversal builders
-
-  /*
-   * return text traversal depending on how many args are passed in
-   * Does not allow verse without chapter
-   *
-   */
-  def _getTextTraversal (dataSet : String, book : String, chapter : Option[Int], verse : Option[Int]) = {
-    println("getting texts");
-    var traversal = chapter match {
-      case Some(c) if verse.isDefined => _fetchTextByStartingVerse(book, c, verse.get)
-      case Some(c) => _fetchTextByStartingChapter(book, c)
-      case None => _fetchTextByStartingBook(book)
-    }
-
-    // filter by dataSet (which is currently just filtering by created_by)
-    println(s"returning dataset: $dataSet")
-
-    if (dataSet == "all") {
-      println("returning  all!")
-
-    } else if (dataSet == "treasury-of-scripture-knowledge") {
-      // this is for now just tsk
-      traversal = traversal.has("updated_by", "treasury-of-scripture-knowledge")
-    } else if (dataSet == "user") {
-      val userTypes = java.util.Arrays.asList("user-upload", "api-endpoint")
-      traversal = traversal.has("updated_by", within(userTypes))
-    }
-    traversal
-  }
-
-  // NOTE returns traversal, doesn't actually hit the db yet until something is called on it
-  def _fetchTextByStartingVerse (book : String, chapter : Int, verse : Int)  = {
-    println(s"getting by starting chapter: $book $chapter:$verse");
-    val g : GraphTraversalSource = CassandraDb.graph
-    val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
-      .has("starting_book", book)
-      .has("starting_chapter", chapter)
-      .has("starting_verse",  verse)
-
-    texts
-  }
-
-  /*
-   * not using overloaded functions for now, since I think there might be distinctive enough behavior for these different queries down the road, so just make them separate
-   */
-  def _fetchTextByStartingChapter (book : String, chapter : Int)  = {
-    println(s"getting by starting chapter: $book $chapter");
-    val g : GraphTraversalSource = CassandraDb.graph
-    val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
-      .has("starting_book", book)
-      .has("starting_chapter", chapter)
-
-    texts
-  }
-
-  def _fetchTextByStartingBook (book : String)  = {
-    println(s"getting by starting book: $book");
-    val g : GraphTraversalSource = CassandraDb.graph
-
-    val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
-      .has("starting_book", book)
-
-    texts
-  }
-
 
 
   //////////////////////////////////////////////////

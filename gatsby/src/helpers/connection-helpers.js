@@ -8,12 +8,12 @@ const verticesUrlBase = apiUrl + "/texts/sources-for-ref-with-alluding-texts"
 /*
  * receives a object with keys: alludingText, sourceText. Each of those keys is an object with keys
  * corresponding to our db fields, but in camelcase
- *
+ * params: {book, chapter, verse, hopsCount, dataSet}
  */
-export async function getTextsRefAlludesTo (book, chapter, verse, hopsCount, dataSet) { 
+export async function getTextsRefAlludesTo (params = {}) { 
   try {
     // filter out parts that don't exist
-    const queryParts = _.pickBy({book, chapter, verse, hopsCount, dataSet})
+    const queryParts = _.pickBy(params)
     // const query = `book=${startingBook}&chapter=1&verse=1&hopsCount=2`
     const qs = Helpers.toQueryString(queryParts)
 
@@ -26,10 +26,13 @@ export async function getTextsRefAlludesTo (book, chapter, verse, hopsCount, dat
   }
 }
 
-export async function getTextsAlludedToByRef (book, chapter, verse, hopsCount, dataSet) { 
+/*
+* same api as getTextsRefAlludesTo
+*/
+export async function getTextsAlludedToByRef (params = {}) { 
   try {
     // filter out parts that don't exist
-    const queryParts = _.pickBy({book, chapter, verse, hopsCount, dataSet})
+    const queryParts = _.pickBy(params)
     // const query = `book=${startingBook}&chapter=1&verse=1&hopsCount=2`
     const qs = Helpers.toQueryString(queryParts)
 

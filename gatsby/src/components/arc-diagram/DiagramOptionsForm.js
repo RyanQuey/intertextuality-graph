@@ -24,17 +24,31 @@ class DiagramOptionsForm extends React.Component {
     this.state = {
 
     }
+    
+    this.getHopsCountOptions = this.getHopsCountOptions.bind(this)
 
 	}
 
   componentDidMount () {
   }
-
-
- 
+  
+  getHopsCountOptions () {
+    const { filterByChapter, filterByVerse } = this.props
+    if (!filterByChapter) {
+      // if filter by book, max out at 1
+      return hopsCountOptions.slice(0, 1)
+    } else if (!filterByVerse) {
+      // if filter by chpater, max out at 2
+      return hopsCountOptions.slice(0, 2)
+      
+    } else {
+      // as much as the options constant allows!
+      return hopsCountOptions 
+    }
+  }
 
   render () {
-    const { startingBook, startingChapter, startingVerse, chapterOptions, verseOptions, allusionDirection, dataSet, hopsCount } = this.props
+    const { startingBook, startingChapter, startingVerse, chapterOptions, verseOptions, allusionDirection, dataSet, hopsCount, filterByChapter, filterByVerse } = this.props
 
 
 
@@ -43,6 +57,14 @@ class DiagramOptionsForm extends React.Component {
         <Form>
           <div className="ref-selects-configs">
             <h2>Now showing:</h2>
+            <div>
+              {chapterOptions && (
+                <Button onClick={this.props.toggleFilterByChapter}>{filterByChapter ? "Filter by Book Only" : "Filter by Chapter"}</Button>
+              )}
+              {filterByChapter && verseOptions && (
+                <Button onClick={this.props.toggleFilterByVerse}>{filterByVerse ? "Filter by Chapter Only" : "Filter by Verse"}</Button>
+              )}
+            </div>
             <div>
               <Select 
                 options={allusionDirectionOptions}
@@ -58,14 +80,14 @@ class DiagramOptionsForm extends React.Component {
                 currentOption={startingBook}
               />
 
-              {chapterOptions && (
+              {filterByChapter && chapterOptions && (
                 <Select 
                   options={chapterOptions}
                   onChange={this.props.selectStartingChapter}
                   currentOption={startingChapter}
                 />
               )}
-              {verseOptions && (
+              {filterByVerse && verseOptions && (
                 <Select 
                   options={verseOptions}
                   onChange={this.props.selectStartingVerse}
@@ -78,7 +100,7 @@ class DiagramOptionsForm extends React.Component {
             <div>
               Hops:
               <Select 
-                options={hopsCountOptions}
+                options={this.getHopsCountOptions()}
                 onChange={this.props.changeHopsCount}
                 currentOption={hopsCount}
               />

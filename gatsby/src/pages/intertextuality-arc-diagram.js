@@ -82,7 +82,8 @@ class IArcDiagram extends React.Component {
       loadingEdges: false,
       selectedNode: null,
       selectedEdge: null,
-      
+      filterByVerse: true,
+      filterByChapter: true,
     }
 
     // TODO when move to redux, can put a lot of this in store and move these functions to the child components
@@ -92,6 +93,7 @@ class IArcDiagram extends React.Component {
     this.selectDataSet = this.selectDataSet.bind(this)
     this.selectAllusionDirection = this.selectAllusionDirection.bind(this)
     this.changeHopsCount = this.changeHopsCount.bind(this)
+    this.toggleFilterByChapter = this.toggleFilterByChapter.bind(this)
     
     
     this.fetchVerticesAndEdges = this.fetchVerticesAndEdges.bind(this)
@@ -105,12 +107,52 @@ class IArcDiagram extends React.Component {
     this.handleClickNode = this.handleClickNode.bind(this)
     this.handleClickEdge = this.handleClickEdge.bind(this)
     
+    this.toggleFilterByVerse = this.toggleFilterByVerse.bind(this)
+    this.toggleFilterByChapter = this.toggleFilterByChapter.bind(this)
   }
 
   componentDidMount () {
     this.refreshData()
   }
+  
+  toggleFilterByChapter (e, value) {
+    e.preventDefault && e.preventDefault()
+    if (value === undefined) {
+      value = !this.state.filterByChapter
+    }
+    const newState = {filterByChapter: value}
+    const paramOverrides = {filterByVerse: value}
+    
+    // max of 0 hops count when filtering by book
+    if (!value && this.state.hopsCount.value > 1) {
+      newState.hopsCount = hopsCountOptions[0] 
+      paramOverrides.hopsCount = 1 
+      console.log("setting as", newState)
+    }
 
+    this.setState(newState)
+    this.refreshData(paramOverrides)
+  }
+  
+  toggleFilterByVerse (e, value) {
+    e.preventDefault && e.preventDefault()
+
+    if (value === undefined) {
+      value = !this.state.filterByVerse
+    }
+    
+    const newState = {filterByVerse: value}
+    const paramOverrides = {filterByVerse: value}
+
+    // max of 2 hops count when filtering by chapter
+    if (!value && this.state.hopsCount.value > 2) {
+      newState.hopsCount = hopsCountOptions[1] 
+      paramOverrides.hopsCount = 2 
+    }
+    
+    this.setState(newState)
+    this.refreshData(paramOverrides)
+  }
 
   downloadAsCSV () {
     const { startingBook, startingChapter, startingVerse, hopsCount } = this.state
@@ -140,7 +182,9 @@ class IArcDiagram extends React.Component {
       startingVerse: this.state.startingVerse.value, 
       hopsCount: this.state.hopsCount.value, 
       dataSet: this.state.dataSet.value, 
-      allusionDirection: this.state.allusionDirection.value
+      allusionDirection: this.state.allusionDirection.value,
+      filterByChapter: this.state.filterByChapter,
+      filterByVerse: this.state.filterByVerse,
     }, paramOverrides)
     
     // convert to format we can send to our api
@@ -151,6 +195,8 @@ class IArcDiagram extends React.Component {
       hopsCount: options.hopsCount, 
       dataSet: options.dataSet, 
       allusionDirection: options.allusionDirection,
+      filterByChapter: options.filterByChapter,
+      filterByVerse: options.filterByVerse,
     }
 
     // start hitting our api
@@ -186,7 +232,6 @@ class IArcDiagram extends React.Component {
           startingChapterData, 
           verseOptions,
           loadingChapterData: false,
-           
         })
       })
 
@@ -201,16 +246,25 @@ class IArcDiagram extends React.Component {
   }
 
   async fetchVerticesAndEdges (queryOptions) {
-    const {book, chapter, verse, hopsCount, dataSet, allusionDirection } = queryOptions
+    // at this point, these are not select dropdown options, these should be real values
+    const {book, chapter, verse, hopsCount, dataSet, allusionDirection, filterByChapter, filterByVerse } = queryOptions
     this.setState({loadingEdges: true})
     
     const fetchFunc = allusionDirection == "alludes-to" ? getTextsRefAlludesTo : getTextsAlludedToByRef
+
+    const params = {book, hopsCount, dataSet}
+    if (filterByChapter) {
+      params.chapter = chapter
+    }
+    if (filterByVerse) {
+      params.verse = verse
+    }
 
     // const [vertices, edges, pathsWithValues] = await Promise.all([
     const [pathsWithValues] = await Promise.all([
       // getVerticesForRef(book, chapter, verse, hopsCount),
       // getPathsForRef(book, chapter, verse, hopsCount),
-      fetchFunc(book, chapter, verse, hopsCount, dataSet),
+      fetchFunc(params),
     ])
 
     const [ edges, vertices ] = extractNodesAndEdgesFromMixedPaths(pathsWithValues)
@@ -371,7 +425,10 @@ class IArcDiagram extends React.Component {
       verseOptions, 
       loadingBookData, 
       loadingChapterData, 
-      loadingEdges
+      loadingEdges,
+      allusionDirection,
+      hopsCount,
+      dataSet,
     } = this.state
 
     //for using intertextual-arc-spec-data-assumed
@@ -404,9 +461,16 @@ class IArcDiagram extends React.Component {
               startingBook={startingBook}
               startingChapter={startingChapter}
               startingVerse={startingVerse}
+              allusionDirection={allusionDirection}
+              hopsCount={hopsCount}
+              dataSet={dataSet}
               chapterOptions={chapterOptions}
               verseOptions={verseOptions}
               refreshData={this.refreshData}
+              filterByChapter={this.state.filterByChapter}
+              filterByVerse={this.state.filterByVerse}
+              toggleFilterByVerse={this.toggleFilterByVerse}
+              toggleFilterByChapter={this.toggleFilterByChapter}
             />
             <Button onClick={this.downloadAsCSV} disabled={loadingEdges}>
               Download {startingBook.value} {startingChapter.value}:{startingVerse.value} as CSV

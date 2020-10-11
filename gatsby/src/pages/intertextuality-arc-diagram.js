@@ -27,9 +27,11 @@ import Form from '../components/shared/elements/Form';
 import Button from '../components/shared/elements/Button';
 import Select from '../components/shared/groups/Select';
 
+import DiagramOptionsForm from '../components/DiagramOptionsForm';
 import AddConnectionForm from '../components/AddConnectionForm';
 import UploadCSVForm from '../components/UploadCSVForm';
-import books from '../data/books';
+import bookData from '../data/books';
+
 import {
   osisDataValue, 
   osisDataIsValid,
@@ -51,65 +53,17 @@ const tooltip = new Handler(tooltipOptions).call
 const apiUrl =  process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
 
 
+// make these functions, so even if the option list changes, these will stay the same. Advantages of
+// immutable stuff
+const initialChapterOption = () => ({label: 1, value: 1})
+const initialVerseOption = () => ({label: 1, value: 1})
+
 // if using intertextual-arc-spec-data-url
 // const verticesUrlBase = apiUrl + "/sources-for-ref-with-alluding-texts"
 // const edgesUrlBase = apiUrl + "/paths-for-sources-starting-with-ref"
 
 // if using intertextual-arc-spec-data-assumed
-const spec = specBuilder({books})
-const bookOptions = books.map(b => ({
-  label: b, 
-  value: b}
-))
-
-// for now, just user data or TSK data
-const dataSetOptions = [
-  // includes uploads and through the form
-  {
-    label: "All", 
-    value: "all",
-  },
-  {
-    label: "User Data", 
-    value: "user",
-  },
-  {
-    label: "Treasury of Scripture Knowledge", 
-    value: "treasury-of-scripture-knowledge",
-  },
-]
-
-const allusionDirectionOptions = [
-  {
-    label: "Text alludes to", 
-    value: "alludes-to",
-  },
-  {
-    label: "Texts Alluded to By", 
-    value: "alluded-to-by",
-  },
-  // {
-  // // TODO might just make these "alluded-to" or something, not sure yet. Make sure to prefer precision over performance though, performance is fine
-  //// for synoptic gospels, or James > Gospels, or Hebrews > John.
-  //   label: "Shared Source", 
-  //   value: "shared-source", 
-  // },
-  // {
-  //   label: "All", 
-  //   value: "all",
-  // },
-]
-
-// allow between 1 and 4 hops
-const hopsCountOptions = [...Array(4).keys()].map(hopCount => ({
-  label: hopCount + 1, 
-  value: hopCount + 1}
-))
-
-// make these functions, so even if the option list changes, these will stay the same. Advantages of
-// immutable stuff
-const initialChapterOption = () => ({label: 1, value: 1})
-const initialVerseOption = () => ({label: 1, value: 1})
+const spec = specBuilder({books: bookData})
 
 class IArcDiagram extends React.Component {
   constructor (props) {
@@ -117,13 +71,11 @@ class IArcDiagram extends React.Component {
 
     this.state = {
       // Genesis
-      startingBook: bookOptions[0],
+      startingBook: {label: "Genesis", value: "Genesis"},
+      // 1
       startingChapter: initialChapterOption(),
+      // 1
       startingVerse: initialVerseOption(),
-      allusionDirection: allusionDirectionOptions[0],
-      refreshCounter: 0,
-      hopsCount: hopsCountOptions[0],
-      dataSet: dataSetOptions[0],
       loadingBookData: false,
       loadingChapterData: false,
       loadingEdges: false,
@@ -134,12 +86,9 @@ class IArcDiagram extends React.Component {
     this.selectStartingBook = this.selectStartingBook.bind(this)
     this.selectStartingChapter = this.selectStartingChapter.bind(this)
     this.selectStartingVerse = this.selectStartingVerse.bind(this)
-    this.selectDataSet = this.selectDataSet.bind(this)
-    this.selectAllusionDirection = this.selectAllusionDirection.bind(this)
     this.fetchVerticesAndEdges = this.fetchVerticesAndEdges.bind(this)
     this.refreshData = this.refreshData.bind(this)
     this.triggerChangeSource = this.triggerChangeSource.bind(this)
-    this.changeHopsCount = this.changeHopsCount.bind(this)
     this.downloadAsCSV = this.downloadAsCSV.bind(this)
 
     this.onParseError = this.onParseError.bind(this)
@@ -305,35 +254,6 @@ class IArcDiagram extends React.Component {
   }
 
   /*
-   * change number of times to go "out" on a connection edge
-   */ 
-  changeHopsCount (option, details, skipRefresh = false) {
-    this.setState({
-      hopsCount: option,
-    })
-
-    !skipRefresh && this.refreshData({hopsCount: option.value})
-  }
-
-  selectDataSet (option, details, skipRefresh = false) {
-    this.setState({
-      dataSet: option,
-    })
-
-    !skipRefresh && this.refreshData({dataSet: option.value})
-  }
- 
-  selectAllusionDirection (option, details, skipRefresh = false) {
-    this.setState({
-      allusionDirection: option,
-    })
-    
-    console.log("hi there", skipRefresh)
-
-    !skipRefresh && this.refreshData({allusionDirection: option.value})
-  }
-
-  /*
    * take osis data (full parsed object) of source text that is being added and show current
    * allusions to it
    *
@@ -405,7 +325,18 @@ class IArcDiagram extends React.Component {
 
 
   render () {
-    const { allusionDirection, dataSet, startingBook, startingChapter, startingVerse, hopsCount, startingBookData, startingChapterData, edges, vertices, chapterOptions, verseOptions, loadingBookData, loadingChapterData, loadingEdges, selectedNode, selectedEdge  } = this.state
+    const { 
+      allusionDirection, 
+      dataSet, 
+      startingBook, 
+      startingChapter, 
+      startingVerse, 
+      hopsCount, 
+      startingBookData, 
+      startingChapterData, 
+      edges, 
+      vertices, 
+      chapterOptions, verseOptions, loadingBookData, loadingChapterData, loadingEdges, selectedNode, selectedEdge  } = this.state
 
     //for using intertextual-arc-spec-data-assumed
     //const spec = specBuilder({edges, nodes: vertices, books})
@@ -418,81 +349,32 @@ class IArcDiagram extends React.Component {
         <SEO title="Intertextuality Arc Diagram" />
           <div>
             <UploadCSVForm 
-              triggerUpdateDiagram={this.refreshDataWithCurrentState}
+              triggerUpdateDiagram={this.refreshData}
             />
             <AddConnectionForm 
-              triggerUpdateDiagram={this.refreshDataWithCurrentState}
+              triggerUpdateDiagram={this.refreshData}
               onChangeSource={this.triggerChangeSource}
             />
           </div>
 
         <div className={"diagram-header"}>
-          <div className={"configForm"}>
-            <Form>
-              <div className="ref-selects-configs">
-                <h2>Now showing:</h2>
-                <div className="ref-selects">
-                  <div>
-                    Texts that allude to &nbsp;
-                  </div>
-                  <Select 
-                    options={bookOptions}
-                    className="book-select"
-                    onChange={this.selectStartingBook}
-                    currentOption={startingBook}
-                  />
-
-                  {chapterOptions && (
-                    <Select 
-                      options={chapterOptions}
-                      onChange={this.selectStartingChapter}
-                      currentOption={startingChapter}
-                    />
-                  )}
-                  {verseOptions && (
-                    <Select 
-                      options={verseOptions}
-                      onChange={this.selectStartingVerse}
-                      currentOption={startingVerse}
-                    />
-                  )}
-                </div>
-              </div>
-              <div className="other-configs">
-                <div>
-                  Hops:
-                  <Select 
-                    options={hopsCountOptions}
-                    onChange={this.changeHopsCount}
-                    currentOption={hopsCount}
-                  />
-                </div>
-                <div>
-                  Data Set
-                  <Select 
-                    options={dataSetOptions}
-                    onChange={this.selectDataSet}
-                    currentOption={dataSet}
-                  />
-                </div>
-                <div>
-                  Alludes or Alluded to?
-                  <Select 
-                    options={allusionDirectionOptions}
-                    onChange={this.selectAllusionDirection}
-                    currentOption={allusionDirection}
-                  />
-                </div>
-
-              </div>
-              <Button onClick={this.downloadAsCSV} disabled={loadingEdges}>
-                Download {startingBook.value} {startingChapter.value}:{startingVerse.value} as CSV
-              </Button>
-
-
-            </Form>
-
+          <div className={"left-panel"}>
+            <DiagramOptionsForm
+              selectStartingBook={this.selectStartingBook}
+              selectStartingChapter={this.selectStartingChapter}
+              selectStartingVerse={this.selectStartingVerse}
+              startingBook={startingBook}
+              startingChapter={startingChapter}
+              startingVerse={startingVerse}
+              chapterOptions={chapterOptions}
+              verseOptions={verseOptions}
+              refreshData={this.refreshData}
+            />
+            <Button onClick={this.downloadAsCSV} disabled={loadingEdges}>
+              Download {startingBook.value} {startingChapter.value}:{startingVerse.value} as CSV
+            </Button>
           </div>
+          
           <div id="selected-item-info">
             {selectedEdge && (
               <div className="selected-item-container">

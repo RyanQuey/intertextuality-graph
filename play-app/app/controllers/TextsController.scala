@@ -192,9 +192,6 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       .has("starting_book", book)
       .has("starting_chapter", chapter)
       .has("starting_verse",  verse)
-      .order()
-        .by("starting_chapter", asc)
-        .by("starting_verse", asc)
 
     texts
   }
@@ -208,9 +205,6 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)
       .has("starting_chapter", chapter)
-      .order()
-        .by("starting_chapter", asc)
-        .by("starting_verse", asc)
 
     texts
   }
@@ -221,9 +215,6 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)
-      .order()
-        .by("starting_chapter", asc)
-        .by("starting_verse", asc)
 
     texts
   }
@@ -257,7 +248,10 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     val sourceTexts = g.V(alludingTexts)
       .order()
         .by("starting_chapter", asc)
-        .by("starting_verse", asc)
+        // send default verse in case it doesn't have one, to prevent breaking
+        // put refs with no verse in front 
+        // https://groups.google.com/g/gremlin-users/c/FKbxWKG-YxA/m/MdUlPnRqCgAJ
+        .by(coalesce(org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.values("starting_verse"), constant(0)), asc)
       .repeat(outE().hasLabel("alludes_to").inV().hasLabel("text")).times(hopsCount)
 
     sourceTexts
@@ -272,7 +266,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     // This returns an entry about the edge between each vertex
     val alludingTexts = g.V(sourceTexts).order()
         .by("starting_chapter", asc)
-        .by("starting_verse", asc).                
+        .by(coalesce(org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.values("starting_verse"), constant(0)), asc).                
       repeat(inE().hasLabel("alludes_to").outV().hasLabel("text")).times(hopsCount)
 
     alludingTexts

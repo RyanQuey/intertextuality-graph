@@ -40,7 +40,7 @@ case class IntertextualConnectionEdge(
   connectionSignificance : Option[String] = None, 
   comments : Option[String] = None,
             // TODO oops! forgot to put this in the db!
-  //description : Option[String] = None,
+  description : Option[String] = None,
   // not just different languages. E.g., can be Theodotian vs other LXX versions
   sourceVersion : Option[String] = None,
   sourceLanguage : Option[String] = None,

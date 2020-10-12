@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS intertextuality_graph.intertextual_connections (
   connection_type TEXT, 
   connection_significance TEXT, 
   comments TEXT,
+  description TEXT,
   // not just different languages. E.g., can be Theodotian vs other LXX versions
   source_version TEXT,
   source_language TEXT,

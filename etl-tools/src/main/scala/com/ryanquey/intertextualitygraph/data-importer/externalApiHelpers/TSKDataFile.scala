@@ -108,6 +108,8 @@ class TSKDataFile (table : String, filename : String) {
         println(s"Persisting alludingText ${alludingText} if not exists")
         TextHelpers.updateOrCreateByRef(alludingText)
         
+        // we are using the "words" given by TSK as the description
+        val icDescription = s"relevant word: ${csvRecord.get("words")}"
         for (srcText <- sourceTexts) {
           breakable {
             println(s"Persisting sourceText ${srcText} if not exists")
@@ -120,7 +122,8 @@ class TSKDataFile (table : String, filename : String) {
             // don't want dupes, so find or create
             TextHelpers.updateOrCreateByRef(srcText)
             println(s"---- Connecting text... ----")
-            IntertextualConnectionsHelpers.connectTexts(srcText, alludingText, "from-generic-list", 30.toFloat)
+            
+            IntertextualConnectionsHelpers.connectTexts(srcText, alludingText, "from-generic-list", 30.toFloat, None, None, None, None, None, Some(icDescription))
           }
         }
 

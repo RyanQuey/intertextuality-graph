@@ -36,6 +36,7 @@ object IntertextualConnectionsHelpers {
     bealeCategories : Option[List[String]] = None, 
     connectionSignificance : Option[String] = None, 
     comments : Option[String] = None, 
+    description : Option[String] = None, 
     sourceVersion : Option[String] = None
   ) = {
     // mostly these will be built mostly with gremlin, so not bothering to do the whole model thing for now
@@ -54,6 +55,7 @@ object IntertextualConnectionsHelpers {
       bealeCategories, 
       connectionSignificance, 
       comments, 
+      description,
       sourceVersion)
 
     println("connecting...")
@@ -111,6 +113,7 @@ object IntertextualConnectionsHelpers {
     setListField("beale_categories", ic.bealeCategories)
     // TODO add description once added to the db schema
     setField("comments", ic.comments)
+    setField("description", ic.description)
     setField("source_version", ic.sourceVersion)
     setField("source_language", ic.sourceLanguage)
 

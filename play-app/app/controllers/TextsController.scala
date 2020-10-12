@@ -192,6 +192,9 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       .has("starting_book", book)
       .has("starting_chapter", chapter)
       .has("starting_verse",  verse)
+      .order()
+        .by("starting_chapter", asc)
+        .by("starting_verse", asc)
 
     texts
   }
@@ -205,6 +208,12 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)
       .has("starting_chapter", chapter)
+      .order()
+        .by("starting_chapter", asc)
+        // send default verse in case it doesn't have one, to prevent breaking
+        // put refs with no verse in front 
+        // https://groups.google.com/g/gremlin-users/c/FKbxWKG-YxA/m/MdUlPnRqCgAJ
+        .by(coalesce(org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.values("starting_verse"), constant(0)), asc)
 
     texts
   }
@@ -215,6 +224,12 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)
+      .order()
+        .by("starting_chapter", asc)
+        // send default verse in case it doesn't have one, to prevent breaking
+        // put refs with no verse in front 
+        // https://groups.google.com/g/gremlin-users/c/FKbxWKG-YxA/m/MdUlPnRqCgAJ
+        .by(coalesce(org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.values("starting_verse"), constant(0)), asc)
 
     texts
   }

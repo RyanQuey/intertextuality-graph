@@ -66,7 +66,6 @@ export async function createConnection (connectionData) {
  * more logic in the backend, second of all by how we're doing dedup stuff
  */
 export function extractNodesAndEdgesFromPaths (pathsWithValues) {
-  console.log("pathsWithValues", pathsWithValues)
   // nodes in hte chart (a text)
   const vertices = []
   // edges between the nodes in teh chart
@@ -108,7 +107,8 @@ export function extractNodesAndEdgesFromPaths (pathsWithValues) {
  *   - if only vertices, use extractNodesAndEdgesFromMixedPaths
  */
 export function extractNodesAndEdgesFromMixedPaths (pathsWithValues) {
-  console.log("pathsWithValues", pathsWithValues)
+    console.log("pathsWithValues", pathsWithValues.slice(0,99).map(p => p.objects[0].starting_chapter[0] + ":" + p.objects[0].starting_verse[0]))
+
   // nodes in hte chart (a text)
   const vertices = []
   // edges between the nodes in teh chart

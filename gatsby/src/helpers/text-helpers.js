@@ -2,6 +2,8 @@ import axios from 'axios'
 import Helpers from './base-helpers'
 import {osisToBookName} from './book-helpers'
 import {osisData} from '../constants/osis-data'
+import bookData from '../data/books';
+
 
 const apiUrl = process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
 

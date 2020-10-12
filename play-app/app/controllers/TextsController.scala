@@ -192,6 +192,9 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       .has("starting_book", book)
       .has("starting_chapter", chapter)
       .has("starting_verse",  verse)
+      .order()
+        .by("starting_chapter", asc)
+        .by("starting_verse", asc)
 
     texts
   }
@@ -205,6 +208,9 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)
       .has("starting_chapter", chapter)
+      .order()
+        .by("starting_chapter", asc)
+        .by("starting_verse", asc)
 
     texts
   }
@@ -215,6 +221,9 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
     val texts : GraphTraversal[Vertex, Vertex] = g.V().hasLabel("text")
       .has("starting_book", book)
+      .order()
+        .by("starting_chapter", asc)
+        .by("starting_verse", asc)
 
     texts
   }
@@ -224,6 +233,10 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   // graph traversals
 
   /**
+   * For alluding texts, return what texts they allude to
+  * - mostly doing order by for now for the sake of downloading as csv, makes it (almost) sorted in the csv by the alluding text chapter and verse
+   * 
+   * 
    * http://www.doanduyhai.com/blog/?p=13301
    *
    * so far just making this for a single reference, but eventually will probably make another one for if there is a starting and ending reference
@@ -241,16 +254,25 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   def _textsAlludeTo(alludingTexts : List[Vertex], hopsCount : Int)  = {
     val g : GraphTraversalSource = CassandraDb.graph
     // This returns an entry about the edge between each vertex
-    val sourceTexts = g.V(alludingTexts).                
-      repeat(outE().hasLabel("alludes_to").inV().hasLabel("text")).times(hopsCount)
+    val sourceTexts = g.V(alludingTexts)
+      .order()
+        .by("starting_chapter", asc)
+        .by("starting_verse", asc)
+      .repeat(outE().hasLabel("alludes_to").inV().hasLabel("text")).times(hopsCount)
 
     sourceTexts
   }
 
+  /*
+  * for sourceTexts, return texts that allude to them
+  * - mostly doing order by for now for the sake of downloading as csv, makes it (almost) sorted in the csv by the source text chapter and verse
+  */
   def _textsAlludedToBy(sourceTexts : List[Vertex], hopsCount : Int)  = {
     val g : GraphTraversalSource = CassandraDb.graph
     // This returns an entry about the edge between each vertex
-    val alludingTexts = g.V(sourceTexts).                
+    val alludingTexts = g.V(sourceTexts).order()
+        .by("starting_chapter", asc)
+        .by("starting_verse", asc).                
       repeat(inE().hasLabel("alludes_to").outV().hasLabel("text")).times(hopsCount)
 
     alludingTexts

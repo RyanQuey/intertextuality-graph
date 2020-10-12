@@ -155,10 +155,11 @@ class IArcDiagram extends React.Component {
   }
 
   downloadAsCSV () {
-    const { startingBook, startingChapter, startingVerse, hopsCount } = this.state
+    const { startingBook, startingChapter, startingVerse, hopsCount, filterByChapter, filterByVerse, allusionDirection } = this.state
     // this just gets used for the file name
-    const refString = `${startingBook.value}.${startingChapter.value}.${startingVerse.value}-${hopsCount.value}hops`
-
+    const chapterVerseStr = !filterByChapter ? "" : `.${startingChapter.value}${filterByVerse ? ": " + startingVerse.value : ""}`
+    const refString = `${allusionDirection.value}-${startingBook.value}${chapterVerseStr}-${hopsCount.value}hops`
+    
     downloadGraphDataAsCSV(this.state.edges, this.state.vertices, refString)
   }
 

@@ -14,4 +14,4 @@ printf "\n\n== Packaging using sbt ==\n" && \
 # now doing it this way, for the sake of heroku
 # $parent_path/sbt/sbt.sh publishLocal
 $parent_path/sbt/sbt.sh package
-cp $parent_path/../target/models-$INTERTEXTUALITY_GRAPH_MODELS_VERSION.jar $INTERTEXTUALITY_GRAPH_PLAY_API_DIR/lib
+cp $parent_path/../target/scala-2.13/models-$INTERTEXTUALITY_GRAPH_MODELS_VERSION.jar $INTERTEXTUALITY_GRAPH_PLAY_API_DIR/lib

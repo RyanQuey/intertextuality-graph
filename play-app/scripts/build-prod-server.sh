@@ -4,13 +4,9 @@ if [ "$BASH" != "/bin/bash" ]; then
   exit 1
 fi
 
+# note: Ran in Heroku, not locally
 # heroku requires running on dynamic port based off of environment variable
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 arg1=${1:-""}
 
-# load all project environment variables
-. $parent_path/../../scripts/config/env-vars.sh && \
-
-cd $INTERTEXTUALITY_GRAPH_PLAY_API_DIR
-
-sbt compile
+sbt package

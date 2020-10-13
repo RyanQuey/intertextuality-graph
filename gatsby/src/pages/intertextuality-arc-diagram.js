@@ -50,11 +50,6 @@ import {
 } from '../helpers/text-helpers'
 import './scss/arc-diagram.scss'
 
-const tooltipOptions = {
-  theme: "dark"
-}
-
-const tooltip = new Handler(tooltipOptions).call
 const apiUrl =  process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
 
 // if using intertextual-arc-spec-data-assumed
@@ -63,6 +58,7 @@ const spec = specBuilder({books: bookData})
 class IArcDiagram extends React.Component {
   constructor (props) {
     super(props)
+
 
     this.state = {
       // Genesis
@@ -84,6 +80,9 @@ class IArcDiagram extends React.Component {
       selectedEdge: null,
       filterByVerse: true,
       filterByChapter: true,
+      tooltipOptions: {
+        theme: "dark"
+      }
     }
 
     // TODO when move to redux, can put a lot of this in store and move these functions to the child components
@@ -109,10 +108,21 @@ class IArcDiagram extends React.Component {
     
     this.toggleFilterByVerse = this.toggleFilterByVerse.bind(this)
     this.toggleFilterByChapter = this.toggleFilterByChapter.bind(this)
+    this.setTooltip = this.setTooltip.bind(this)
   }
 
   componentDidMount () {
     this.refreshData()
+
+  // we have to do this after mounting component, so it runs client side, not server side
+    this.setTooltip()
+
+  }
+
+  setTooltip () {
+    this.setState({
+      tooltip: new Handler(this.state.tooltipOptions).call
+    })
   }
   
   toggleFilterByChapter (e, value) {
@@ -432,12 +442,14 @@ class IArcDiagram extends React.Component {
       allusionDirection,
       hopsCount,
       dataSet,
+      tooltip, 
     } = this.state
 
     //for using intertextual-arc-spec-data-assumed
     //const spec = specBuilder({edges, nodes: vertices, books})
     const loading = loadingBookData || loadingChapterData || loadingEdges
 
+    // keep this in a place that will work for server side rendering...it might not be here
     
     return (
       <Layout>

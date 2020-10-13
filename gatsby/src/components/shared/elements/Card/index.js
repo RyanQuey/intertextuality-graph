@@ -1,7 +1,6 @@
 import React from "react"
 import PropTypes from 'prop-types'
 import classes from './style.scss'
-import { StyleSheet, css } from 'aphrodite'
 import theme from '../../../../theme'
 
 const Card = ({
@@ -17,6 +16,8 @@ const Card = ({
   wrapperClass,
 }) => {
 
+  /* 
+   * removing to get off of aphrodite for server side rendering
   const styles = StyleSheet.create({
     card: {
       background: theme.color[background],
@@ -29,10 +30,11 @@ const Card = ({
       },
     },
   })
+  */
   return (
     <div className={`${classes.wrapper} ${wrapperClass || ""}`}>
       <div
-        className={`${className} ${css(styles.card)} ${classes.card} ${selected ? classes.selected : ""}`}
+        className={`${className} ${classes.card} ${selected ? classes.selected : ""}`}
         onClick={onClick}
       >
         {children}

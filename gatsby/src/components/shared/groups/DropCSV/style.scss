@@ -1,10 +1,12 @@
 @import '../../../../theme/_helpers';
 
 .dropzone {
+  width: 100%;
+  max-width: 100%;
+  background: #fff;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  max-width: 100%;
   opacity: 1;
   transition: opacity 1s;
   color: $black;

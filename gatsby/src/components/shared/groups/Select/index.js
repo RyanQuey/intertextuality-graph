@@ -2,19 +2,9 @@ import React from "react"
 import { Component } from 'react'
 import PropTypes from 'prop-types'
 import theme from '../../../../theme'
-import { StyleSheet, css } from 'aphrodite'
 import classes from './style.scss'
 import Select from 'react-select'
 
-const styles = StyleSheet.create({
-  icon: {
-    color: theme.color.black,
-  },
-  select: {
-    backgroundColor: theme.color.white,
-    width: "100%",
-  },
-})
 
 class MySelect extends Component {
 
@@ -25,13 +15,14 @@ class MySelect extends Component {
     //haevn't added creatable to async yet TODO
     const SelectTag = creatable ? Select.Creatable : Select
 
+    // TODO note that importing classes like this does not work currently. Just use a plain string
     return (
       <div className={`${classes.selectWrapper} ${className}`}>
         {!labelAfter && (label ? (<label htmlFor={name}>{label}</label>) : null)}
         <div className={classes.selectCtn}>
           {asynchronous ? (
             <Select.Async
-              className={`${css(styles.select)} ${classes.select}`}
+              className={`select`}
               name={name}
               id={name}
               onChange={onChange}
@@ -42,7 +33,7 @@ class MySelect extends Component {
             />
           ) : (
             <SelectTag
-              className={`${css(styles.select)} ${classes.select}`}
+              className={`select`}
               name={name}
               id={name}
               onChange={onChange}

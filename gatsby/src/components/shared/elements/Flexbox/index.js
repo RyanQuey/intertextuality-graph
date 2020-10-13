@@ -4,7 +4,10 @@ import { StyleSheet, css } from 'aphrodite'
 import theme from '../../../../theme'
 
 const Flexbox = ({ id, align, background, className, direction, justify, flexWrap, wrap, children, name, color, onClick }) => {
-  const styles = StyleSheet.create({
+  // hack to get around server side rendering issue
+  // https://github.com/Khan/aphrodite#server-side-rendering
+  // https://joshwcomeau.com/react/the-perils-of-rehydration/#server-side-rendering-101
+  const styleDef = {
     flex: {
       backgroundColor: theme.color[background] || background,
       display: 'flex',
@@ -14,9 +17,13 @@ const Flexbox = ({ id, align, background, className, direction, justify, flexWra
       flexWrap: flexWrap || wrap,
       color: theme.color[color] || color,
     },
-  })
+  }
+  // this is a hack to get around gatsby server side rendering in prod. Better is to get off
+  // Aphrodite
+  const serverSideRendered = typeof window === 'undefined'
+  const aphroditeStyles = typeof window === 'undefined' ? "" : css(styles.flex)
   return (
-    <div id={id || name} name={name} className={`${css(styles.flex)} ${className || ''}`} onClick={onClick}>{children}</div>
+    <div id={id || name} name={name} className={`${aphroditeStyles} ${className || ''}`} onClick={onClick}>{children}</div>
   )
 }
 

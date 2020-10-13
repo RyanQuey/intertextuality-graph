@@ -87,10 +87,13 @@ const styles = (style, disabled, selected) => {
 
 const Button = ({ style = 'primary', children, onClick, disabled, selected, type, pending, small, rectangle, className, title }) => {
   disabled = disabled || disabled == 'disabled' ? true : false
+  // this is a hack to get around gatsby server side rendering in prod. Better is to get off
+  // Aphrodite
+  const serverSideRendered = typeof window === 'undefined'
 
   return (
     <button
-      className={`${css(styles(style, disabled, selected).button)} ${classes.button} ${className || ""} ${(disabled || pending) ? classes.disabled : ""} ${small ? classes.small : ""} ${rectangle ? classes.rectangle : ""}`}
+      className={`${serverSideRendered ? "" : css(styles(style, disabled, selected).button)} ${classes.button} ${className || ""} ${(disabled || pending) ? classes.disabled : ""} ${small ? classes.small : ""} ${rectangle ? classes.rectangle : ""}`}
       onClick={onClick}
       disabled={disabled || pending}
       type={type || "button"}

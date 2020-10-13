@@ -1,7 +1,6 @@
 import React from 'react'
 import { Component } from 'react'
 import Dropzone from 'react-dropzone'
-import { StyleSheet, css } from 'aphrodite'
 import Flexbox from '../../elements/Flexbox'
 import Icon from '../../elements/Icon'
 import './style.scss'
@@ -16,14 +15,6 @@ class DropCSV extends Component {
     this.state = {
       pending: false,
     }
-    this.styles = StyleSheet.create({
-      dropzone: {
-        background: (props.imageUrl || props.defaultImage) ? `url(${encodeURI(props.imageUrl) || props.defaultImage}) no-repeat center center` : this.props.backgroundColor || theme.color.white,
-        backgroundSize: "cover",
-        height: props.height || "100%",
-        width: props.width || "100%",
-      },
-    })
 
     this.onDrop = this.onDrop.bind(this)
     this.onDragOver = this.onDragOver.bind(this)
@@ -123,7 +114,7 @@ class DropCSV extends Component {
 
             return (
               <div {...getRootProps({
-                className: `${(this.styles.dropzone)} dropzone`,
+                className: `dropzone`,
                 activeClassName: "draggingOver",
               })}>
                 <Flexbox align="center" direction="column">

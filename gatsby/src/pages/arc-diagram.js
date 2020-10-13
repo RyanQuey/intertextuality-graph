@@ -26,22 +26,32 @@ import arcData from '../data/les-mis-arc-diagram-sample.json';
 // https://github.com/vega/react-vega/blob/master/packages/react-vega-demo/stories/ReactVegaDemo.tsx
 
 
-function handleHover(...args){
-  console.log(args);
-}
-
-// TODO check to see if this does anything
-const signalListeners = { hover: handleHover };
-const tooltipOptions = {
-  theme: "dark"
-}
-
-const tooltip = new Handler(tooltipOptions).call
 const spec = spec1(arcData)
 
 console.log("sample arc diagram spec", Object.assign({}, spec))
 
-const ArcDiagram = () => (
+const ArcDiagram = () => {
+  function handleHover(...args){
+    console.log(args);
+  }
+
+  // TODO check to see if this does anything
+  const signalListeners = { hover: handleHover };
+  const tooltipOptions = {
+    theme: "dark"
+  }
+
+  let tooltip
+  function setTooltip (ready) {
+    tooltip = ready ? new Handler(tooltipOptions).call : {}
+  }
+
+  React.useEffect(() => {
+    setTooltip(true);
+  }, []);
+  
+
+  return (
   <Layout>
     <SEO title="ArcDiagram" />
 
@@ -51,6 +61,7 @@ const ArcDiagram = () => (
       tooltip={tooltip}
     />
   </Layout>
-)
+  )
+}
 
 export default ArcDiagram

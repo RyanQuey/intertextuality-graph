@@ -1,0 +1,4 @@
+# this is for Heroku deployment
+# only doing play app for now
+# use their default, but also add APP_SECRET
+web target/universal/stage/bin/intertextuality-graph-play-api -Dhttp.port=$PORT -Dplay.http.secret.key=$APP_SECRET

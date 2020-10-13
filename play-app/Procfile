@@ -1,5 +1,0 @@
-# this is for Heroku deployment
-# only doing play app for now
-# have release stage helps avoid 60s boot timeout on teh web stage
-release: bash ./scripts/build-prod-server.sh
-web: bash ./scripts/run-prod-server.sh

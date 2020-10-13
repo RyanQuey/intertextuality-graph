@@ -20,7 +20,12 @@ artifactId=models
 cd $INTERTEXTUALITY_GRAPH_MODELS_DIR && \
   # we don't need all this extra stuff, make it simple
   mvn clean install
-# mvn package && \
+
+# for play api
+
+mvn package && \
+cp $parent_path/../target/intertextuality-graph-etl-tools_2.13-0.1.0-SNAPSHOT.jar $INTERTEXTUALITY_GRAPH_PLAY_API_DIR/lib
+
 # mvn install:install-file \
 #   -Dfile=$parent_path/../target/$artifactId-$version.jar \
 #   -DgroupId=com.ryanquey.intertextuality-graph \

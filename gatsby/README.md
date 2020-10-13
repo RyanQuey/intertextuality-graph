@@ -21,6 +21,14 @@
 
     Open the `my-default-starter` directory in your code editor of choice and edit `src/pages/index.js`. Save your changes and the browser will update in real time!
 
+3. Deploy: 
+
+
+- TODO make this easier by adding a netlify.toml
+
+- Set env vars in Netlify
+INTERTEXTUALITY_GRAPH_PLAY_API_URL
+
 ## 🧐 What's inside?
 
 A quick look at the top-level files and directories you'll see in a Gatsby project.

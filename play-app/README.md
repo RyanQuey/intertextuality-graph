@@ -44,6 +44,17 @@ docker-compose up -d
 git push
 ```
 
+Make sure following env vars are set:
+
+- KAFKA_URL
+- APP_SECRET
+- CASSANDRA_URL
+- CASSANDRA_DATACENTER
+- 
+- 
+- 
+
+
 ## Try the console
 https://www.playframework.com/documentation/2.8.x/PlayConsole
 

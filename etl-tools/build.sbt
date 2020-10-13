@@ -11,7 +11,7 @@ name := "intertextuality-graph-etl-tools"
 version := "0.1.0-SNAPSHOT"
 
 
-// allow my projects which are installed to local mvn work here. Should work after running packaging scripts in root of this git repo
+// allow my other projects which are installed to local mvn work here. Should work after running packaging scripts in root of this git repo
 // https://stackoverflow.com/a/21628869/6952495
 resolvers += Resolver.mavenLocal
 

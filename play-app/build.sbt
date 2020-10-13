@@ -42,14 +42,15 @@ lazy val intertextualityPlayApi = (project in file("."))
 
       "com.michaelpollmeier" %% "gremlin-scala" % "3.4.7.2",
 
-      "com.ryanquey.intertextuality-graph" % "models" % modelsVersion.get,
+      // "com.ryanquey.intertextuality-graph" % "models" % modelsVersion.get,
       // for now just putting the jar in the libs dir, rather than installing from local mvn repo
       // but maybe jar is better
-      "com.ryanquey" % "data-utils" % dataUtilsVersion.get,
+      // "com.ryanquey" % "data-utils" % dataUtilsVersion.get,
 
       // if this doesn't work, make sure to run ./scripts/sbt/sbt.sh publishLocal from the etl-tools dir
       // play app will only see changes made that get published using publishLocal
-      "com.ryanquey" %% "intertextuality-graph-etl-tools" % "0.1.0-SNAPSHOT"
+      // NOTE now trying to put jar in source control, for easy deploys to Heroku
+      // "com.ryanquey" %% "intertextuality-graph-etl-tools" % "0.1.0-SNAPSHOT"
     ),
     scalacOptions ++= Seq(
       "-feature",

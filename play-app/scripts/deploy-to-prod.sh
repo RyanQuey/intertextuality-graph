@@ -15,5 +15,8 @@
 # Alt method: build in heroku
 # https://devcenter.heroku.com/articles/build-docker-images-heroku-yml
 # now heroku will look for the heroku.yml file
-heroku stack:set container --app cambodia-charts
+#heroku stack:set container --app cambodia-charts
 # then git push master
+
+
+# for now, not doing in Docker....

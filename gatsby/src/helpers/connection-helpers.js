@@ -3,6 +3,7 @@ import Helpers from '../helpers/base-helpers'
 import _ from 'lodash'
 
 const verticesUrlBase = apiUrl + "/texts/sources-for-ref-with-alluding-texts"
+const apiUrl = process.env.GATSBY_PLAY_API_URL || "http://localhost:9000"
 
 /*
  * receives a object with keys: alludingText, sourceText. Each of those keys is an object with keys

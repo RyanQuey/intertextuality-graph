@@ -1,6 +1,11 @@
 # Intertextuality graph
 
 ## Setup Dev Env
+If you need to use a db password or change from localhost DSE instance:
+```
+cp scripts/config/.env.sample  scripts/config/.env
+```
+
 For the first time this project is being ran on a box (in development)
 
 ```

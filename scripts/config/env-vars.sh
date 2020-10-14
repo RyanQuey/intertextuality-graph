@@ -24,4 +24,13 @@ export INTERTEXTUALITY_GRAPH_MIGRATIONS_DIR=$INTERTEXTUALITY_GRAPH_DB_DIR/migrat
 export INTERTEXTUALITY_GRAPH_DATA_UTILS_DIR=$INTERTEXTUALITY_GRAPH_PROJECT_DIR/data-utils-for-java
 export INTERTEXTUALITY_GRAPH_GATSBY_DIR=$INTERTEXTUALITY_GRAPH_PROJECT_DIR/gatsby
 
+# for secrets
+SECRETS_FILE=$env_vars_parent_path/.env
+if [ -f "$SECRETS_FILE" ]; then
+      echo "$SECRETS_FILE exists."
+      . $SECRETS_FILE
+
+fi
+
 # TODO all other script files should use these same vars by using `. ../setup/env-vars.sh`
+

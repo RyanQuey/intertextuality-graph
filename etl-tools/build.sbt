@@ -43,5 +43,6 @@ libraryDependencies ++= Seq(
 // requires .get to force it to not be an option, but an actual String
 libraryDependencies +=  "com.ryanquey.intertextuality-graph" % "models" % modelsVersion.get
 
+// our _build-data-utils-jar.sh should install to maven as well as put a jar in hte play app's lib dir
 libraryDependencies +=  "com.ryanquey" % "data-utils" % dataUtilsVersion.get
 

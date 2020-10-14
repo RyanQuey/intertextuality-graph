@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const apiUrl = process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
+const apiUrl = process.env.GATSBY_PLAY_API_URL || "http://localhost:9000"
 
 export async function getChapterData (bookName, chapter) { 
   try {

@@ -5,7 +5,7 @@ import {osisData} from '../constants/osis-data'
 import bookData from '../data/books';
 
 
-const apiUrl = process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
+const apiUrl = process.env.GATSBY_PLAY_API_URL || "http://localhost:9000"
 
   /* takes the return value of parsed_entities() and returns Boolean if valid
   */

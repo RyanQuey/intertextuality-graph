@@ -1,7 +1,7 @@
 import axios from 'axios'
 import {osisData} from '../constants/osis-data'
 
-const apiUrl = process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
+const apiUrl = process.env.GATSBY_PLAY_API_URL || "http://localhost:9000"
 
 export async function getBookData (bookName) { 
   try {

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import Helpers from './base-helpers'
-const apiUrl = process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
+const apiUrl = process.env.GATSBY_PLAY_API_URL || "http://localhost:9000"
 
 /*
  * take an array of array of strings and turn into json

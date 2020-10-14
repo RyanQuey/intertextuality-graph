@@ -2,7 +2,6 @@ import axios from 'axios'
 import Helpers from '../helpers/base-helpers'
 import _ from 'lodash'
 
-const apiUrl = process.env.INTERTEXTUALITY_GRAPH_PLAY_API_URL || "http://localhost:9000"
 const verticesUrlBase = apiUrl + "/texts/sources-for-ref-with-alluding-texts"
 
 /*

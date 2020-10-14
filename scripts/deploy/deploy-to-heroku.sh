@@ -20,7 +20,7 @@ fi
 
 # always base everything relative to this file to make it simple
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-. $parent_path/config/env-vars.sh
+. $parent_path/../config/env-vars.sh
 
 cd $INTERTEXTUALITY_GRAPH_PROJECT_DIR
 git subtree push --prefix play-app heroku master

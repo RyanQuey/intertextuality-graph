@@ -7,21 +7,26 @@ const Flexbox = ({ id, align, background, className, direction, justify, flexWra
   // hack to get around server side rendering issue
   // https://github.com/Khan/aphrodite#server-side-rendering
   // https://joshwcomeau.com/react/the-perils-of-rehydration/#server-side-rendering-101
-  const styleDef = {
-    flex: {
-      backgroundColor: theme.color[background] || background,
-      display: 'flex',
-      flexDirection: direction,
-      justifyContent: justify,
-      alignItems: align,
-      flexWrap: flexWrap || wrap,
-      color: theme.color[color] || color,
-    },
-  }
   // this is a hack to get around gatsby server side rendering in prod. Better is to get off
   // Aphrodite
   const serverSideRendered = typeof window === 'undefined'
-  const aphroditeStyles = typeof window === 'undefined' ? "" : css(styles.flex)
+    
+  let aphroditeStyles = ""
+  if (serverSideRendered) {
+      const styles = StyleSheet.create({
+        flex: {
+        backgroundColor: theme.color[background] || background,
+        display: 'flex',
+        flexDirection: direction,
+        justifyContent: justify,
+        alignItems: align,
+        flexWrap: flexWrap || wrap,
+        color: theme.color[color] || color,
+      },
+    })
+    aphroditeStyles = css(styles.flex)
+  }
+
   return (
     <div id={id || name} name={name} className={`${aphroditeStyles} ${className || ''}`} onClick={onClick}>{children}</div>
   )

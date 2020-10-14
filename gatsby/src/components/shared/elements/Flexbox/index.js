@@ -12,7 +12,7 @@ const Flexbox = ({ id, align, background, className, direction, justify, flexWra
   const serverSideRendered = typeof window === 'undefined'
     
   let aphroditeStyles = ""
-  if (serverSideRendered) {
+  if (!serverSideRendered) {
       const styles = StyleSheet.create({
         flex: {
         backgroundColor: theme.color[background] || background,

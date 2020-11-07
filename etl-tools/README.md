@@ -75,3 +75,6 @@ Check out the `./scripts` dir
 We have a good start with a js script that will use npm libs to convert references into osis, which is easily machine readable.
 
 `./scripts/format-tsk-csv.sh`
+
+# Code Organization
+TODO

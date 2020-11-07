@@ -11,8 +11,23 @@ import java.util.UUID;
 import java.time.Instant;
 import com.datastax.oss.driver.api.core.cql._;
 
-// TODO
-case class ChapterVertex()
+/*
+ * - NOTE make sure to keep fields in sync with com.ryanquey.intertextualitygraph.models.chapters.ChapterBase
+ */
+case class ChapterVertex(
+  number : Integer,  // INT
+  yearWritten : Integer,  // INT 
+  author : String,  // TEXT
+  scrollmapper_id : String,  // TEXT 
+  osisRef : String,  // TEXT 
+  canonical : Boolean,  // BOOLEAN 
+  book : String,  // TEXT 
+  bookSeriesId : String,  // TEXT 
+  verseCount : Integer,  // INT
+  testament : String,  // TEXT 
+  comments : String,  // TEXT
+  updatedAt : Instant  // TIMESTAMP 
+  )
 
 object ChapterVertex {
 }

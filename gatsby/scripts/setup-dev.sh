@@ -16,6 +16,6 @@ IP=localhost
 
 cd $INTERTEXTUALITY_GRAPH_GATSBY_DIR && \
   # run nvm use if they have nvm...
+  # NOTE this doesn't work, nvm needs special trick to run in shell script
   nvm use || true && \
-  npm i && \
-  gatsby develop -p $PORT -H $IP
+  npm i

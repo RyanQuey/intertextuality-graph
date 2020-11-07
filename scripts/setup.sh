@@ -27,11 +27,6 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd $parent_path
 git submodule update --init --recursive
 
-###########################
-# Run migrations
-##########################
-$INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/scripts/run_migrations.sh
-
 
 #################################################
 # START THE DOCKER CONTAINERS with docker-compose
@@ -79,5 +74,17 @@ while [[ $CASSANDRA_IS_UP == false ]]; do
   # if above returns false, will try again
 done && \
 
+
+
+###########################
+# build scala/java classes
+##########################
+
+$INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/startup/_package-subprojects.sh && \
+
+###########################
+# Run migrations
+##########################
+
 # This assumes C* is up, which requires docker-compose to run
-$parent_path/run_migrations.sh
+$INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/run_migrations.sh

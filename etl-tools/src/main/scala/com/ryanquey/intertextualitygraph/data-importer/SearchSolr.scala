@@ -6,6 +6,7 @@ package com.ryanquey.intertextualitygraph.dataimporter
 import scala.collection.immutable.Map
 import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers._
 import com.ryanquey.intertextualitygraph.initializers.Initialize
+import com.ryanquey.intertextualitygraph.graphmodels.TextVertex
 import com.ryanquey.intertextualitygraph.modelhelpers._
 
 object SearchSolr {

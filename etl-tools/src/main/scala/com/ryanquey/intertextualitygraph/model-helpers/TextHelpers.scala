@@ -16,7 +16,8 @@ import com.datastax.oss.driver.api.core.cql._;
 
 /*
  * (DEPRECATED)
- * This is only for helpers that interact with the java model Class; for anything that interacts with the scala case class use TextVertex companion object
+ * for helpers that interact with the java model Class; 
+ * - for anything that interacts with the scala case class use TextVertex companion object
  * - And, in general, don't add to this much, so it's easy to migrate over from the java models in the future. Instead of writing methods here, convert the java class > case class, and then use method from TextVertex companion object
  */
 

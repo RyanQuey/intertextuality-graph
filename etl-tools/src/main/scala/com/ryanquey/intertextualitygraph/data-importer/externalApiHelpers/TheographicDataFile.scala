@@ -105,6 +105,7 @@ class TheographicDataFile (table : String, filename : String) {
           val value = convertRawValue(modelInstance, csvCol, modelField, rawValue)
 
           if (value == null) {
+            // continue
             break
           }
 

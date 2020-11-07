@@ -15,7 +15,7 @@ public class ChapterBase extends ModelBase {
   private Integer number;  // INT
   private Integer yearWritten;  // INT 
   private String author;  // TEXT
-  private String scrollmapper_id;  // TEXT 
+  private String scrollmapperId;  // TEXT 
   private String osisRef;  // TEXT 
   private Boolean canonical;  // BOOLEAN 
   private String book;  // TEXT 
@@ -43,11 +43,11 @@ public class ChapterBase extends ModelBase {
   public void setAuthor(String author) {
     this.author = author;
   }
-  public String getScrollmapper_id() {
-    return scrollmapper_id;
+  public String getScrollmapperId() {
+    return scrollmapperId;
   }
-  public void setScrollmapper_id(String scrollmapper_id) {
-    this.scrollmapper_id = scrollmapper_id;
+  public void setScrollmapperId(String scrollmapperId) {
+    this.scrollmapperId = scrollmapperId;
   }
   public String getOsisRef() {
     return osisRef;

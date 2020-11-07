@@ -28,7 +28,7 @@ object BookHelpers {
    *   * Also does not pollute our BookVertex companion object with all this stuff that mostly just interacts with constants
    */
   val _dataFile = new TheographicDataFile("books", "books-Grid view.csv");
-  val books : Iterable[Book] = _dataFile.getModelInstances().asInstanceOf[Iterable[Book]]
+  val allBooksFromFile : Iterable[Book] = _dataFile.getModelInstances().asInstanceOf[Iterable[Book]]
 
   ///////////////////////////////////////////////////////
   // Get books by filter
@@ -41,12 +41,12 @@ object BookHelpers {
    * - provides an easy way to get book metadata quickly
    */ 
   def getBookByNum (bookNum : Int) : Book = {
-    books.find((b) => b.getBookOrder() == bookNum).get
+    allBooksFromFile.find((b) => b.getBookOrder() == bookNum).get
   }
 
   def getBookByOsis (osisName : String ) : Book = {
     println(s"looking for osis name $osisName...")
-    books.find((b) => b.getOsisAbbreviation() == osisName).get
+    allBooksFromFile.find((b) => b.getOsisAbbreviation() == osisName).get
   }
 
   /*
@@ -54,23 +54,24 @@ object BookHelpers {
    * - uses the same name that we use as db primary keys
    */ 
   def getBookByName (bookName : String) : Book = {
-    books.find((b) => b.getName() == bookName).get
+    allBooksFromFile.find((b) => b.getName() == bookName).get
   }
 
   /*
    * retrieve book java model instances using for ALL books between the two provided, inclusive
    * - assumes English Bible book ordering
+   * - TODO this works, but don't want to use, since we are switching over to using case classes almost exclusively
    */ 
-  def getBooksBetween (startingBook : Book, endingBook : Book) : Iterable[Book] = {
-    books.filter((b) => b.getBookOrder >= startingBook.getBookOrder && b.getBookOrder <= endingBook.getBookOrder)
-  }
+   // def getBooksBetween (startingBook : Book, endingBook : Book) : Iterable[Book] = {
+   //   allBooksFromFile.filter((b) => b.getBookOrder >= startingBook.getBookOrder && b.getBookOrder <= endingBook.getBookOrder)
+   // }
 
   /*
    * taking a model instance of Chapter, returning book model instance
    *
    */
   def getBookForChapter (chapter : Chapter) : Book = {
-    books.find((b) => b.getName() == chapter.getBook).get
+    allBooksFromFile.find((b) => b.getName() == chapter.getBook).get
   }
 
 

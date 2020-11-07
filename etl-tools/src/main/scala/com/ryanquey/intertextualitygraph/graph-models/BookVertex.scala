@@ -4,6 +4,7 @@ import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
+import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers
 import scala.collection.JavaConverters._ 
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
@@ -14,6 +15,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.structure.Vertex
 
+import com.ryanquey.datautils.models.{Model, Record}
 /*
  * - NOTE make sure to keep fields in sync with com.ryanquey.intertextualitygraph.models.chapters.BookBase
  */
@@ -35,9 +37,9 @@ case class BookVertex(
   verseCount : Integer, // INT
   comments : String, // TEXT
   updatedAt : Instant // TIMESTAMP, 
-  )
+  ) extends GraphReferenceVertex
 
-object BookVertex {
+object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
   /*
    * overloading the apply method so we can instantiate the case class using the corresponding Java model class
    * - https://stackoverflow.com/a/2401153/6952495
@@ -62,6 +64,50 @@ object BookVertex {
       javabean.getComments(),
       javabean.getUpdatedAt()
       )
+  }
+
+  def convertJavabeanModelInstances(javabeanModelInstances : Iterable[Model]) : Iterable[BookVertex] = {
+    javabeanModelInstances.map((instance) => {
+      // BookVertex requires Book type as arg 
+      val typecastedInstance : Book = instance.asInstanceOf[Book]
+
+      BookVertex(typecastedInstance)
+    })
+  }
+
+  ///////////////////////////////////////////////////////////
+  // METADATA HELPERS
+  ///////////////////////////////////////////////////////////
+
+  /*
+   * for now, just make thin wrapper around what we have already with BookHelpers
+   * - a little bit of performance overhead, because has to iterate over everything again to convert into case classes
+   * - if it becomes a performance issue, can have TheographicDataFile do something to instantiate as case classes directly instead
+   */
+  val allBooksFromFile = convertJavabeanModelInstances(BookHelpers.allBooksFromFile)
+
+  /*
+   * retrieve book case class instance using standard name
+   * - uses the same name that we use as db primary keys
+   */ 
+  def getBookByName (bookName : String) : BookVertex = {
+    allBooksFromFile.find((b) => b.name == bookName).get
+  }
+
+  /*
+   * taking a model instance of Chapter, returning book model instance
+   *
+   */
+  def getBookForChapter (chapter : ChapterVertex) : BookVertex = {
+    getBookByName(chapter.book) 
+  }
+
+  /*
+   * retrieve book java model instances using for ALL books between the two provided, inclusive
+   * - assumes English Bible book ordering
+   */ 
+  def getBooksBetween (startingBook : BookVertex, endingBook : BookVertex) : Iterable[BookVertex] = {
+    allBooksFromFile.filter((b) => b.bookOrder >= startingBook.bookOrder && b.bookOrder <= endingBook.bookOrder)
   }
 
   ///////////////////////////////////////////////////////////

@@ -16,6 +16,9 @@ import com.datastax.oss.driver.api.querybuilder.QueryBuilder._;
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
+/*
+ * - NOTE make sure to keep fields in sync with com.ryanquey.intertextualitygraph.models.chapters.IntertextualConnectionBase (if we ever make one)
+ */
 case class IntertextualConnectionEdge(
   sourceTextStartingBook : String,
   sourceTextId : UUID,

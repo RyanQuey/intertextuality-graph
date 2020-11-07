@@ -6,70 +6,52 @@ import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
 import scala.collection.JavaConverters._ 
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
+import org.apache.tinkerpop.gremlin.structure.Vertex
+import com.ryanquey.intertextualitygraph.graphmodels.BookVertex
+import com.ryanquey.intertextualitygraph.graphmodels.BookVertex._
 
 import java.util.UUID;
 import java.time.Instant;
 import com.datastax.oss.driver.api.core.cql._;
 
-// TODO make this, I think it's helpful. Can have better helpers
-// case class Reference()
-
-// avoiding 
+/*
+ * (DEPRECATED)
+ * This is only for helpers that interact with the java model Class; for anything that interacts with the scala case class use TextVertex companion object
+ * - And, in general, don't add to this much, so it's easy to migrate over from the java models in the future. Instead of writing methods here, convert the java class > case class, and then use method from TextVertex companion object
+ */
 
 object TextHelpers {
-  // NOTE could be a range (ps.1.1-ps.1.6), but osisRangeList could also be a single ref (ps.1.1) or list of refs (ps.1.1-ps.1.3,ps.1.4). You won't know until you parse
-  // main use case for this one though is building a text model instance
-  // For now, at least assuming that the list of refs are in order...we did make it a LIST after all in C* not a SET! Let's have some order here!
-  def populateFieldsfromOsis (osisRangeList : String, text : Text) { 
-    println(s"osisRangeList is: $osisRangeList")
-    val allRefs : Array[String] = osisRangeList.split(",")
-    val startingRange : String = allRefs(0)
-    // NOTE might be same as startingRange. Note that it might not be a range, but we're treating it as such
-    val endingRange = allRefs.last
+
+  ///////////////////////////////////////////////////////////
+  // CRUD
+  ///////////////////////////////////////////////////////////
+
+  ///////////////
+  // CREATE
+  ///////////////
+
+  /*
+   *
+   *  find by ref. Use the unchangeable columns, though eventually split_passages should work too. 
+   * - you don't want to do this all the time, but only when you don't have access to the id of a text, and want to make sure to not create duplicates (e.g., when importing data from a file, and want to be able to do so multiple times without creating duplicates)
+   * - NOTE does not update...that would require doing some stuff, and I dont need updating yet
+   * - would do in dao, even though this si too specific and too many moving parts to entrust to their limited api in the dao. Makes it easy, you get your model back...but had way too much trouble. So just do string
+   *
+   */
+  def createByRefIfNotExists (text : Text) = {
+
+    val dbMatch = findMatchByRef(text)
 
 
-    // get it down to two single refs. E.g,. From Gen.1.1-Gen.10.1,Gen.11.1 to: startingRef is Gen.1.1 and endingRef is Gen.11.1
-    // in this starting range
-    val startingRef : String = startingRange.split("-")(0)
-    // NOTE might be the same as the starting ref, if there was no commas (,) AND no dash (-)
-    val endingRef : String = endingRange.split("-").last
-
-    // parse startingRef
-    val startingRefData = startingRef.split("\\.")
-    println(s"starting ref is: $startingRef")
-    val startingBookOsis = startingRefData(0)
-    
-    val startingBookName = BookHelpers.osisNameToName(startingBookOsis)
-
-    println(s"starting book is: $startingBookName")
-    text.setStartingBook(startingBookName)
-    println(s"starting ch is: ${startingRefData(1).toInt}")
-    val startingChapter = startingRefData(1).toInt
-    text.setStartingChapter(startingChapter)
-    if (startingRefData.length > 2) {
-      // has a verse (most do for TSK)
-      val startingVerse = startingRefData(2).toInt
-      text.setStartingVerse(startingVerse)
+    if (dbMatch != null) {
+      // go ahead and create another
+      text.persist();
     }
-
-    // parse endingRef
-    val endingRefData = endingRef.split("\\.")
-    val endingBookOsis = endingRefData(0)
-    val endingBookName = BookHelpers.osisNameToName(endingBookOsis)
-    text.setEndingBook(endingBookName)
-    val endingChapter = endingRefData(1).toInt
-    text.setEndingChapter(endingChapter)
-    
-    if (endingRefData.length > 2) {
-      // has a verse (most do for TSK)
-      val endingVerse = endingRefData(2).toInt
-      text.setEndingVerse(endingVerse)
-    }
-    
-    // NOTE for TSK data at least, should not have any semicolon at this point, so will just be a single split passage.
-    val splitPassages = osisRangeList.split(";").toList.asJava
-    text.setSplitPassages(splitPassages)
   }
+
+  ///////////////
+  // READ
+  ///////////////
 
   // NOTE hits db, using solr
   // TODO find a way to deal with when verses are not set. Since if not set, will get more than what we want, the search will be too broad
@@ -147,6 +129,11 @@ object TextHelpers {
     dbMatch
   }
 
+
+  ///////////////
+  // UPDATE
+  ///////////////
+
   // TODO find a way to deal with when verses are not set. Since if not set, will get more than what we want, the search will be too broad
   // NOTE also by default searches by createdBy
   // This will update records we don't want updated potentially
@@ -168,18 +155,62 @@ object TextHelpers {
     }
   }
 
-  // you don't want to do this all the time, but only when you don't have access to the id of a text, and want to make sure to not create duplicates (e.g., when importing data from a file, and want to be able to do so multiple times without creating duplicates)
-  // NOTE does not update...that would require doing some stuff, and I dont need updating yet
-  def createByRefIfNotExists (text : Text) = {
-    // find by ref. Use the unchangeable columns, though eventually split_passages should work too. 
-    // would do in dao, even though this si too specific and too many moving parts to entrust to their limited api in the dao. Makes it easy, you get your model back...but had way too much trouble. So just do string
+  ///////////////////////////////////////////////////////////
+  // MUTATION HELPERS
+  ///////////////////////////////////////////////////////////
 
-    val dbMatch = findMatchByRef(text)
+  // NOTE could be a range (ps.1.1-ps.1.6), but osisRangeList could also be a single ref (ps.1.1) or list of refs (ps.1.1-ps.1.3,ps.1.4). You won't know until you parse
+  // main use case for this one though is building a text model instance
+  // For now, at least assuming that the list of refs are in order...we did make it a LIST after all in C* not a SET! Let's have some order here!
+  def populateFieldsfromOsis (osisRangeList : String, text : Text) { 
+    println(s"osisRangeList is: $osisRangeList")
+    val allRefs : Array[String] = osisRangeList.split(",")
+    val startingRange : String = allRefs(0)
+    // NOTE might be same as startingRange. Note that it might not be a range, but we're treating it as such
+    val endingRange = allRefs.last
 
 
-    if (dbMatch != null) {
-      // go ahead and create another
-      text.persist();
+    // get it down to two single refs. E.g,. From Gen.1.1-Gen.10.1,Gen.11.1 to: startingRef is Gen.1.1 and endingRef is Gen.11.1
+    // in this starting range
+    val startingRef : String = startingRange.split("-")(0)
+    // NOTE might be the same as the starting ref, if there was no commas (,) AND no dash (-)
+    val endingRef : String = endingRange.split("-").last
+
+    // parse startingRef
+    val startingRefData = startingRef.split("\\.")
+    println(s"starting ref is: $startingRef")
+    val startingBookOsis = startingRefData(0)
+    
+    val startingBookName = BookHelpers.osisNameToName(startingBookOsis)
+
+    println(s"starting book is: $startingBookName")
+    text.setStartingBook(startingBookName)
+    println(s"starting ch is: ${startingRefData(1).toInt}")
+    val startingChapter = startingRefData(1).toInt
+    text.setStartingChapter(startingChapter)
+    if (startingRefData.length > 2) {
+      // has a verse (most do for TSK)
+      val startingVerse = startingRefData(2).toInt
+      text.setStartingVerse(startingVerse)
     }
+
+    // parse endingRef
+    val endingRefData = endingRef.split("\\.")
+    val endingBookOsis = endingRefData(0)
+    val endingBookName = BookHelpers.osisNameToName(endingBookOsis)
+    text.setEndingBook(endingBookName)
+    val endingChapter = endingRefData(1).toInt
+    text.setEndingChapter(endingChapter)
+    
+    if (endingRefData.length > 2) {
+      // has a verse (most do for TSK)
+      val endingVerse = endingRefData(2).toInt
+      text.setEndingVerse(endingVerse)
+    }
+    
+    // NOTE for TSK data at least, should not have any semicolon at this point, so will just be a single split passage.
+    val splitPassages = osisRangeList.split(";").toList.asJava
+    text.setSplitPassages(splitPassages)
   }
+
 }

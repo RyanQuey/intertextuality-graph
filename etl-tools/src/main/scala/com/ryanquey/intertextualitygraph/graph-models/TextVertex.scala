@@ -20,9 +20,15 @@ import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers
+import com.ryanquey.intertextualitygraph.modelhelpers.ChapterHelpers
+import com.ryanquey.intertextualitygraph.modelhelpers.VerseHelpers
 
+import com.ryanquey.intertextualitygraph.graphmodels.GraphModel
+import com.ryanquey.intertextualitygraph.graphmodels.GraphReferenceVertex
 import com.ryanquey.intertextualitygraph.graphmodels.BookVertex
 import com.ryanquey.intertextualitygraph.graphmodels.BookVertex._
+
+import com.ryanquey.datautils.models.{Model, Record}
 
 /*
  * - NOTE make sure to keep fields in sync with com.ryanquey.intertextualitygraph.models.chapters.ChapterBase
@@ -47,9 +53,9 @@ case class TextVertex(
   createdBy : String,
   updatedBy : String, 
   updatedAt : Instant // TIMESTAMP, 
-)
+) extends GraphReferenceVertex
 
-object TextVertex {
+object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
   /*
    * overloading the apply method so we can instantiate the case class using the corresponding Java model class
    * - https://stackoverflow.com/a/2401153/6952495
@@ -79,6 +85,17 @@ object TextVertex {
       )
   }
 
+  /*
+   */
+  def convertJavabeanModelInstances(javabeanModelInstances : Iterable[Model]) : Iterable[TextVertex] = {
+    javabeanModelInstances.map((instance) => {
+      // TextVertex requires Text type as arg 
+      val typecastedInstance : Text = instance.asInstanceOf[Text]
+
+      TextVertex(typecastedInstance)
+    })
+  }
+
   ///////////////////////////////////////////////////////////
   // CRUD
   ///////////////////////////////////////////////////////////
@@ -101,16 +118,7 @@ object TextVertex {
    *
    */ 
   def createReferenceVertices (text : TextVertex) = {
-    // extract out all books for this text
-    val startingBook = BookHelpers.getBookByName(text.startingBook)
-    val endingBook = BookHelpers.getBookByName(text.endingBook)
-
-    val books = BookHelpers.getBooksBetween(startingBook, endingBook)
-    
-    // extract out all chapters for this text
-    
-    // extract out all verses for this text
-
+    val (books, chapters, verses) = getReferenceMetadata(text)
   }
 
   ///////////////
@@ -133,6 +141,39 @@ object TextVertex {
     
     // for each verse that does not currently exist, create a new edge
   }
+
+  ///////////////////////////////////////////////////////////
+  // METADATA HELPERS
+  ///////////////////////////////////////////////////////////
+
+  /*
+   * for a given textVertex, return java model instances of all book, ch, and verses that this text intersects with
+   * - could create a helper to get graphModels instead, but not bothering with that for now
+   */ 
+  def getReferenceMetadata (text : TextVertex) = {
+    // extract out all books for this text
+    val startingBook = BookVertex.getBookByName(text.startingBook)
+    val startingChapter = ChapterVertex.getChapterByNum(startingBook, text.startingChapter)
+    val startingVerse = VerseVertex.getVerseByNum(startingBook, startingChapter, text.startingVerse)
+
+    val endingBook = BookVertex.getBookByName(text.endingBook)
+    val endingChapter = ChapterVertex.getChapterByNum(endingBook, text.endingChapter)
+    val endingVerse = VerseVertex.getVerseByNum(endingBook, endingChapter, text.endingVerse)
+
+    val books = BookVertex.getBooksBetween(startingBook, endingBook)
+    
+    // extract out all chapters for this text
+    val chapters = ChapterVertex.getChaptersBetween(startingChapter, endingChapter)
+    
+    // extract out all verses for this text
+    val verses = VerseVertex.getVersesBetween(startingVerse, endingVerse)
+
+    (books, chapters, verses)
+  }
+
+
+
+
 
   ///////////////////////////////////////////////////////////
   // GRAPH HELPERS

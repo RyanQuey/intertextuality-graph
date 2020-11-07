@@ -31,13 +31,13 @@ object ChapterHelpers {
    *   * Also does not pollute our ChapterVertex companion object with all this stuff that mostly just interacts with constants
    */
   val _dataFile = new TheographicDataFile("chapters", "chapters-Grid view.csv");
-  val chapters : Iterable[Chapter] = _dataFile.getModelInstances().asInstanceOf[Iterable[Chapter]]
+  val allChaptersFromFile : Iterable[Chapter] = _dataFile.getModelInstances().asInstanceOf[Iterable[Chapter]]
 
   ///////////////////////////////////////////////////////
   // Get chapters by filter
   ///////////////////////////////////////////////////////
   def getChapterByNum (book : Book, chapterNum : Int) : Chapter = {
-    chapters.find((c) => c.getBook == book.getName && c.getNumber() == chapterNum).get
+    getChapterByRefData(book.getName, chapterNum) 
   }
 
   /*
@@ -47,44 +47,49 @@ object ChapterHelpers {
    * - only reads from file one time, when class is loaded
    * - provides an easy way to get chapter metadata quickly
    */ 
-  def getChapterByNumAndBookName (bookName : String, chapterNum : Int) : Chapter = {
-    chapters.find((c) => c.getBook == bookName && c.getNumber() == chapterNum).get
+  def getChapterByRefData (bookName : String, chapterNum : Int) : Chapter = {
+    allChaptersFromFile.find((c) => c.getBook == bookName && c.getNumber() == chapterNum).get
+  }
+
+  def getChapterForVerse (verse : Verse) : Chapter = {
+    allChaptersFromFile.find((c) => c.getBook == verse.getBook && c.getNumber() == verse.getChapter).get
   }
 
 
   /*
    * retrieve chapter java model instance using for ALL chapters between the two provided
    * - uses the same name that we use as db primary keys
+   * - works as of 11/2020 but trying to use case classes instead
    */ 
-  def getChaptersBetween (startingChapter : Chapter, endingChapter : Chapter) : Iterable[Chapter] = {
-    val endingBookNumber = endingChapter.getBook
-    val startingBook = BookHelpers.getBookForChapter(startingChapter)
-    val endingBook = BookHelpers.getBookForChapter(endingChapter)
-    val books = BookHelpers.getBooksBetween(startingBook, endingBook)
+  // def getChaptersBetween (startingChapter : Chapter, endingChapter : Chapter) : Iterable[Chapter] = {
+  //   val endingBookNumber = endingChapter.getBook
+  //   val startingBook = BookHelpers.getBookForChapter(startingChapter)
+  //   val endingBook = BookHelpers.getBookForChapter(endingChapter)
+  //   val books = BookHelpers.getBooksBetween(startingBook, endingBook)
 
-    // https://alvinalexander.com/scala/how-to-create-mutable-list-in-scala-listbuffer-cookbook/
-    val chapters = new ListBuffer[Chapter]()
+  //   // https://alvinalexander.com/scala/how-to-create-mutable-list-in-scala-listbuffer-cookbook/
+  //   val chapters = new ListBuffer[Chapter]()
 
-    // iterate over the books
-    // - TODO probably could do this using chapters.filter, and probably better performance?? Except, would have to iterate over all chapters in bible a few times.
-    books.foreach(book => {
-      // note that endingBook could also be first book, if there' only one book
-      val isFirstBook = book.getName == startingBook.getName
-      val isFinalBook = book.getName == endingBook.getName
+  //   // iterate over the books
+  //   // - TODO probably could do this using chapters.filter, and probably better performance?? Except, would have to iterate over all chapters in bible a few times.
+  //   books.foreach(book => {
+  //     // note that endingBook could also be first book, if there' only one book
+  //     val isFirstBook = book.getName == startingBook.getName
+  //     val isFinalBook = book.getName == endingBook.getName
 
-      // if this is NOT the first book, then start at beginning of the book
-      val initialChapterNum : Int = if (isFirstBook) startingChapter.getNumber else 1
-      val finalChapterNum : Int = if (isFinalBook) endingChapter.getNumber else book.getChapterCount
+  //     // if this is NOT the first book, then start at beginning of the book
+  //     val initialChapterNum : Int = if (isFirstBook) startingChapter.getNumber else 1
+  //     val finalChapterNum : Int = if (isFinalBook) endingChapter.getNumber else book.getChapterCount
 
-      val chapterRange = initialChapterNum to finalChapterNum
-      for (chapterNum <- chapterRange) {
-        chapters += getChapterByNum(book, chapterNum)
-      }
+  //     val chapterRange = initialChapterNum to finalChapterNum
+  //     for (chapterNum <- chapterRange) {
+  //       chapters += getChapterByNum(book, chapterNum)
+  //     }
 
-    }) 
+  //   }) 
 
-    chapters
-  }
+  //   chapters
+  // }
 
 
 

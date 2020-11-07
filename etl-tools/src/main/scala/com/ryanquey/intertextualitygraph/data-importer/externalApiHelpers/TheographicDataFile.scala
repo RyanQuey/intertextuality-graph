@@ -43,10 +43,16 @@ class TheographicDataFile (table : String, filename : String) {
     // TODO I think it does not stop itself because it opened a file and did not close it (?)
   }
 
-  // not for persisting, but just for reference when parsing/importing other data
-  // how to use if only want the model instances: 
-  // val dataFile = new TheographicDataFile("books", "books-Grid view.csv");
-  // val books : Array[Book] = dataFile.getModelInstances()
+  /*
+   * get model instances of each (book, ch, or verse)
+   * - TODO I'm not sure why this is an Iterable rather than ArrayBuffer, because at least in teh console seems to come out as an ArrayBuffer[Model]
+   * - not for persisting, but just for reference when parsing/importing other data
+   * - how to use if only want the model instances: 
+   *    ```
+   *    val dataFile = new TheographicDataFile("books", "books-Grid view.csv");
+   *    val books : Array[Book] = dataFile.getModelInstances()
+   *    ```
+   */
   def getModelInstances() : Iterable[Model] = {
     println(s"parsing $filename")
     val bufferedSource = Source.fromFile(fullPath.toString)

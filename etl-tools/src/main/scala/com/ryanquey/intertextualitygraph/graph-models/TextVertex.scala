@@ -19,6 +19,7 @@ import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
+import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers
 
 import com.ryanquey.intertextualitygraph.graphmodels.BookVertex
 import com.ryanquey.intertextualitygraph.graphmodels.BookVertex._
@@ -52,6 +53,7 @@ object TextVertex {
   /*
    * overloading the apply method so we can instantiate the case class using the corresponding Java model class
    * - https://stackoverflow.com/a/2401153/6952495
+   * - http://alvinalexander.com/source-code/scala-how-create-case-class-multiple-alternate-constructors/
    */
   def apply(javabean : Text) = {
     new TextVertex(
@@ -78,6 +80,15 @@ object TextVertex {
   }
 
   ///////////////////////////////////////////////////////////
+  // CRUD
+  ///////////////////////////////////////////////////////////
+
+  ///////////////
+  // CREATE
+  ///////////////
+
+
+  ///////////////////////////////////////////////////////////
   // ASSOCIATION CRUD
   ///////////////////////////////////////////////////////////
 
@@ -90,6 +101,15 @@ object TextVertex {
    *
    */ 
   def createReferenceVertices (text : TextVertex) = {
+    // extract out all books for this text
+    val startingBook = BookHelpers.getBookByName(text.startingBook)
+    val endingBook = BookHelpers.getBookByName(text.endingBook)
+
+    val books = BookHelpers.getBooksBetween(startingBook, endingBook)
+    
+    // extract out all chapters for this text
+    
+    // extract out all verses for this text
 
   }
 

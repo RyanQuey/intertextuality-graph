@@ -13,15 +13,13 @@ import scala.collection.immutable.List
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.structure.Vertex
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.unfold
 
 import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
-import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers
-import com.ryanquey.intertextualitygraph.modelhelpers.ChapterHelpers
-import com.ryanquey.intertextualitygraph.modelhelpers.VerseHelpers
 
 import com.ryanquey.intertextualitygraph.graphmodels.GraphModel
 import com.ryanquey.intertextualitygraph.graphmodels.GraphReferenceVertex
@@ -53,7 +51,9 @@ case class TextVertex(
   createdBy : String,
   updatedBy : String, 
   updatedAt : Instant // TIMESTAMP, 
-) extends GraphReferenceVertex
+) extends GraphReferenceVertex[TextVertex] {
+    def companionObject = TextVertex
+}
 
 object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
   /*
@@ -104,6 +104,18 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
   // CREATE
   ///////////////
 
+  ///////////////
+  // READ
+  ///////////////
+
+  ///////////////
+  // UPDATE
+  ///////////////
+
+  ///////////////
+  // DELETE
+  ///////////////
+
 
   ///////////////////////////////////////////////////////////
   // ASSOCIATION CRUD
@@ -115,11 +127,35 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
 
   /*
    * take a given text vertex and create references to all books, chapters, and verses
+   * - Unfortunately, due to the way that C* works, never know if we are truly "creating" something, since it is just an upsert. We might never use this function
+   * - keeping it as functional as possible, but not setting this on the case class
+   * - TODO make this a transaction of some sort?
    *
    */ 
-  def createReferenceVertices (text : TextVertex) = {
+  def createReferenceVertices (text : TextVertex) : Unit = {
+    // fetch metadata (as represented by case class instances) for each book/ch/v overlapping with this text
     val (books, chapters, verses) = getReferenceMetadata(text)
+
+    books.foreach((b) => createEdgeToBook(text, b.name)) 
+    chapters.foreach((c) => createEdgeToChapter(text, c.book, c.number)) 
+    verses.foreach((v) => createEdgeToVerse(text, v.book, v.chapter, v.number)) 
   }
+
+  ///////////////
+  // ASSOCIATION READ
+  ///////////////
+
+  /*
+   * fetch all books that this text includes
+   *
+   */ 
+  def fetchBooks (text : TextVertex) = {
+    val textTraversal = TextVertex.buildVertexTraversal(text)
+    val id = textTraversal.values("id").by(unfold()).next()
+
+    
+  }
+
 
   ///////////////
   // ASSOCIATION UPDATE
@@ -129,7 +165,7 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
    * take a given text vertex and update references to all books, chapters, and verses
    *
    */ 
-  def updateReferenceVertices (text : TextVertex) = {
+  def updateReferenceVertices (text : TextVertex) : Unit = {
     // 1) fetch all currently existing reference vertices (book, ch, v)
 
     // 2) delete all old vertices
@@ -185,12 +221,18 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
    * - can call `next()` on the return value to get a Vertex (I think...)
    */
   def buildVertexTraversal (text : TextVertex) : GraphTraversal[Vertex, Vertex] = {
-    val g : GraphTraversalSource = CassandraDb.graph
-    val textVertex = g.V().hasLabel("text")
-      .has("starting_book", text.startingBook)
-      .has("id", text.id)
+    buildVertexTraversalFromPK(List(text.startingBook, text.id))
+  }
 
-    textVertex
+  def buildVertexTraversalFromPK (pk : List[Any]) : GraphTraversal[Vertex, Vertex] = {
+    val g : GraphTraversalSource = CassandraDb.graph
+    val startingBook : String = pk(0).asInstanceOf[String]
+    val id : UUID = pk(1).asInstanceOf[UUID]
+    val traversal = g.V().hasLabel("text")
+      .has("starting_book", startingBook)
+      .has("id", id)
+
+    traversal
   }
 
   ///////////////////////////////////////////////////////////
@@ -200,12 +242,35 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
 
   /*
    * creates edge record between text and book
-   *
+   * - assumes that book already exists (which always should, if we imported the seed that already)
    */
   private def createEdgeToBook (textVertex : TextVertex, bookName : String) = {
     val textVertexTraversal = TextVertex.buildVertexTraversal(textVertex)
-    val bookVertexTraversal = BookVertex.buildVertexTraversalFromPK(bookName)
+    val bookVertexTraversal = BookVertex.buildVertexTraversalFromPK(List(bookName))
 
     textVertexTraversal.addE("from_book").from(bookVertexTraversal)
+  }
+
+  /*
+   * creates edge record between text and chapter
+   * - assumes that book and chapter already exists (which always should, if we imported the seed that already)
+   *
+   */
+  private def createEdgeToChapter (textVertex : TextVertex, bookName : String, chapterNumber : Int) = {
+    val textVertexTraversal = TextVertex.buildVertexTraversal(textVertex)
+    val chapterVertexTraversal = ChapterVertex.buildVertexTraversalFromPK(List(bookName, chapterNumber))
+
+    textVertexTraversal.addE("from_chapter").from(chapterVertexTraversal)
+  }
+  /*
+   * creates edge record between text and verse
+   * - assumes that book and chapter and verse already exists (which always should, if we imported the seed that already)
+   *
+   */
+  private def createEdgeToVerse (text : TextVertex, bookName : String, chapterNumber : Int, verseNumber : Int) = {
+    val textTraversal = TextVertex.buildVertexTraversal(text)
+    val verseTraversal = VerseVertex.buildVertexTraversalFromPK(List(bookName, chapterNumber, verseNumber))
+
+    textTraversal.addE("from_verse").from(verseTraversal)
   }
 }

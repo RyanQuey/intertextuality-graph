@@ -8,6 +8,10 @@ import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers
 import scala.collection.JavaConverters._ 
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
+import org.apache.tinkerpop.gremlin.structure.Vertex
+
 import java.util.UUID;
 import java.time.Instant;
 import com.datastax.oss.driver.api.core.cql._;
@@ -37,7 +41,9 @@ case class BookVertex(
   verseCount : Integer, // INT
   comments : String, // TEXT
   updatedAt : Instant // TIMESTAMP, 
-  ) extends GraphReferenceVertex
+  ) extends GraphReferenceVertex[BookVertex] {
+    def companionObject = BookVertex
+  }
 
 object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
   /*
@@ -119,12 +125,15 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
    * There should only be one result, but rather than returning a Vertex, just return the traversal, so can continue traversing off of it without hitting the database yet
    * - can call `next()` on the return value to get a Vertex (I think...)
    */
-  def buildVertexTraversalFromPK (bookName : String) : GraphTraversal[Vertex, Vertex] = {
+  //def buildVertexTraversalFromPK (bookName : String) : GraphTraversal[Vertex, Vertex] = {
+  def buildVertexTraversalFromPK (pk : List[Any]) : GraphTraversal[Vertex, Vertex] = {
     val g : GraphTraversalSource = CassandraDb.graph
-    val bookVertex = g.V().hasLabel("text")
-      .has("starting_book", bookName)
+    val bookName : String = pk(0).asInstanceOf[String]
+    println(s"Get vertex for book ${bookName}");
+    val traversal = g.V().hasLabel("book")
+      .has("name", bookName)
 
-    bookVertex
+    traversal
   }
 
 }

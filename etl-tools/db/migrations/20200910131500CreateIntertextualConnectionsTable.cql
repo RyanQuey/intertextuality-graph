@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS intertextuality_graph.intertextual_connections (
   // not just different languages. E.g., can be Theodotian vs other LXX versions
   source_version TEXT,
   source_language TEXT,
-  updated_at TIMESTAMP, 
-  // this will allow good default order in the db when we do basic selects. 
+  updated_at TIMESTAMP,
+  // this will allow good default order in the db when we do basic selects. LATER UPDATE will it?? Perhaps one of the book should be partition key?
   PRIMARY KEY (source_text_id, source_text_starting_book, alluding_text_id, alluding_text_starting_book)
 );

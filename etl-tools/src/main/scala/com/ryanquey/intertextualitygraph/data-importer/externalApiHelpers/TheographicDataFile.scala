@@ -14,6 +14,7 @@ import com.ryanquey.intertextualitygraph.dataimporter.externalApiHelpers.Helpers
 import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
+import com.ryanquey.intertextualitygraph.graphmodels.BookVertex
 
 // needed so I can call .asScala
 import scala.collection.JavaConverters._
@@ -111,6 +112,19 @@ class TheographicDataFile (table : String, filename : String) {
 
           modelInstance.setV(dbCol, value)
         }
+      }
+
+      // set some other stuff manually
+      modelInstance.setV("canonical", true)
+      if (table != "books") {
+        // get corresponding book
+        val book = BookVertex.getBookByOsis(modelInstance.getV("book").asInstanceOf[String])
+
+        // overwrite bookname from osis abbr to full name
+        modelInstance.setV("book", book.name)
+
+        // overwrite testament from book metadata
+        modelInstance.setV("testament", book.testament)
       }
 
       modelInstance

@@ -22,6 +22,9 @@ class EagerLoadModule extends AbstractModule {
 
 
 // in play, would import the EagerLoadModule. Elsewhere, just import and create a new instance of the class and it runs
+// ```
+//  new Initialize()
+// ```
 // @Singleton class Initialize {
 class Initialize {
   val keyspace = "intertextuality_graph"

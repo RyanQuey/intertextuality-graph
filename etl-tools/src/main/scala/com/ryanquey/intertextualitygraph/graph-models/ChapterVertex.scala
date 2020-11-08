@@ -10,6 +10,10 @@ import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers
 import com.ryanquey.intertextualitygraph.modelhelpers.ChapterHelpers
 
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
+import org.apache.tinkerpop.gremlin.structure.Vertex
+
 import java.util.UUID;
 import java.time.Instant;
 import com.datastax.oss.driver.api.core.cql._;
@@ -31,7 +35,9 @@ case class ChapterVertex(
   testament : String,  // TEXT 
   comments : String,  // TEXT
   updatedAt : Instant  // TIMESTAMP 
-  ) extends GraphReferenceVertex
+  ) extends GraphReferenceVertex[ChapterVertex] {
+    def companionObject = ChapterVertex
+  }
 
 object ChapterVertex extends GraphReferenceVertexCompanion[ChapterVertex] {
   def apply(javabean : Chapter) = {
@@ -122,6 +128,28 @@ object ChapterVertex extends GraphReferenceVertexCompanion[ChapterVertex] {
     }) 
 
     chaptersBetween
+  }
+
+  ///////////////////////////////////////////////////////////
+  // GRAPH HELPERS
+  ///////////////////////////////////////////////////////////
+
+  /*
+   * 
+   * There should only be one result, but rather than returning a Vertex, just return the traversal, so can continue traversing off of it without hitting the database yet
+   * - can call `next()` on the return value to get a Vertex (I think...)
+   */
+  //def buildVertexTraversalFromPK (bookName : String, chapterNumber : Int) : GraphTraversal[Vertex, Vertex] = {
+  def buildVertexTraversalFromPK (pk : List[Any]) : GraphTraversal[Vertex, Vertex] = {
+    val g : GraphTraversalSource = CassandraDb.graph
+    val bookName : String = pk(0).asInstanceOf[String]
+    val chapterNumber : Int = pk(1).asInstanceOf[Int]
+
+    val traversal = g.V().hasLabel("chapter")
+      .has("book", bookName)
+      .has("number", chapterNumber)
+
+    traversal
   }
 
 }

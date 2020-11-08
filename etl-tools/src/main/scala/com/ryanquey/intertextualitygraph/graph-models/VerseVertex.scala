@@ -8,6 +8,10 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
+import org.apache.tinkerpop.gremlin.structure.Vertex
+
 import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers
 import com.ryanquey.intertextualitygraph.modelhelpers.ChapterHelpers
 import com.ryanquey.intertextualitygraph.modelhelpers.VerseHelpers
@@ -40,7 +44,9 @@ case class VerseVertex(
   testament : String,  // TEXT 
   comments : String,  // TEXT
   updatedAt : Instant // TIMESTAMP, 
-  ) extends GraphReferenceVertex
+  ) extends GraphReferenceVertex[VerseVertex] {
+    def companionObject = VerseVertex
+  }
 
 object VerseVertex extends GraphReferenceVertexCompanion[VerseVertex] {
   /*
@@ -142,4 +148,31 @@ object VerseVertex extends GraphReferenceVertexCompanion[VerseVertex] {
 
     versesBetween
   }
+
+  ///////////////////////////////////////////////////////////
+  // GRAPH HELPERS
+  ///////////////////////////////////////////////////////////
+
+  /*
+   * 
+   * There should only be one result, but rather than returning a Vertex, just return the traversal, so can continue traversing off of it without hitting the database yet
+   * - can call `next()` on the return value to get a Vertex (I think...)
+   */
+  //def buildVertexTraversalFromPK (bookName : String, chapterNumber : Int, verseNumber : Int) : GraphTraversal[Vertex, Vertex] = {
+  def buildVertexTraversalFromPK (pk : List[Any]) : GraphTraversal[Vertex, Vertex] = {
+    val g : GraphTraversalSource = CassandraDb.graph
+    // tuple version
+    //val (bookName : String, chapterNumber : Int, verseNumber : Int) = pk
+    val bookName : String = pk(0).asInstanceOf[String]
+    val chapterNumber : Int = pk(1).asInstanceOf[Int]
+    val verseNumber : Int = pk(2).asInstanceOf[Int]
+
+    val traversal = g.V().hasLabel("chapter")
+      .has("book", bookName)
+      .has("chapter", chapterNumber)
+      .has("number", verseNumber)
+
+    traversal
+  }
+
 }

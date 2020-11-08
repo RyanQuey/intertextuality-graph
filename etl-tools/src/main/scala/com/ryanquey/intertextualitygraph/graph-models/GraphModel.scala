@@ -52,8 +52,6 @@ trait GraphModel[A <: GraphModel[A]] extends Product {
  *   * to refer to the companion object, use GraphModelSubClass.companionObject (but instead of GraphModelSubClass, put the name of the subclass)
  */ 
 trait GraphModelCompanion[A <: GraphModel[A]] {
-  def modelFields () = {
-    // TODO not working, try this: https://stackoverflow.com/questions/8208179/scala-obtaining-a-class-object-from-a-generic-type
-    classOf[A].getDeclaredFields
-  }
+  // might not need
+  //def modelFields () : List[String]
 }

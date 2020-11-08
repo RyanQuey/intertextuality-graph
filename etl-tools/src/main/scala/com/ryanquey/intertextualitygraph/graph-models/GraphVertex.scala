@@ -34,7 +34,7 @@ trait GraphVertexCompanion[A <: GraphVertex[A]] extends GraphModelCompanion[A] {
    *   * downside is that it looks pretty complex, and would require specific implementation of case classes, so might be hard to get out of. Might not even work with DSE, who knows
    *
    */ 
-  def valueMapToCaseClass(valueMap: java.util.Map[Object, Any]) : A = {
+  /*def valueMapToCaseClass(valueMap: java.util.Map[Object, Any]) : A = {
     // fields of case class, in order to defind by case class
     val fields : List[String] = modelFields
 
@@ -54,6 +54,7 @@ trait GraphVertexCompanion[A <: GraphVertex[A]] extends GraphModelCompanion[A] {
     val caseClass = classOf[A]
     caseClass.newInstance(valuesInOrder: _*)
   }
+  */
 
   /*
    * - sacrificing type safety for convenience. 

@@ -4,16 +4,18 @@ import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
+import com.ryanquey.intertextualitygraph.helpers.shapeless.{CaseClassFromMap}
 import scala.collection.JavaConverters._ 
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
-import java.util.UUID;
+import java.util.{UUID};
 import java.time.Instant;
 import com.datastax.oss.driver.api.core.cql._;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.unfold
 import org.apache.tinkerpop.gremlin.structure.Vertex
+
 
 import com.ryanquey.datautils.helpers.StringHelpers._;
 
@@ -30,31 +32,23 @@ trait GraphVertexCompanion[A <: GraphVertex[A]] extends GraphModelCompanion[A] {
 
   /*
    * Takes valueMap with all values (ie, what is returned from gremlin traversal) and returns case class instance
+   * - especially needed so that I can create a simple findOne for all vertices (findOne)
    * - Alternatively, could try this one: https://github.com/mpollmeier/gremlin-scala#mapping-vertices-fromto-case-classes
-   *   * downside is that it looks pretty complex, and would require specific implementation of case classes, so might be hard to get out of. Might not even work with DSE, who knows
+   *   * downside is that it looks pretty complex, and would require specific implementation of case classes, so might be hard to get out of. Might not even work with DSE, who knows. I had a ahrd time figuring out how to instantiate ScalaGraph by calling "asScala" on ...well I'm not sure what I should have called it on. They call it on return value of tinkergraph.open() 
    *
    */ 
-  /*def valueMapToCaseClass(valueMap: java.util.Map[Object, Any]) : A = {
-    // fields of case class, in order to defind by case class
-    val fields : List[String] = modelFields
+  // this didn't work, works when a specific case class is used, but not when using generics (ie A). 
+  // TODO I'm sure there's a way to get it working with generics, but not wasting any more time on this
+  // def valueMapToCaseClass(valueMap: java.util.Map[String, Any]) : A = {
+  //    val typecastedMap = valueMap.asScala.toMap
 
-    // - use the order defined in the case class definition (so we don't have to use named arguments)
-    // - in valueMap, fields will be the same as in the database (snake case), so convert that to camel case 
-    val valuesInOrder = fields.map((field) => {
-      val dbCol : String = snakeToCamel(field)
-      val value = valueMap.get(dbCol)
+  //    CaseClassFromMap[A](typecastedMap)
+  // }
+  def valueMapToCaseClass(valueMap: java.util.Map[String, Any]) : A;
 
-      value
-    })
+  
 
 
-    // whatever the case class is, instantiate it using these values, 
-    // - lists provide arg destructuring, so use list (https://alvinalexander.com/scala/how-to-define-methods-variable-arguments-varargs-fields/)
-    // - using some lightweight reflection here on the case class to make instance
-    val caseClass = classOf[A]
-    caseClass.newInstance(valuesInOrder: _*)
-  }
-  */
 
   /*
    * - sacrificing type safety for convenience. 
@@ -80,12 +74,13 @@ trait GraphVertexCompanion[A <: GraphVertex[A]] extends GraphModelCompanion[A] {
    * e.g., 
    *    java.util.Map[Object,Any] = {updated_at=2020-11-07T05:21:06.855Z, split_passages=[Phlm.1.12], starting_book=Philemon, ending_chapter=1, ending_verse=12, ending_book=Philemon, starting_verse=12, updated_by=treasury-of-scripture-knowledge, starting_chapter=1, id=7e5e5965-207f-11eb-ac8c-5bc5497614cf, created_by=treasury-of-scripture-knowledge}
    */
-  def findOneValueMap(pk: List[Any]) : java.util.Map[Object, Any]  = {
+  def findOneValueMap(pk: List[Any]) : java.util.Map[String, Any]  = {
     val traversal = this.buildVertexTraversalFromPK(pk)
 
     // unfold, so all the values are not nested within a java ArrayList
     // if don't set as java.util.Map[Object,Any], will be java.util.Map[Object,Nothing]
-    val valueMap : java.util.Map[Object,Any] = traversal.valueMap().by(unfold()).next()
+    // currently we are just assuming that all keys are strings, so typecasting like that, so at least it's a little bit more specific
+    val valueMap = traversal.valueMap().by(unfold()).next().asInstanceOf[java.util.Map[String, Any]]
 
     valueMap
   }
@@ -94,10 +89,8 @@ trait GraphVertexCompanion[A <: GraphVertex[A]] extends GraphModelCompanion[A] {
   /*
    * returns an instance of one of our graph models
    */ 
-  /*def findOne(pk: List[Any]) : B = {
-    val gremlinVertex = findOneGremlinVertex(pk).next()
-
-    // convert gremlin vertex class to graph model
-    gremlinVertexToCaseClass(gremlinVertex)
-  }*/
+  def findOne(pk: List[Any]) : A = {
+    val valueMap = findOneValueMap(pk)
+    valueMapToCaseClass(valueMap)
+  }
 }

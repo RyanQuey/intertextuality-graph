@@ -45,7 +45,6 @@ object BookHelpers {
   }
 
   def getBookByOsis (osisName : String ) : Book = {
-    println(s"looking for osis name $osisName...")
     allBooksFromFile.find((b) => b.getOsisAbbreviation() == osisName).get
   }
 

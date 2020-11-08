@@ -15,6 +15,12 @@ version := "0.1.0-SNAPSHOT"
 // https://stackoverflow.com/a/21628869/6952495
 resolvers += Resolver.mavenLocal
 
+// https://github.com/milessabin/shapeless
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases"),
+  Resolver.sonatypeRepo("snapshots")
+)
+
 // https://github.com/scalaj/scalaj-http
 libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.2"
 
@@ -36,7 +42,9 @@ libraryDependencies ++= Seq(
   "com.datastax.oss" % "java-driver-query-builder" % cassandraJavaDriverVersion,
   "com.datastax.oss" % "java-driver-mapper-runtime" % cassandraJavaDriverVersion,
   "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-  "com.michaelpollmeier" %% "gremlin-scala" % "3.4.7.2"
+  "com.michaelpollmeier" %% "gremlin-scala" % "3.4.7.2",
+  "com.chuusai" %% "shapeless" % "2.3.3",
+
   )
 
 // local projects

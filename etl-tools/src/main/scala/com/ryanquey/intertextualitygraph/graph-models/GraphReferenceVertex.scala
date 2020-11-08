@@ -21,11 +21,12 @@ import org.apache.tinkerpop.gremlin.structure.Vertex
  * - <: is upper bounds, requiring that A is an instance of GraphReferenceVertex or child class
  */ 
 trait GraphReferenceVertex[A <: GraphReferenceVertex[A]] extends GraphVertex[A] {
-  def yearWritten : Integer  // INT 
-  def author : String  // TEXT
+  def yearWritten : Option[Integer]  // INT 
+  def author : Option[String]  // TEXT
   def canonical : Boolean  // BOOLEAN 
+  // always should have. If not Old Testament or New Testament, can be Pseudapigrapha, Apocrypha etc.
   def testament : String  // TEXT 
-  def comments : String  // TEXT
+  def comments : Option[String]  // TEXT
   def updatedAt : Instant // TIMESTAMP, 
 }
 

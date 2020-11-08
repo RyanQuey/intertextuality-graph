@@ -153,6 +153,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
   //////////////////////////////////////////////////
   // TODO Move all of this kind of stuff into the model
+  // TODO make private
   // graph traversal builders
 
   /*
@@ -177,6 +178,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     } else if (dataSet == "treasury-of-scripture-knowledge") {
       // this is for now just tsk
       traversal = traversal.has("updated_by", "treasury-of-scripture-knowledge")
+
     } else if (dataSet == "user") {
       val userTypes = java.util.Arrays.asList("user-upload", "api-endpoint")
       traversal = traversal.has("updated_by", within(userTypes))

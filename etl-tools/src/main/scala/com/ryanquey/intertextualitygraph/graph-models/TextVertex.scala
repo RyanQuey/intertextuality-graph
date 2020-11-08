@@ -15,6 +15,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.unfold
 
+import gremlin.scala._
+
 import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
@@ -31,7 +33,9 @@ import com.ryanquey.datautils.models.{Model, Record}
 /*
  * - NOTE make sure to keep fields in sync with com.ryanquey.intertextualitygraph.models.chapters.ChapterBase
  */
+@label("text")
 case class TextVertex(
+  // maybe use @id annotation, looks optional
   id : UUID,  
   startingBook : String,  
   yearWritten : Integer,  // INT 
@@ -50,7 +54,8 @@ case class TextVertex(
   comments : String,  // TEXT
   createdBy : String,
   updatedBy : String, 
-  updatedAt : Instant // TIMESTAMP, 
+  updatedAt : Instant, // TIMESTAMP, 
+  @underlying vertex: Option[Vertex] = None
 ) extends GraphReferenceVertex[TextVertex] {
     def companionObject = TextVertex
 }
@@ -152,7 +157,6 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
   def fetchBooks (text : TextVertex) = {
     val textTraversal = TextVertex.buildVertexTraversal(text)
     val id = textTraversal.values("id").by(unfold()).next()
-
     
   }
 

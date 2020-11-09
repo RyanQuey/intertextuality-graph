@@ -9,10 +9,13 @@ import scala.jdk.CollectionConverters._
 
 import com.datastax.oss.driver.api.core.cql._;
 import scala.collection.immutable.List
+import scala.util.{Try, Success, Failure}
+
+import com.datastax.oss.driver.api.core.servererrors.InvalidQueryException
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
-import org.apache.tinkerpop.gremlin.structure.Vertex
+import org.apache.tinkerpop.gremlin.structure.{Vertex, Edge}
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.unfold
 
 import gremlin.scala._
@@ -23,6 +26,7 @@ import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 import com.ryanquey.datautils.helpers.StringHelpers._;
+import java.time.Instant;
 
 import com.ryanquey.intertextualitygraph.graphmodels.GraphModel
 import com.ryanquey.intertextualitygraph.graphmodels.GraphReferenceVertex
@@ -40,6 +44,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource;
 import scala.reflect._
 import scala.reflect.runtime.universe._
 
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder._;
 
 
 /*
@@ -53,16 +58,16 @@ case class TextVertex(
   startingBook : String,  
   splitPassages : List[String],  // LIST<TEXT>
   startingChapter : Integer,  
-  startingVerse : Integer,  
   endingBook : String,  
   endingChapter : Integer, 
-  endingVerse : Integer,  
   testament : String,  // TEXT 
   canonical : Boolean,  // BOOLEAN 
   updatedAt : Instant, // TIMESTAMP, 
   createdBy : String,
   updatedBy : String, 
 
+  startingVerse : Option[Integer],  
+  endingVerse : Option[Integer],  
   yearWritten : Option[Integer],  // INT 
   author : Option[String],  // TEXT
   canonicalText : Option[String],  // TEXT
@@ -71,8 +76,223 @@ case class TextVertex(
   comments : Option[String],  // TEXT
 
 ) extends GraphReferenceVertex[TextVertex] {
-    def companionObject = TextVertex
+  def companionObject = TextVertex
+  /*
+   *
+   * - needs to maintain order, since we will pass in primary key in order sometimes (C* generally requires knowing the primary key in order). So use a list, not set
+   */ 
+  def getPrimaryKey() = {
+    List(
+      this.startingBook,
+      this.id,
+      )
+  }
+
+  ///////////////////////////////////////////////////////////
+  // CRUD
+  ///////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+  // ASSOCIATION CRUD
+  ///////////////////////////////////////////////////////////
+
+  ///////////////
+  // ASSOCIATION CREATE
+  ///////////////
+
+  /*
+   * take a given text vertex and create references to all books, chapters, and verses
+   * - Unfortunately, due to the way that C* works, never know if we are truly "creating" something, since it is just an upsert. We might never use this function
+   * - keeping it as functional as possible, but not setting this on the case class
+   * - TODO make this a transaction of some sort?
+   *
+   */ 
+  def createReferenceVertices () : Unit = {
+    // fetch metadata (as represented by case class instances) for each book/ch/v overlapping with this text
+    val (books, chapters, verses) = getReferenceMetadata()
+
+    books.foreach((b) => {
+      println(s"creating book edge for $b");
+      createEdgeToBook(b.name)}) 
+    chapters.foreach((c) => createEdgeToChapter(c.book, c.number)) 
+    verses.foreach((v) => createEdgeToVerse(v.book, v.chapter, v.number)) 
+  }
+
+  ///////////////
+  // ASSOCIATION READ
+  ///////////////
+
+  /*
+   * fetch all books that this text includes
+   *
+   */ 
+  def fetchBooks () = {
+    val textTraversal = buildVertexTraversal()
+    val id = textTraversal.values("id").by(unfold()).next()
+    
+  }
+
+
+  ///////////////
+  // ASSOCIATION UPDATE
+  ///////////////
+
+  /*
+   * take a given text vertex and update references to all books, chapters, and verses
+   * - TODO don't just dropping all edges to references and creating new ones, create a lot of tombstones every time any edit on a text is made
+   * - TODO really, if this is an update, don't need to drop/create book edges. This could be a fairly large performance gain, and enough to be worth doing a doing a read first before write
+   *
+   */ 
+  def updateReferenceVertices () : Unit = {
+    // 1) fetch all currently existing edges to reference vertices (book, ch, v) (do not delete the vertices themselves!)
+    // TODO do it this way for better performance
+
+    // 2) delete all old edges
+    // TODO for now just dropping all
+    buildTraversal.outE("from_book").drop
+    buildTraversal.outE("from_chapter").drop
+    buildTraversal.outE("from_verse").drop
+
+    // 3) create vertices that don't exist yet
+    // for each book that does not currently exist, create a new edge
+    // TODO for now just creating edges for all, whether or not they previously existed
+    
+    createReferenceVertices() 
+
+  }
+
+  ///////////////////////////////////////////////////////////
+  // METADATA HELPERS
+  ///////////////////////////////////////////////////////////
+
+
+
+
+  /*
+   * for a given textVertex, return java model instances of all book, ch, and verses that this text intersects with
+   * - could create a helper to get graphModels instead, but not bothering with that for now
+   */ 
+  def getReferenceMetadata () = {
+    // extract out all books for this text
+    val startingBook = BookVertex.getBookByName(this.startingBook)
+    val startingChapter = ChapterVertex.getChapterByNum(startingBook, this.startingChapter)
+
+    val endingBook = BookVertex.getBookByName(this.endingBook)
+    val endingChapter = ChapterVertex.getChapterByNum(endingBook, this.endingChapter)
+
+    val books = BookVertex.getBooksBetween(startingBook, endingBook)
+    
+    // extract out all chapters for this text
+    val chapters = ChapterVertex.getChaptersBetween(startingChapter, endingChapter)
+    
+    // if verses are not specified, then getting for the whole chapter
+    val startingVerseNumber : Int = if (this.startingVerse == None) 1 else startingChapter.verseCount
+    val endingVerseNumber : Int = if (this.endingVerse == None) 1 else endingChapter.verseCount
+    val startingVerse : VerseVertex = VerseVertex.getVerseByNum(startingBook, startingChapter, startingVerseNumber)
+    val endingVerse : VerseVertex = VerseVertex.getVerseByNum(endingBook, endingChapter, endingVerseNumber)
+
+    // extract out all verses for this text
+    val verses = VerseVertex.getVersesBetween(startingVerse, endingVerse)
+
+    (books, chapters, verses)
+  }
+
+  ///////////////////////////////////////////////////////////
+  // GRAPH HELPERS
+  ///////////////////////////////////////////////////////////
+
+  /*
+   * 
+   * There should only be one result, but rather than returning a Vertex, just return the traversal, so can continue traversing off of it without hitting the database yet
+   * - can call `next()` on the return value to get a Vertex (I think...)
+   */
+  def buildVertexTraversal () : GraphTraversal[Vertex, Vertex] = {
+    buildVertexTraversalFromPK(List(this.startingBook, this.id))
+  }
+
+
+  ///////////////////////////////////////////////////////////
+  // PRIVATE METHODS
+  ///////////////////////////////////////////////////////////
+
+
+  /*
+   * creates edge record between text and book
+   * - assumes that book already exists (which always should, if we imported the seed that already)
+   * - should not ever be needed to call directly, I don't think.
+   *   TODO I'm sure there's a way to do all of this in a single traversal, getting the book name from the properties, assigning it using .as("bookName") or something, then using it to get all teh books? But I think it might be hard to find books in between...and chapters and verses would have the same issue
+   */
+  private def createEdgeToBook (bookName : String) : Unit = {
+    try { 
+      /*
+       * TODO this is how I should be doing it, but going to try using cql real quick
+      val textVertexTraversal = buildVertexTraversal()
+      val bookVertexTraversal = BookVertex.buildVertexTraversalFromPK(List(bookName))
+      val bookVertex = bookVertexTraversal.next()
+
+      println(s"adding edge from text ${this.id} to book $bookName");
+      println(s"- using text traversal $textVertexTraversal");
+
+      //textVertexTraversal.addE("from_book").from(bookVertexTraversal)
+      val addETraversal : GraphTraversal[Vertex,Edge] = textVertexTraversal.addE("from_book").from(bookVertex)
+      println(s"result of adding edge : $addETraversal");
+      addETraversal.next()
+     // textVertexTraversal.addOutE("from_book", bookVertex)
+     */
+
+      var query = insertInto("text_from_book_edges")
+        .value("book_name", literal(bookName))
+        .value("text_starting_book", literal(this.startingBook))
+        .value("text_id", literal(this.id))
+        .value("updated_at", literal(Instant.now()))
+
+    println(s"Executing string to create connection: $query")
+    val result = CassandraDb.execute(s"$query ;");
+    println(s"result from creating connection: $result");
+      
+    } catch {
+      case e: InvalidQueryException => {
+        e.printStackTrace
+        e.getStackTrace.mkString("\n")
+        throw e
+      }
+      case e: Exception => throw e
+    }
+  }
+
+
+
+
+  /*
+   * creates edge record between text and chapter
+   * - assumes that book and chapter already exists (which always should, if we imported the seed that already)
+   *  TODO update with changes made from createEdgeToBook once I get it working up there
+   *
+   */
+  private def createEdgeToChapter (bookName : String, chapterNumber : Int) : Unit = {
+    val textVertexTraversal = buildVertexTraversal()
+    val chapterVertexTraversal = ChapterVertex.buildVertexTraversalFromPK(List(bookName, chapterNumber))
+
+    textVertexTraversal.addE("from_chapter").from(chapterVertexTraversal)
+  }
+  /*
+   * creates edge record between text and verse
+   * - assumes that book and chapter and verse already exists (which always should, if we imported the seed that already)
+   *  TODO update with changes made from createEdgeToBook once I get it working up there
+   *
+   */
+  private def createEdgeToVerse (bookName : String, chapterNumber : Int, verseNumber : Int) : Unit = {
+    val textTraversal = buildVertexTraversal()
+    val verseTraversal = VerseVertex.buildVertexTraversalFromPK(List(bookName, chapterNumber, verseNumber))
+
+    textTraversal.addE("from_verse").from(verseTraversal)
+  }
 }
+
+
+
+
+
+
 
 object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
   /*
@@ -90,12 +310,12 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
       canonical = javabean.getCanonical,
       splitPassages = javabean.getSplitPassages.asScala.toList,
       startingChapter = javabean.getStartingChapter,
-      startingVerse = javabean.getStartingVerse,
       endingBook = javabean.getEndingBook,
       endingChapter = javabean.getEndingChapter,
-      endingVerse = javabean.getEndingVerse,
       testament = javabean.getTestament,
 
+      endingVerse = Option(javabean.getEndingVerse),
+      startingVerse = Option(javabean.getStartingVerse),
       author = Option(javabean.getAuthor),
       canonicalText = Option(javabean.getCanonicalText),
       greekTranslation = Option(javabean.getGreekTranslation),
@@ -125,6 +345,8 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
   def getOptionalFields() = {
     Set(
       "yearWritten",
+      "startingVerse",
+      "endingVerse",
       "author",
       "canonicalText",
       "greekTranslation",
@@ -135,6 +357,18 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
 
   def getFieldsOfType[T: TypeTag: ClassTag] () : List[String] = getFieldsOfTypeForClass[TextVertex, T]
 
+  /*
+   *
+   * - needs to maintain order, since we will pass in primary key in order sometimes (C* generally requires knowing the primary key in order). So use a list, not set
+   */ 
+  def getPrimaryKeyFields() = {
+    List(
+      "startingBook",
+      "id",
+      )
+  }
+
+
   ///////////////////////////////////////////////////////////
   // CRUD
   ///////////////////////////////////////////////////////////
@@ -142,14 +376,6 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
   ///////////////
   // CREATE
   ///////////////
-
-  def findAllTexts(map : Map[Any, Any]) = {  
-    //implicit val graph :  = g.asScala
-    //graph.V.hasLabel[TextVertex]
-    // val repr = FromMap[TextVertex]
-
-    // vertexClassGen.from(map)
-  }
 
   ///////////////
   // READ
@@ -164,111 +390,11 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
   ///////////////
 
 
-  ///////////////////////////////////////////////////////////
-  // ASSOCIATION CRUD
-  ///////////////////////////////////////////////////////////
-
-  ///////////////
-  // ASSOCIATION CREATE
-  ///////////////
-
-  /*
-   * take a given text vertex and create references to all books, chapters, and verses
-   * - Unfortunately, due to the way that C* works, never know if we are truly "creating" something, since it is just an upsert. We might never use this function
-   * - keeping it as functional as possible, but not setting this on the case class
-   * - TODO make this a transaction of some sort?
-   *
-   */ 
-  def createReferenceVertices (text : TextVertex) : Unit = {
-    // fetch metadata (as represented by case class instances) for each book/ch/v overlapping with this text
-    val (books, chapters, verses) = getReferenceMetadata(text)
-
-    books.foreach((b) => createEdgeToBook(text, b.name)) 
-    chapters.foreach((c) => createEdgeToChapter(text, c.book, c.number)) 
-    verses.foreach((v) => createEdgeToVerse(text, v.book, v.chapter, v.number)) 
-  }
-
-  ///////////////
-  // ASSOCIATION READ
-  ///////////////
-
-  /*
-   * fetch all books that this text includes
-   *
-   */ 
-  def fetchBooks (text : TextVertex) = {
-    val textTraversal = TextVertex.buildVertexTraversal(text)
-    val id = textTraversal.values("id").by(unfold()).next()
-    
-  }
-
-
-  ///////////////
-  // ASSOCIATION UPDATE
-  ///////////////
-
-  /*
-   * take a given text vertex and update references to all books, chapters, and verses
-   *
-   */ 
-  def updateReferenceVertices (text : TextVertex) : Unit = {
-    // 1) fetch all currently existing reference vertices (book, ch, v)
-
-    // 2) delete all old vertices
-
-    // 3) create vertices that don't exist yet
-    // for each book that does not currently exist, create a new edge
-    
-    // for each chapter that does not currently exist, create a new edge
-    
-    // for each verse that does not currently exist, create a new edge
-  }
-
-  ///////////////////////////////////////////////////////////
-  // METADATA HELPERS
-  ///////////////////////////////////////////////////////////
-
-  /*
-   * for a given textVertex, return java model instances of all book, ch, and verses that this text intersects with
-   * - could create a helper to get graphModels instead, but not bothering with that for now
-   */ 
-  def getReferenceMetadata (text : TextVertex) = {
-    // extract out all books for this text
-    val startingBook = BookVertex.getBookByName(text.startingBook)
-    val startingChapter = ChapterVertex.getChapterByNum(startingBook, text.startingChapter)
-    val startingVerse = VerseVertex.getVerseByNum(startingBook, startingChapter, text.startingVerse)
-
-    val endingBook = BookVertex.getBookByName(text.endingBook)
-    val endingChapter = ChapterVertex.getChapterByNum(endingBook, text.endingChapter)
-    val endingVerse = VerseVertex.getVerseByNum(endingBook, endingChapter, text.endingVerse)
-
-    val books = BookVertex.getBooksBetween(startingBook, endingBook)
-    
-    // extract out all chapters for this text
-    val chapters = ChapterVertex.getChaptersBetween(startingChapter, endingChapter)
-    
-    // extract out all verses for this text
-    val verses = VerseVertex.getVersesBetween(startingVerse, endingVerse)
-
-    (books, chapters, verses)
-  }
-
-
-
 
 
   ///////////////////////////////////////////////////////////
   // GRAPH HELPERS
   ///////////////////////////////////////////////////////////
-
-  /*
-   * 
-   * There should only be one result, but rather than returning a Vertex, just return the traversal, so can continue traversing off of it without hitting the database yet
-   * - can call `next()` on the return value to get a Vertex (I think...)
-   */
-  def buildVertexTraversal (text : TextVertex) : GraphTraversal[Vertex, Vertex] = {
-    buildVertexTraversalFromPK(List(text.startingBook, text.id))
-  }
 
   def buildVertexTraversalFromPK (pk : List[Any]) : GraphTraversal[Vertex, Vertex] = {
     val g : GraphTraversalSource = CassandraDb.graph
@@ -279,44 +405,5 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
       .has("id", id)
 
     traversal
-  }
-
-  ///////////////////////////////////////////////////////////
-  // PRIVATE METHODS
-  ///////////////////////////////////////////////////////////
-
-
-  /*
-   * creates edge record between text and book
-   * - assumes that book already exists (which always should, if we imported the seed that already)
-   */
-  private def createEdgeToBook (textVertex : TextVertex, bookName : String) = {
-    val textVertexTraversal = TextVertex.buildVertexTraversal(textVertex)
-    val bookVertexTraversal = BookVertex.buildVertexTraversalFromPK(List(bookName))
-
-    textVertexTraversal.addE("from_book").from(bookVertexTraversal)
-  }
-
-  /*
-   * creates edge record between text and chapter
-   * - assumes that book and chapter already exists (which always should, if we imported the seed that already)
-   *
-   */
-  private def createEdgeToChapter (textVertex : TextVertex, bookName : String, chapterNumber : Int) = {
-    val textVertexTraversal = TextVertex.buildVertexTraversal(textVertex)
-    val chapterVertexTraversal = ChapterVertex.buildVertexTraversalFromPK(List(bookName, chapterNumber))
-
-    textVertexTraversal.addE("from_chapter").from(chapterVertexTraversal)
-  }
-  /*
-   * creates edge record between text and verse
-   * - assumes that book and chapter and verse already exists (which always should, if we imported the seed that already)
-   *
-   */
-  private def createEdgeToVerse (text : TextVertex, bookName : String, chapterNumber : Int, verseNumber : Int) = {
-    val textTraversal = TextVertex.buildVertexTraversal(text)
-    val verseTraversal = VerseVertex.buildVertexTraversalFromPK(List(bookName, chapterNumber, verseNumber))
-
-    textTraversal.addE("from_verse").from(verseTraversal)
   }
 }

@@ -14,6 +14,7 @@ import com.datastax.oss.driver.api.core.cql._;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.structure.Vertex
+import org.apache.tinkerpop.gremlin.structure.Element
 
 import com.ryanquey.datautils.helpers.StringHelpers._;
 
@@ -71,5 +72,4 @@ trait GraphModelCompanion[A <: GraphModel[A]] {
    * NOTE WARNING: Prone to runtime errors if this is off, even by one. Need to unit test all of these
    */ 
   def getOptionalFields() : Set[String]
-
 }

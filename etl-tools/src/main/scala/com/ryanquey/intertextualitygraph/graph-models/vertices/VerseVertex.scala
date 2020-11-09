@@ -53,6 +53,18 @@ case class VerseVertex(
   comments : Option[String],  // TEXT
   ) extends GraphReferenceVertex[VerseVertex] {
     def companionObject = VerseVertex
+
+    /*
+     *
+     * - needs to maintain order, since we will pass in primary key in order sometimes (C* generally requires knowing the primary key in order). So use a list, not set
+     */ 
+    def getPrimaryKey() = {
+      List(
+        this.book,
+        this.chapter,
+        this.number
+        )
+    }
   }
 
 object VerseVertex extends GraphReferenceVertexCompanion[VerseVertex] {
@@ -114,7 +126,22 @@ object VerseVertex extends GraphReferenceVertexCompanion[VerseVertex] {
       "comments"
     )
   }
+
+  /*
+   *
+   * - needs to maintain order, since we will pass in primary key in order sometimes (C* generally requires knowing the primary key in order). So use a list, not set
+   */ 
+  def getPrimaryKeyFields() = {
+    List(
+      "book",
+      "chapterNumber",
+      "number"
+      )
+  }
+
   def getFieldsOfType[T: TypeTag: ClassTag] () : List[String] = getFieldsOfTypeForClass[VerseVertex, T]
+
+
   ///////////////////////////////////////////////////////////
   // METADATA HELPERS
   ///////////////////////////////////////////////////////////
@@ -141,6 +168,7 @@ object VerseVertex extends GraphReferenceVertexCompanion[VerseVertex] {
    * - provides an easy way to get verse metadata quickly
    */ 
   def getVerseByRefData (bookName : String, chapterNum : Int, verseNum : Int) : VerseVertex = {
+    println(s"$bookName $chapterNum : $verseNum");
     allVersesFromFile.find((v) => v.book == bookName && v.chapter == chapterNum && v.number == verseNum).get
   }
   
@@ -167,7 +195,7 @@ object VerseVertex extends GraphReferenceVertexCompanion[VerseVertex] {
 
       // if this is NOT the first chapter, then start at beginning of the chapter
       val initialVerseNum : Int = if (isFirstChapter) startingVerse.number else 1
-      val finalVerseNum : Int = if (isFinalChapter) endingVerse.number else chapter.verseCount.get
+      val finalVerseNum : Int = if (isFinalChapter) endingVerse.number else chapter.verseCount
 
       val verseRange = initialVerseNum to finalVerseNum
       for (verseNum <- verseRange) {

@@ -105,6 +105,7 @@ object IntertextualConnectionEdge {
     *   * actually, this might have been fixed already
     * - TODO heading into the future, we want to do inserts using gremlin. This is probably fine for now though, no reason to change
     * - NOTE tsk importer is not idempotent, will create new connectins since no ids are in tsk csv
+    *   TODO can make this a case class method
     */
 
 

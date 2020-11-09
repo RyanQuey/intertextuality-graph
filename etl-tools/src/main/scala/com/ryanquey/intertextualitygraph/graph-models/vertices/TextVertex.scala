@@ -224,7 +224,7 @@ case class TextVertex(
   private def createEdgeToBook (bookName : String) : Unit = {
     try { 
       /*
-       * TODO this is how I should be doing it, but going to try using cql real quick
+       * TODO this is how I should be doing it, but going to try using cql since I'm not able to get this working
       val textVertexTraversal = buildVertexTraversal()
       val bookVertexTraversal = BookVertex.buildVertexTraversalFromPK(List(bookName))
       val bookVertex = bookVertexTraversal.next()
@@ -245,9 +245,7 @@ case class TextVertex(
         .value("text_id", literal(this.id))
         .value("updated_at", literal(Instant.now()))
 
-    println(s"Executing string to create connection: $query")
-    val result = CassandraDb.execute(s"$query ;");
-    println(s"result from creating connection: $result");
+      CassandraDb.execute(s"$query ;");
       
     } catch {
       case e: InvalidQueryException => {
@@ -269,10 +267,24 @@ case class TextVertex(
    *
    */
   private def createEdgeToChapter (bookName : String, chapterNumber : Int) : Unit = {
+      /*
+       * TODO this is how I should be doing it, but going to try using cql since I'm not able to get this working
+      val textVertexTraversal = buildVertexTraversal()
     val textVertexTraversal = buildVertexTraversal()
     val chapterVertexTraversal = ChapterVertex.buildVertexTraversalFromPK(List(bookName, chapterNumber))
 
-    textVertexTraversal.addE("from_chapter").from(chapterVertexTraversal)
+    textVertexTraversal.addE("from_chapter").from(chapterVertexTraversal).next()
+    */
+
+      var query = insertInto("text_from_chapter_edges")
+        .value("chapter_number", literal(chapterNumber))
+        .value("chapter_book", literal(bookName))
+        .value("text_starting_book", literal(this.startingBook))
+        .value("text_id", literal(this.id))
+        .value("updated_at", literal(Instant.now()))
+
+      CassandraDb.execute(s"$query ;");
+
   }
   /*
    * creates edge record between text and verse
@@ -281,10 +293,23 @@ case class TextVertex(
    *
    */
   private def createEdgeToVerse (bookName : String, chapterNumber : Int, verseNumber : Int) : Unit = {
+      /*
+       * TODO this is how I should be doing it, but going to try using cql since I'm not able to get this working
+      val textVertexTraversal = buildVertexTraversal()
     val textTraversal = buildVertexTraversal()
     val verseTraversal = VerseVertex.buildVertexTraversalFromPK(List(bookName, chapterNumber, verseNumber))
 
-    textTraversal.addE("from_verse").from(verseTraversal)
+    textTraversal.addE("from_verse").from(verseTraversal).next()
+    */
+      var query = insertInto("text_from_verse_edges")
+        .value("verse_number", literal(chapterNumber))
+        .value("verse_chapter", literal(chapterNumber))
+        .value("verse_book", literal(bookName))
+        .value("text_starting_book", literal(this.startingBook))
+        .value("text_id", literal(this.id))
+        .value("updated_at", literal(Instant.now()))
+
+      CassandraDb.execute(s"$query ;");
   }
 }
 

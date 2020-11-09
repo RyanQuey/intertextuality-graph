@@ -70,11 +70,20 @@ object ChapterVertex extends GraphReferenceVertexCompanion[ChapterVertex] {
     })
   }
 
-  def valueMapToCaseClass(valueMap: java.util.Map[String, Any]) : ChapterVertex = {
-     val typecastedMap = valueMap.asScala.toMap
-     val mapWithFixedKeys = typecastedMap.map { case (key, value) => snakeToCamel(key) -> value }
+  def preparedValueMapToCaseClass(preparedValueMap: Map[String, Any]) : ChapterVertex = {
+     CaseClassFromMap[ChapterVertex](preparedValueMap)
+  }
 
-     CaseClassFromMap[ChapterVertex](mapWithFixedKeys)
+  def getOptionalFields() = {
+    Set(
+      "yearWritten",
+      "author",
+      "scrollmapperId",
+      "osisRef",
+      "bookSeriesId",
+      "verseCount",
+      "comments"
+    )
   }
 
   ///////////////////////////////////////////////////////////

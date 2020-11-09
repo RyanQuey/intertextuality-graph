@@ -1,6 +1,6 @@
 package com.ryanquey.intertextualitygraph.graphmodels
 
-import java.util.{UUID, Map}
+import java.util.{UUID}
 import java.time.Instant;
 
 //import scala.collection.JavaConverters._ 
@@ -116,14 +116,21 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
     })
   }
 
-  def valueMapToCaseClass(valueMap: java.util.Map[String, Any]) : TextVertex = {
-     val typecastedMap = valueMap.asScala.toMap
+  def preparedValueMapToCaseClass(preparedValueMap: Map[String, Any]) : TextVertex = {
 
-     val mapWithFixedKeys = typecastedMap.map { case (key, value) => snakeToCamel(key) -> value }
-
-     CaseClassFromMap[TextVertex](mapWithFixedKeys)
+    CaseClassFromMap[TextVertex](preparedValueMap)
   }
 
+  def getOptionalFields() = {
+    Set(
+      "yearWritten",
+      "author",
+      "canonicalText",
+      "greekTranslation",
+      "englishTranslation",
+      "comments"
+    )
+  }
   ///////////////////////////////////////////////////////////
   // CRUD
   ///////////////////////////////////////////////////////////

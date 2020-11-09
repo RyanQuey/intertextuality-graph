@@ -27,28 +27,6 @@ trait GraphVertex[A <: GraphVertex[A]] extends GraphModel[A] {
 }
 
 trait GraphVertexCompanion[A <: GraphVertex[A]] extends GraphModelCompanion[A] {
-  //def findOne() : B
-
-
-  /*
-   * Takes valueMap with all values (ie, what is returned from gremlin traversal) and returns case class instance
-   * - especially needed so that I can create a simple findOne for all vertices (findOne)
-   * - Alternatively, could try this one: https://github.com/mpollmeier/gremlin-scala#mapping-vertices-fromto-case-classes
-   *   * downside is that it looks pretty complex, and would require specific implementation of case classes, so might be hard to get out of. Might not even work with DSE, who knows. I had a ahrd time figuring out how to instantiate ScalaGraph by calling "asScala" on ...well I'm not sure what I should have called it on. They call it on return value of tinkergraph.open() 
-   *
-   */ 
-  // this didn't work, works when a specific case class is used, but not when using generics (ie A). 
-  // TODO I'm sure there's a way to get it working with generics, but not wasting any more time on this
-  // def valueMapToCaseClass(valueMap: java.util.Map[String, Any]) : A = {
-  //    val typecastedMap = valueMap.asScala.toMap
-
-  //    CaseClassFromMap[A](typecastedMap)
-  // }
-  def valueMapToCaseClass(valueMap: java.util.Map[String, Any]) : A;
-
-  
-
-
 
   /*
    * - sacrificing type safety for convenience. 
@@ -56,7 +34,6 @@ trait GraphVertexCompanion[A <: GraphVertex[A]] extends GraphModelCompanion[A] {
    *   * Convenience: can define a single helper on this trait to perform various common graph traversals. Means our code is easier to develop, since all of this logic is in one file, here
    */
   def buildVertexTraversalFromPK(pk: List[Any] ): GraphTraversal[Vertex, Vertex]
-
 
   /*
    * return type: gremlin vertex 
@@ -85,12 +62,60 @@ trait GraphVertexCompanion[A <: GraphVertex[A]] extends GraphModelCompanion[A] {
     valueMap
   }
 
+  def prepareValueMapForCaseClass (valueMap: java.util.Map[String, Any]) : Map[String, Any] = {
+    val typecastedMap = valueMap.asScala.toMap
+
+    val fixedKeysMap = typecastedMap.map { 
+      case (key, value) => {
+        // from db col => case class field
+        val camelKey = snakeToCamel(key)
+        camelKey -> value
+      }
+    }
+
+    // will return e.g., List(("key1" -> None), ("key2" -> Some(4)))
+    val optionVals : Set[(String, Option[Any])] = getOptionalFields.map {
+      // anyMap.get will return an option (either Some(val) or None). so can just use that
+      case (field) => field -> fixedKeysMap.get(field)
+    }
+
+    println(s"optionVals: ${optionVals}")
+
+    // add/update optionVals to existing map, so all fields in the case class have coresponding key
+    // https://stackoverflow.com/a/29008426/6952495
+    val preparedMap = fixedKeysMap ++ optionVals
+
+
+    preparedMap
+  }
+
+  /*
+   * Takes valueMap with all values (ie, what is returned from gremlin traversal) and returns case class instance
+   * - especially needed so that I can create a simple findOne for all vertices (findOne)
+   * - Alternatively, could try this one: https://github.com/mpollmeier/gremlin-scala#mapping-vertices-fromto-case-classes
+   *   * downside is that it looks pretty complex, and would require specific implementation of case classes, so might be hard to get out of. Might not even work with DSE, who knows. I had a ahrd time figuring out how to instantiate ScalaGraph by calling "asScala" on ...well I'm not sure what I should have called it on. They call it on return value of tinkergraph.open() 
+   *
+   */ 
+  // this didn't work, works when a specific case class is used, but not when using generics (ie A). 
+  // TODO I'm sure there's a way to get it working with generics, but not wasting any more time on this
+  // def preparedValueMapToCaseClass(valueMap: java.util.Map[String, Any]) : A = {
+  //    val typecastedMap = valueMap.asScala.toMap
+
+  //    CaseClassFromMap[A](typecastedMap)
+  // }
+  def preparedValueMapToCaseClass(valueMap: Map[String, Any]) : A;
+
+
 
   /*
    * returns an instance of one of our graph models
    */ 
   def findOne(pk: List[Any]) : A = {
     val valueMap = findOneValueMap(pk)
-    valueMapToCaseClass(valueMap)
+    val preparedValueMap = prepareValueMapForCaseClass(valueMap)
+
+    preparedValueMapToCaseClass(preparedValueMap)
   }
 }
+
+

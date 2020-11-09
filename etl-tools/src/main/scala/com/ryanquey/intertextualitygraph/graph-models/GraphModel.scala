@@ -16,6 +16,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex
 
 import com.ryanquey.datautils.helpers.StringHelpers._;
 
+import scala.reflect.runtime.universe._
 /*
  * Represents all graph models
  * - keep the type of the case class on hand, to refer to it in methods
@@ -54,4 +55,17 @@ trait GraphModel[A <: GraphModel[A]] extends Product {
 trait GraphModelCompanion[A <: GraphModel[A]] {
   // might not need
   //def modelFields () : List[String]
+
+  // https://stackoverflow.com/a/16079804/6952495
+  def classAccessors[T: TypeTag]: List[String] = typeOf[T].members.sorted.collect {
+    case m: MethodSymbol if m.isCaseAccessor => m.name.toString
+  }.toList
+
+
+  /*
+  // better than doing crazy reflection stuff
+  // leave as method though if we use reflection in future though
+   * NOTE WARNING: Prone to runtime errors if this is off, even by one. Need to unit test all of these
+   */ 
+  def getOptionalFields() : Set[String]
 }

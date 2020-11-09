@@ -8,6 +8,7 @@ import scala.collection.JavaConverters._
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import com.ryanquey.intertextualitygraph.graphmodels.BookVertex
+import com.ryanquey.intertextualitygraph.graphmodels.TextVertex
 import com.ryanquey.intertextualitygraph.graphmodels.BookVertex._
 
 import java.util.UUID;
@@ -27,6 +28,23 @@ object TextHelpers {
   // CRUD
   ///////////////////////////////////////////////////////////
 
+  /*
+   * - we should never use persistText(text) directly, or else we will not take advantage of this helpers hooks
+   * - TODO as we pull more and more out of this file and put it into TextVertex class, will have to change this definition
+   *   * eventually this should be no more than a pointer to the TextVertex method, and then after that, get rid of it altogether
+   */ 
+  def persistText (text : Text) = {
+    // TODO create a system so that can check if changes are actually made, and what changes were made. 
+    // ie, some sort of "dirty" flag, or getDirty method
+    // only really helpful if we end up having a lot of people changing texts
+
+    val textVertex = TextVertex(text)
+    println("stextVertex: $textVertex");
+    textVertex.updateReferenceVertices
+
+
+    text.persist()
+  }
   ///////////////
   // CREATE
   ///////////////
@@ -46,7 +64,7 @@ object TextHelpers {
 
     if (dbMatch != null) {
       // go ahead and create another
-      text.persist();
+      persistText(text);
     }
   }
 
@@ -143,16 +161,15 @@ object TextHelpers {
 
     val dbMatch = findMatchByRef(text)
 
-
     if (dbMatch == null) {
       // go ahead and create another
-      text.persist();
+      persistText(text);
     } else {
       // basically, update the old record with data from the new record
       // this is if dbMatch is a Row instance
       // text.setId(dbMatch.getUuid("id"))
       text.setId(dbMatch.getId())
-      text.persist();
+      persistText(text);
     }
   }
 
@@ -163,6 +180,7 @@ object TextHelpers {
   // NOTE could be a range (ps.1.1-ps.1.6), but osisRangeList could also be a single ref (ps.1.1) or list of refs (ps.1.1-ps.1.3,ps.1.4). You won't know until you parse
   // main use case for this one though is building a text model instance
   // For now, at least assuming that the list of refs are in order...we did make it a LIST after all in C* not a SET! Let's have some order here!
+  // TODO eventually make a port for this using case class. Both could largely depend on a shared helper
   def populateFieldsfromOsis (osisRangeList : String, text : Text) { 
     println(s"osisRangeList is: $osisRangeList")
     val allRefs : Array[String] = osisRangeList.split(",")

@@ -34,17 +34,28 @@ case class ChapterVertex(
   canonical : Boolean,  // BOOLEAN 
   testament : String,  // TEXT 
   updatedAt : Instant,  // TIMESTAMP 
+  // is actually just the number of the last verse. So even if a chapter skips verses, is just that last number
+  verseCount : Integer,  // INT
 
   yearWritten : Option[Integer],  // INT 
   author : Option[String],  // TEXT
   scrollmapperId : Option[String],  // TEXT 
   osisRef : Option[String],  // TEXT 
   bookSeriesId : Option[String],  // TEXT 
-  // is actually just the number of the last verse. So even if a chapter skips verses, is just that last number
-  verseCount : Option[Integer],  // INT
   comments : Option[String],  // TEXT
   ) extends GraphReferenceVertex[ChapterVertex] {
     def companionObject = ChapterVertex
+
+    /*
+     *
+     * - needs to maintain order, since we will pass in primary key in order sometimes (C* generally requires knowing the primary key in order). So use a list, not set
+     */ 
+    def getPrimaryKey() = {
+      List(
+        this.book,
+        this.number,
+        )
+    }
   }
 
 object ChapterVertex extends GraphReferenceVertexCompanion[ChapterVertex] {
@@ -55,13 +66,13 @@ object ChapterVertex extends GraphReferenceVertexCompanion[ChapterVertex] {
       canonical=javabean.getCanonical(),
       testament=javabean.getTestament(),
       updatedAt=javabean.getUpdatedAt(),
+      verseCount=javabean.getVerseCount(),
 
       yearWritten=Option(javabean.getYearWritten()),
       author=Option(javabean.getAuthor()),
       scrollmapperId=Option(javabean.getScrollmapperId()),
       osisRef=Option(javabean.getOsisRef()),
       bookSeriesId=Option(javabean.getBookSeriesId()),
-      verseCount=Option(javabean.getVerseCount()),
       comments=Option(javabean.getComments()),
     )
   }
@@ -85,9 +96,19 @@ object ChapterVertex extends GraphReferenceVertexCompanion[ChapterVertex] {
       "scrollmapperId",
       "osisRef",
       "bookSeriesId",
-      "verseCount",
       "comments"
     )
+  }
+
+  /*
+   *
+   * - needs to maintain order, since we will pass in primary key in order sometimes (C* generally requires knowing the primary key in order). So use a list, not set
+   */ 
+  def getPrimaryKeyFields() = {
+    List(
+      "book",
+      "number"
+      )
   }
 
   def getFieldsOfType[T: TypeTag: ClassTag] () : List[String] = getFieldsOfTypeForClass[ChapterVertex, T]

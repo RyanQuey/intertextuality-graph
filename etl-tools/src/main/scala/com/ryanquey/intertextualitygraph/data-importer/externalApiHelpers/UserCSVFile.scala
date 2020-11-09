@@ -100,7 +100,7 @@ class UserCSVFile (filePath : String) {
 
         // don't want dupes, so find or create
         println(s"update or create ${alludingText}")
-        alludingText.persist()
+        TextHelpers.persistText(alludingText)
         
         for (srcText <- sourceTexts) {
           breakable {
@@ -112,7 +112,7 @@ class UserCSVFile (filePath : String) {
             }
             
             // don't want dupes, so find or create
-            srcText.persist()
+            TextHelpers.persistText(srcText)
 
             println(s"---- Connecting text... ----")
             val connectionType = csvRecord.get("connection_type")

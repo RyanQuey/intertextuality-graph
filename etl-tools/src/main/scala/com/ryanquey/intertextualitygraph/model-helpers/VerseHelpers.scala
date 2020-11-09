@@ -30,7 +30,7 @@ object VerseHelpers {
    *   * It's hacky, but it works well, and provides and easy way to access basic information about our verses. 
    *   * Also does not pollute our VerseVertex companion object with all this stuff that mostly just interacts with constants
    */
-  val _dataFile = new TheographicDataFile("verses", "verses-Grid view.csv");
+  val _dataFile = new TheographicDataFile("verses", "verses-completed_records.csv");
   val verses : Iterable[Verse] = _dataFile.getModelInstances().asInstanceOf[Iterable[Verse]]
 
   ///////////////////////////////////////////////////////

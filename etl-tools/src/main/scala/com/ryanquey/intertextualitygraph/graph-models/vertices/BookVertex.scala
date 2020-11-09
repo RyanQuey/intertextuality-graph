@@ -51,9 +51,20 @@ case class BookVertex(
   theographicShortName : Option[String] = None, // TEXT
   scrollmapperId : Option[String] = None, // TEXT 
   comments : Option[String] = None, // TEXT
-  ) extends GraphReferenceVertex[BookVertex] {
+) extends GraphReferenceVertex[BookVertex] {
     def companionObject = BookVertex
+
+  /*
+   *
+   * - needs to maintain order, since we will pass in primary key in order sometimes (C* generally requires knowing the primary key in order). So use a list, not set
+   */ 
+  def getPrimaryKey() = {
+    List(
+      this.name,
+      )
   }
+
+}
 
 object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
   /*
@@ -117,6 +128,16 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
     )
   }
 
+  /*
+   *
+   * - needs to maintain order, since we will pass in primary key in order sometimes (C* generally requires knowing the primary key in order). So use a list, not set
+   */ 
+  def getPrimaryKeyFields() = {
+    List(
+      "name",
+      )
+  }
+
   def getFieldsOfType[T: TypeTag: ClassTag] () : List[String] = getFieldsOfTypeForClass[BookVertex, T]
 
   ///////////////////////////////////////////////////////////
@@ -147,7 +168,6 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
   }
 
   def getBookByOsis (osisName : String) : BookVertex = {
-    println(s"looking for osis name $osisName...")
     allBooksFromFile.find((b) => b.osisAbbreviation.get == osisName).get
   }
 

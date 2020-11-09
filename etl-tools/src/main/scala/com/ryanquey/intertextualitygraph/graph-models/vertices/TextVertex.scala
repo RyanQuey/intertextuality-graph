@@ -113,8 +113,12 @@ case class TextVertex(
     books.foreach((b) => {
       println(s"creating book edge for $b");
       createEdgeToBook(b.name)}) 
+
     chapters.foreach((c) => createEdgeToChapter(c.book, c.number)) 
-    verses.foreach((v) => createEdgeToVerse(v.book, v.chapter, v.number)) 
+    verses.foreach((v) => {
+      println(s"creating verse edge for $v");
+      createEdgeToVerse(v.book, v.chapter, v.number)
+      })
   }
 
   ///////////////
@@ -302,7 +306,7 @@ case class TextVertex(
     textTraversal.addE("from_verse").from(verseTraversal).next()
     */
       var query = insertInto("text_from_verse_edges")
-        .value("verse_number", literal(chapterNumber))
+        .value("verse_number", literal(verseNumber))
         .value("verse_chapter", literal(chapterNumber))
         .value("verse_book", literal(bookName))
         .value("text_starting_book", literal(this.startingBook))

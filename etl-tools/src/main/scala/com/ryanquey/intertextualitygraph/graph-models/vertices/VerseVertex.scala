@@ -16,12 +16,16 @@ import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers
 import com.ryanquey.intertextualitygraph.modelhelpers.ChapterHelpers
 import com.ryanquey.intertextualitygraph.modelhelpers.VerseHelpers
 import com.ryanquey.intertextualitygraph.helpers.shapeless.{CaseClassFromMap}
+import com.ryanquey.intertextualitygraph.helpers.Reflection.{fromMap, getFieldsOfTypeForClass}
 import com.ryanquey.datautils.helpers.StringHelpers._;
 
 import java.util.UUID;
 import java.time.Instant;
 import com.datastax.oss.driver.api.core.cql._;
 import com.ryanquey.datautils.models.{Model, Record}
+import scala.reflect._
+import scala.reflect.runtime.universe._
+
 
 /*
  * - I put the CQL data type to the right of the field definition
@@ -110,6 +114,7 @@ object VerseVertex extends GraphReferenceVertexCompanion[VerseVertex] {
       "comments"
     )
   }
+  def getFieldsOfType[T: TypeTag: ClassTag] () : List[String] = getFieldsOfTypeForClass[VerseVertex, T]
   ///////////////////////////////////////////////////////////
   // METADATA HELPERS
   ///////////////////////////////////////////////////////////

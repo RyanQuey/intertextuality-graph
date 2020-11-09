@@ -19,8 +19,12 @@ import java.util.UUID;
 import java.time.Instant;
 import com.datastax.oss.driver.api.core.cql._;
 
+import com.ryanquey.intertextualitygraph.helpers.Reflection.{fromMap, getFieldsOfTypeForClass}
 import com.ryanquey.intertextualitygraph.helpers.shapeless.{CaseClassFromMap}
 import com.ryanquey.datautils.models.{Model, Record}
+import scala.reflect._
+import scala.reflect.runtime.universe._
+
 /*
  * - NOTE make sure to keep fields in sync with com.ryanquey.intertextualitygraph.models.chapters.ChapterBase
  */
@@ -85,6 +89,8 @@ object ChapterVertex extends GraphReferenceVertexCompanion[ChapterVertex] {
       "comments"
     )
   }
+
+  def getFieldsOfType[T: TypeTag: ClassTag] () : List[String] = getFieldsOfTypeForClass[ChapterVertex, T]
 
   ///////////////////////////////////////////////////////////
   // METADATA HELPERS

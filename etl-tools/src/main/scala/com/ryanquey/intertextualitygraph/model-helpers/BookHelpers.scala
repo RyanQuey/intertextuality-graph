@@ -91,4 +91,9 @@ object BookHelpers {
     // e.g., 1 > Genesis
     BookHelpers.getBookByNum(bookNum).getName()
   }
+
+  def nameToTestament (name : String ) : String = {
+    BookHelpers.getBookByName(name).getTestament()
+  }
+
 }

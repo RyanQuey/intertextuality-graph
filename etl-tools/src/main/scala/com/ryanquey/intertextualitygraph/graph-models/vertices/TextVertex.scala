@@ -31,14 +31,14 @@ import com.ryanquey.intertextualitygraph.graphmodels.BookVertex._
 
 import com.ryanquey.intertextualitygraph.helpers.shapeless.{CaseClassFromMap}
 import com.ryanquey.datautils.models.{Model, Record}
+import com.ryanquey.intertextualitygraph.helpers.Reflection.{fromMap, getFieldsOfTypeForClass}
 
 // TODO these are just temp to test
 import com.datastax.dse.driver.api.core.graph._;
 import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource;
 
-import shapeless.{LabelledGeneric, Generic}
-import shapeless.record.Record
-import shapeless.syntax.std.maps._
+import scala.reflect._
+import scala.reflect.runtime.universe._
 
 
 
@@ -118,7 +118,8 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
 
   def preparedValueMapToCaseClass(preparedValueMap: Map[String, Any]) : TextVertex = {
 
-    CaseClassFromMap[TextVertex](preparedValueMap)
+    // CaseClassFromMap[TextVertex](preparedValueMap)
+    fromMap[TextVertex](preparedValueMap) 
   }
 
   def getOptionalFields() = {
@@ -131,6 +132,9 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
       "comments"
     )
   }
+
+  def getFieldsOfType[T: TypeTag: ClassTag] () : List[String] = getFieldsOfTypeForClass[TextVertex, T]
+
   ///////////////////////////////////////////////////////////
   // CRUD
   ///////////////////////////////////////////////////////////
@@ -142,7 +146,6 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
   def findAllTexts(map : Map[Any, Any]) = {  
     //implicit val graph :  = g.asScala
     //graph.V.hasLabel[TextVertex]
-    // val vertexClassGen = Generic[TextVertex]
     // val repr = FromMap[TextVertex]
 
     // vertexClassGen.from(map)

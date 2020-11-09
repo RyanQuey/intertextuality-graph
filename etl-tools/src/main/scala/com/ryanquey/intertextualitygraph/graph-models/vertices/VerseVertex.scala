@@ -89,14 +89,27 @@ object VerseVertex extends GraphReferenceVertexCompanion[VerseVertex] {
     })
   }
 
-  def valueMapToCaseClass(valueMap: java.util.Map[String, Any]) : VerseVertex = {
-     val typecastedMap = valueMap.asScala.toMap
+  def preparedValueMapToCaseClass(preparedValueMap: Map[String, Any]) : VerseVertex = {
 
-     val mapWithFixedKeys = typecastedMap.map { case (key, value) => snakeToCamel(key) -> value }
-
-     CaseClassFromMap[VerseVertex](mapWithFixedKeys)
+     CaseClassFromMap[VerseVertex](preparedValueMap)
   }
 
+  def getOptionalFields() = {
+    Set(
+      "yearWritten",
+      "author",
+      "osisRef",
+      "scrollmapperId",
+      "canonicalText",
+      "kjvText",
+      "mtText",
+      "rahlfsLxxText",
+      "sblGntText",
+      "byzGntText",
+      "bookSeries",
+      "comments"
+    )
+  }
   ///////////////////////////////////////////////////////////
   // METADATA HELPERS
   ///////////////////////////////////////////////////////////

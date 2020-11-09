@@ -48,20 +48,6 @@ case class BookVertex(
     def companionObject = BookVertex
   }
 
-  /*
-  val myMap = Map("author" -> "moses_2108", "osisAbbreviation" -> "Gen", "testament" -> "Old Testament", "theographicShortName" -> "Ge", "slug" -> "gen", "verseCount" -> 1533, "canonical" -> true, "chapterCount" -> 50, "bookOrder" -> 1, "name" -> "Genesis", "updatedAt" -> "2020-11-08T06:52:04.425Z", 
-    "bookSeries" -> "h",
-    "yearWritten" -> 3,
-    "placeWritten" -> "3",
-    "author" -> "3",
-    "tyndaleAbbreviation" -> "3",
-    "scrollmapperId" -> "3",
-    "comments" -> "3",
-    )
-  */
-  //(author -> moses_2108, osisAbbreviation -> Gen, testament -> Old Testament, theographicShortName -> Ge, slug -> gen, verseCount -> 1533, chapterCount -> 50, bookOrder -> 1, name -> Genesis, updatedAt -> 2020-11-07T06:15:31.608Z)
-  //author -> moses_2108, osisAbbreviation -> Gen, testament -> Old Testament, theographicShortName -> Ge, slug -> gen, verseCount -> 1533, canonical -> true, chapterCount -> 50, bookOrder -> 1, name -> Genesis, updatedAt -> 2020-11-08T06:52:04.425Z
-
 object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
   /*
    * overloading the apply method so we can instantiate the case class using the corresponding Java model class
@@ -99,16 +85,28 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
     })
   }
 
-  def valueMapToCaseClass(valueMap: java.util.Map[String, Any]) : BookVertex = {
-     val typecastedMap = valueMap.asScala.toMap
+  def preparedValueMapToCaseClass(preparedValueMap: Map[String, Any]) : BookVertex = {
+     CaseClassFromMap[BookVertex](preparedValueMap)
+  }
 
-     // convert keys from snake case (as db column) to camel case (as case class)
-     // maybe using "case" is unnecessary?
-     val mapWithFixedKeys = typecastedMap.map { case (key, value) => snakeToCamel(key) -> value }
-     // TODO remove
-     println(mapWithFixedKeys);
-
-     CaseClassFromMap[BookVertex](mapWithFixedKeys)
+  /*
+   * NOTE WARNING: Prone to runtime errors if this is off, even by one. Need to unit test all of these
+   */ 
+  def getOptionalFields() = {
+    Set(
+      "bookOrder",
+      "bookSeries",
+      "yearWritten",
+      "placeWritten",
+      "author",
+      "verseCount",
+      "tyndaleAbbreviation",
+      "osisAbbreviation",
+      "slug",
+      "theographicShortName",
+      "comments",
+      "scrollmapperId"
+    )
   }
 
   ///////////////////////////////////////////////////////////
@@ -173,3 +171,4 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
   }
 
 }
+

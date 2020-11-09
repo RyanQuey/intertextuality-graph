@@ -6,6 +6,7 @@ import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
 import scala.collection.JavaConverters._ 
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
+import com.ryanquey.intertextualitygraph.helpers.Reflection.{fromMap}
 
 import java.util.UUID;
 import java.time.Instant;
@@ -17,6 +18,8 @@ import org.apache.tinkerpop.gremlin.structure.Vertex
 import com.ryanquey.datautils.helpers.StringHelpers._;
 
 import scala.reflect.runtime.universe._
+
+
 /*
  * Represents all graph models
  * - keep the type of the case class on hand, to refer to it in methods
@@ -68,4 +71,5 @@ trait GraphModelCompanion[A <: GraphModel[A]] {
    * NOTE WARNING: Prone to runtime errors if this is off, even by one. Need to unit test all of these
    */ 
   def getOptionalFields() : Set[String]
+
 }

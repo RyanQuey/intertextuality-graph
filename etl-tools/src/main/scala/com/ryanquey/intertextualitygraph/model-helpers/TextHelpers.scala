@@ -182,7 +182,8 @@ object TextHelpers {
     println(s"starting ref is: $startingRef")
     val startingBookOsis = startingRefData(0)
     
-    val startingBookName = BookHelpers.osisNameToName(startingBookOsis)
+    val startingBookData = BookHelpers.getBookByOsis(startingBookOsis)
+    val startingBookName = startingBookData.getName
 
     println(s"starting book is: $startingBookName")
     text.setStartingBook(startingBookName)
@@ -212,6 +213,13 @@ object TextHelpers {
     // NOTE for TSK data at least, should not have any semicolon at this point, so will just be a single split passage.
     val splitPassages = osisRangeList.split(";").toList.asJava
     text.setSplitPassages(splitPassages)
+
+    // set text metadata based on starting book (these should be same between starting and ending book)
+    // TODO add validation to make sure this is true!
+    val testament = startingBookData.getTestament
+    text.setTestament(testament)
+    val canonical = startingBookData.getCanonical
+    text.setCanonical(canonical)
   }
 
 }

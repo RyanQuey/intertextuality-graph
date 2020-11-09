@@ -6,6 +6,7 @@ import shapeless.syntax.std.maps._
 import shapeless._
 import labelled.{ FieldType, field }
 
+// NOTE watch out; I mihgt have read somewhere that this will break if import reflection classes in this file
 
 /*
  * for converting maps to case classes
@@ -24,6 +25,10 @@ import labelled.{ FieldType, field }
  *   java.util.NoSuchElementException: None.get
  *
  *   It probably means that there is a field in the case class that has not been marked Option and was not passed in
+ * 
+ *
+ * CURRENT ISSUES
+ * - does not work for java.time.Instant
  */
 trait FromMap[L <: HList] {
   def apply(m: Map[String, Any]): Option[L]

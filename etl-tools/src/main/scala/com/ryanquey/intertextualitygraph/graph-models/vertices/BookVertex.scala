@@ -1,27 +1,34 @@
 package com.ryanquey.intertextualitygraph.graphmodels
 
-import com.ryanquey.intertextualitygraph.models.books.Book
-import com.ryanquey.intertextualitygraph.models.chapters.Chapter
-import com.ryanquey.intertextualitygraph.models.verses.Verse
-import com.ryanquey.intertextualitygraph.models.texts.Text
-import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers
-import scala.collection.JavaConverters._ 
-import com.ryanquey.datautils.cassandraHelpers.CassandraDb
+//import scala.collection.JavaConverters._ 
+import scala.jdk.CollectionConverters._
+import java.util.UUID;
+import java.time.Instant;
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.structure.Vertex
 
-import java.util.UUID;
-import java.time.Instant;
 import com.datastax.oss.driver.api.core.cql._;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.structure.Vertex
 
+import com.ryanquey.intertextualitygraph.models.books.Book
+import com.ryanquey.intertextualitygraph.models.chapters.Chapter
+import com.ryanquey.intertextualitygraph.models.verses.Verse
+import com.ryanquey.intertextualitygraph.models.texts.Text
+import com.ryanquey.intertextualitygraph.modelhelpers.BookHelpers
+import com.ryanquey.datautils.cassandraHelpers.CassandraDb
+
 import com.ryanquey.datautils.models.{Model, Record}
 import com.ryanquey.intertextualitygraph.helpers.shapeless.{CaseClassFromMap}
 import com.ryanquey.datautils.helpers.StringHelpers._;
+import com.ryanquey.intertextualitygraph.helpers.Reflection.{fromMap, getFieldsOfTypeForClass}
+
+import scala.reflect._
+import scala.reflect.runtime.universe._
+
 /*
  * - NOTE make sure to keep fields in sync with com.ryanquey.intertextualitygraph.models.chapters.BookBase
  */
@@ -86,7 +93,8 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
   }
 
   def preparedValueMapToCaseClass(preparedValueMap: Map[String, Any]) : BookVertex = {
-     CaseClassFromMap[BookVertex](preparedValueMap)
+     //CaseClassFromMap[BookVertex](preparedValueMap)
+     fromMap[BookVertex](preparedValueMap) 
   }
 
   /*
@@ -108,6 +116,8 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
       "scrollmapperId"
     )
   }
+
+  def getFieldsOfType[T: TypeTag: ClassTag] () : List[String] = getFieldsOfTypeForClass[BookVertex, T]
 
   ///////////////////////////////////////////////////////////
   // METADATA HELPERS

@@ -1,6 +1,6 @@
 import React from "react"
 import PropTypes from 'prop-types'
-import classes from './style.scss'
+import './style.scss'
 import { StyleSheet, css } from 'aphrodite'
 import Icon from '../Icon'
 import theme from '../../../../theme'
@@ -93,7 +93,7 @@ const Button = ({ style = 'primary', children, onClick, disabled, selected, type
 
   return (
     <button
-      className={`${serverSideRendered ? "" : css(styles(style, disabled, selected).button)} ${classes.button} ${className || ""} ${(disabled || pending) ? classes.disabled : ""} ${small ? classes.small : ""} ${rectangle ? classes.rectangle : ""}`}
+      className={`${serverSideRendered ? "" : css(styles(style, disabled, selected).button)} button ${className || ""} ${(disabled || pending) ? "disabled" : ""} ${small ? "small" : ""} ${rectangle ? "rectangle" : ""}`}
       onClick={onClick}
       disabled={disabled || pending}
       type={type || "button"}

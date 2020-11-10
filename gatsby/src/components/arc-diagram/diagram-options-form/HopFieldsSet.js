@@ -29,14 +29,6 @@ class HopFieldsSet extends React.Component {
   constructor (props) {
     super(props)
 
-
-
-
-    this.state = {
-      reference: {},
-
-    }
-
     this.changeReference = this.changeReference.bind(this)
     this.getParams = this.getParams.bind(this)
     this.setParams = this.setParams.bind(this)

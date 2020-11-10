@@ -153,11 +153,15 @@ class IArcDiagram extends React.Component {
     if (!hopSet0) {
       return 
     }
+
     const { 
       reference,
       allusionDirection,
     } = hopSet0
 
+    if (!reference) {
+      return 
+    }
     const { 
       startingBook, 
       startingBookData, 
@@ -359,7 +363,12 @@ class IArcDiagram extends React.Component {
               dataSet={dataSet}
               refreshData={this.refreshData}
             />
-            <Button onClick={this.downloadAsCSV} disabled={loadingEdges}>
+            <Button 
+              onClick={this.downloadAsCSV} 
+              disabled={loadingEdges}
+              small={true}
+              rectangle={true}
+            >
               {downloadButtonText}
             </Button>
           </div>

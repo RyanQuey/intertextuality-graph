@@ -19,6 +19,10 @@ import {
   dataSetOptions,
 } from '../constants/arc-diagram'
 
+import {
+  alertActions,
+} from "../actions"
+
 /*
 import edgesData from '../data/intertextuality-edges.json';
 import targetVerticesData from '../data/intertextuality-vertices.json';
@@ -306,6 +310,15 @@ class IArcDiagram extends React.Component {
       startingChapter: startingChapter.value, 
       startingVerse: startingVerse.value,
     })
+
+    console.log("starting alert")
+    alertActions.newAlert({
+      title: "Invalid Token:",
+      message: "Please try again. If problem persists, please contact support",
+      level: "DANGER",
+      options: {timer: false},
+    })
+    console.log("made it out the other side of alert")
   }
 
   selectStartingChapter (option, details, skipRefresh = false) {

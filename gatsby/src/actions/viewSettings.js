@@ -3,7 +3,8 @@ import {
   CLOSE_MODAL,
   SET_VIEW_MODE,
   DATA_IS_READY,
-} from 'constants/actionTypes'
+} from '../constants/action-types'
+import store from "../reducers"
 
 export const openModal = (modal) => {
   store.dispatch({

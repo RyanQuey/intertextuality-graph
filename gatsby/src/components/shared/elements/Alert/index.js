@@ -1,11 +1,13 @@
-import theme from 'theme'
-import classes from './style.scss'
+import React from "react"
+import './style.scss'
 import {
   closeAlerts
-} from 'shared/actions/alerts'
+} from '../../../../actions/alerts'
+import _ from "lodash"
 
-export default ({ alert, className, color, ...props }) => {
+const Alert = ({ alert, className, color, ...props }) => {
   let borderStyle = {}
+  console.log(alert)
   //TODO: maybe create a parent component, that goes around all of the alerts
   let level
   if (["BUG", "DANGER"].includes(alert.level)) {
@@ -20,10 +22,10 @@ export default ({ alert, className, color, ...props }) => {
 
   return (
     <div
-      className={`${classes.alert} ${classes["alert-" + level]}`}
+      className={`alert alert-${level} ${className}`}
       role="alert"
     >
-      <button type="button" className={classes.closeButton} onClick={closeAlerts.bind(null, alert.id)} aria-label="Close">
+      <button type="button" className={"closeButton"} onClick={closeAlerts.bind(null, alert.id)} aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
       <span
@@ -36,4 +38,4 @@ export default ({ alert, className, color, ...props }) => {
   )
 }
 
-
+export default Alert

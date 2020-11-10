@@ -4,4 +4,6 @@
  * See: https://www.gatsbyjs.org/docs/ssr-apis/
  */
 
-// You can delete this file if you're not using it
+// https://www.gatsbyjs.com/docs/adding-redux-store/
+import wrapWithProvider from "./wrap-with-provider"
+export const wrapRootElement = wrapWithProvider

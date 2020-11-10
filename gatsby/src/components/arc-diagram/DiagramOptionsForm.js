@@ -4,6 +4,7 @@ import Button from '../shared/elements/Button';
 import Select from '../shared/groups/Select';
 
 import classes from './scss/diagram-options-form.scss'
+import HopFieldsSet from "./HopFieldsSet"
 
 import {
   bookOptions,
@@ -56,47 +57,21 @@ class DiagramOptionsForm extends React.Component {
     return (
       <div className={"configForm"}>
         <Form>
-          <div className="ref-selects-configs">
-            <h2>Now showing:</h2>
-            <div>
-              {chapterOptions && (
-                <Button onClick={this.props.toggleFilterByChapter}>{filterByChapter ? "Filter by Book Only" : "Filter by Chapter"}</Button>
-              )}
-              {filterByChapter && verseOptions && (
-                <Button onClick={this.props.toggleFilterByVerse}>{filterByVerse ? "Filter by Chapter Only" : "Filter by Verse"}</Button>
-              )}
-            </div>
-            <div>
-              <Select 
-                options={allusionDirectionOptions}
-                onChange={this.props.selectAllusionDirection}
-                currentOption={allusionDirection}
-              />
-            </div>
-            <div className="ref-selects">
-              <Select 
-                options={bookOptions}
-                className="book-select"
-                onChange={this.props.selectStartingBook}
-                currentOption={startingBook}
-              />
-
-              {filterByChapter && chapterOptions && (
-                <Select 
-                  options={chapterOptions}
-                  onChange={this.props.selectStartingChapter}
-                  currentOption={startingChapter}
-                />
-              )}
-              {filterByVerse && verseOptions && (
-                <Select 
-                  options={verseOptions}
-                  onChange={this.props.selectStartingVerse}
-                  currentOption={startingVerse}
-                />
-              )}
-            </div>
-          </div>
+          <HopFieldsSet 
+            startingBook={startingBook} 
+            startingChapter={startingChapter} 
+            startingVerse={startingVerse} 
+            chapterOptions={chapterOptions} 
+            verseOptions={verseOptions} 
+            allusionDirection={allusionDirection} 
+            dataSet={dataSet} 
+            hopsCount={hopsCount} 
+            filterByChapter={filterByChapter} 
+            filterByVerse={filterByVerse}  
+            selectStartingBook={this.props.selectStartingBook}
+            selectStartingChapter={this.props.selectStartingChapter}
+            selectStartingVerse={this.props.selectStartingVerse}
+          />
           <div className="other-configs">
             <div>
               Hops:

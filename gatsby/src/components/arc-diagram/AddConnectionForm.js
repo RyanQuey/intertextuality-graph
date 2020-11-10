@@ -55,7 +55,7 @@ class AddConnectionForm extends React.Component {
     this.setState({sourceText, formResult: false})
 
     if (sourceText.valid) {
-      this.props.onChangeSource(sourceText.parsed)
+      this.props.onChangeSource && this.props.onChangeSource(sourceText.parsed)
     }
   }
 

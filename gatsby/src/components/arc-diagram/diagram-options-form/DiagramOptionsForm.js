@@ -1,12 +1,13 @@
 import React from "react"
+import _ from "lodash"
+import { connect } from 'react-redux'
+
 import Form from '../../shared/elements/Form';
 import Button from '../../shared/elements/Button';
 import Select from '../../shared/groups/Select';
 
-import classes from './scss/diagram-options-form.scss'
 import HopFieldsSet from "./HopFieldsSet"
-import _ from "lodash"
-import { connect } from 'react-redux'
+import HopFieldSetsContainer from "./HopFieldSetsContainer"
 
 import Helpers from '../../../helpers/base-helpers'
 import {
@@ -16,6 +17,7 @@ import {
   allusionDirectionOptions,
 } from '../../../constants/arc-diagram'
 
+import './scss/diagram-options-form.scss'
 
 
 class DiagramOptionsForm extends React.Component {
@@ -47,16 +49,9 @@ class DiagramOptionsForm extends React.Component {
     return (
       <div className={"configForm"}>
         <Form  onSubmit={this.submit}>
-          {Object.keys(hopsParams).map((hopKey, index) => {
-            const value = hopsParams[hopKey]
 
-            return (
-              <HopFieldsSet 
-                index={index}
-              />
-            )
+          <HopFieldSetsContainer />
 
-          })}
           <div className="other-configs">
             <div>
               Data Set
@@ -71,6 +66,8 @@ class DiagramOptionsForm extends React.Component {
             onClick={this.submit}
             disabled={invalidParams}
             type="submit"
+            small={true}
+            rectangle={true}
           >
             Submit
           </Button>
@@ -83,7 +80,7 @@ class DiagramOptionsForm extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {hopSet0: {}})
+    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params")
   }
 }
 

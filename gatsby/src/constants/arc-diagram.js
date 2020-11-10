@@ -34,7 +34,7 @@ export const allusionDirectionOptions = [
     value: "alludes-to",
   },
   {
-    label: "Texts Alluded to By", 
+    label: "Texts alluded to by", 
     value: "alluded-to-by",
   },
   // {
@@ -48,6 +48,7 @@ export const allusionDirectionOptions = [
   //   value: "all",
   // },
 ]
+export const initialAllusionDirection = () => (allusionDirectionOptions[0])
 
 // allow between 1 and 4 hops
 export const hopsCountOptions = [...Array(4).keys()].map(hopCount => ({

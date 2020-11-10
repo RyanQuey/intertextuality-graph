@@ -67,11 +67,6 @@ class IArcDiagram extends React.Component {
 
 
     this.state = {
-      // Genesis
-      // 1
-      startingVerse: initialVerseOption(),
-      allusionDirection: allusionDirectionOptions[0],
-      // 1
       hopsCount: hopsCountOptions[0],
       // all
       dataSet: dataSetOptions[0],
@@ -129,7 +124,18 @@ class IArcDiagram extends React.Component {
   
   
   downloadAsCSV () {
-    const { hopsCount, allusionDirection } = this.state
+    const {hopSet0} = this.props.referenceFilterParams
+    const { 
+      startingBook, 
+      startingBookData, 
+      startingChapter, 
+      startingChapterData, 
+      startingVerse, 
+      allusionDirection,
+    } = hopSet0
+
+    const { hopsCount } = this.state
+
     // this just gets used for the file name
     const refString = `${allusionDirection.value}-${hopsCount.value}hops`
     
@@ -142,14 +148,13 @@ class IArcDiagram extends React.Component {
    */
   refreshData (paramOverrides = {}) {
     const {hopSet0} = this.props.referenceFilterParams
-
-
     const { 
       startingBook, 
       startingBookData, 
       startingChapter, 
       startingChapterData, 
       startingVerse, 
+      allusionDirection,
     } = hopSet0
     
     // don't bother refreshing anything if we don't have some basic params set
@@ -166,7 +171,7 @@ class IArcDiagram extends React.Component {
       startingVerse, 
       hopsCount: this.state.hopsCount.value, 
       dataSet: this.state.dataSet.value, 
-      allusionDirection: this.state.allusionDirection.value,
+      allusionDirection,
     }, paramOverrides)
     
     // convert to format we can send to our api
@@ -295,7 +300,6 @@ class IArcDiagram extends React.Component {
       edges, 
       vertices, 
       loadingEdges,
-      allusionDirection,
       hopsCount,
       dataSet,
       tooltip, 
@@ -309,6 +313,7 @@ class IArcDiagram extends React.Component {
       startingChapter, 
       startingChapterData, 
       startingVerse, 
+      allusionDirection,
       osis,
     } = hopSet0
     
@@ -319,7 +324,7 @@ class IArcDiagram extends React.Component {
 
     // keep this in a place that will work for server side rendering...it might not be here
     
-    const directionText = allusionDirection.value == "alludes-to" ? "allusions to " : "source texts for "
+    const directionText = allusionDirection == "alludes-to" ? "allusions to " : "source texts for "
     // it would be better to have the book/ch/v information, but commenting out for now as we refactor this code
     const downloadButtonText = `Download as CSV ${directionText} ${osis}`
 
@@ -339,10 +344,8 @@ class IArcDiagram extends React.Component {
         <div className={"diagram-header"}>
           <div className={"left-panel"}>
             <DiagramOptionsForm
-              selectAllusionDirection={this.selectAllusionDirection}
               selectDataSet={this.selectDataSet}
               changeHopsCount={this.changeHopsCount}
-              allusionDirection={allusionDirection}
               hopsCount={hopsCount}
               dataSet={dataSet}
               refreshData={this.refreshData}

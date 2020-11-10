@@ -14,6 +14,7 @@ import {
   bookOptions,
   hopsCountOptions,
   allusionDirectionOptions,
+  initialAllusionDirection,
 } from '../../../constants/arc-diagram'
 
 import {
@@ -38,26 +39,55 @@ class HopFieldsSet extends React.Component {
 
     this.changeReference = this.changeReference.bind(this)
     this.getParams = this.getParams.bind(this)
+    this.setParams = this.setParams.bind(this)
+    this.getParamKey = this.getParamKey.bind(this)
+    this.changeAllusionDirection = this.changeAllusionDirection.bind(this)
 	}
 
   componentDidMount () {
   }
 
-	getParams () {
-	  const {index, hopParams} = this.props
+	getParamKey () {
+	  const {index} = this.props
+	  return `hopSet${index}` 
+  }
 
-	  return Helpers.safeDataPath(hopParams, `hopSet${index}`, {})
+
+	getParams () {
+	  const {hopParams} = this.props
+
+    const params = Helpers.safeDataPath(hopParams, this.getParamKey(), {[this.getParamKey()]: {}})
+    console.log("current params:", params)
+    return params
+  }
+
+	setParams (key, value) {
+    const params = this.getParams()
+
+    // set it on the specific key, not overwriting the whole object belonging to this hops set
+    _.set(params, `${this.getParamKey()}.${key}`, value)
+
+    // set to redux
+    formActions.setParams("HopFieldsSet", "referenceFilter", params)
+  }
+
+  changeAllusionDirection (option) {
+    // merge allusion direction into existing parameters
+    this.setParams("allusionDirection", option.value)
+
   }
 
   changeReference (reference) {
     console.log("reference:", reference)
     const {startingBook, startingChapter, startingVerse} = reference
 
-    const params = {
-      [`hopSet${this.props.index}`]: reference
-    }
+    // merge current reference data, into existing parameters
+    console.log("current params:", this.getParams())
+    const params = Object.assign(this.getParams(), {...reference})
 
     formActions.setParams("HopFieldsSet", "referenceFilter", params)
+
+
     if (reference.valid) {
       // TODO not yet implemented
       this.props.onChangeReference && this.props.onChangeReference(reference.referenceData)
@@ -69,16 +99,21 @@ class HopFieldsSet extends React.Component {
 
   render () {
     const { 
-      chapterOptions, verseOptions, allusionDirection, dataSet, hopsCount, filterByChapter, filterByVerse, 
+      chapterOptions, verseOptions, dataSet, hopsCount, filterByChapter, 
       index,
       hopParams 
     } = this.props
 
-    const {
+    let {
       startingChapter,
       startingBook,
       startingVerse,
+      allusionDirection
     } = this.getParams()
+
+    if (!allusionDirection) {
+      allusionDirection = initialAllusionDirection().value
+    }
 
     const {reference} = this.state
 
@@ -87,18 +122,12 @@ class HopFieldsSet extends React.Component {
           <div className="ref-selects-configs">
             <h2>Now showing:</h2>
             <div>
-              {chapterOptions && (
-                <Button onClick={this.props.toggleFilterByChapter}>{filterByChapter ? "Filter by Book Only" : "Filter by Chapter"}</Button>
-              )}
-              {filterByChapter && verseOptions && (
-                <Button onClick={this.props.toggleFilterByVerse}>{filterByVerse ? "Filter by Chapter Only" : "Filter by Verse"}</Button>
-              )}
             </div>
             <div>
               <Select 
                 options={allusionDirectionOptions}
-                onChange={this.props.selectAllusionDirection}
-                currentOption={allusionDirection}
+                onChange={this.changeAllusionDirection}
+                currentOption={allusionDirectionOptions.find(op => op.value == allusionDirection)}
               />
             </div>
             <div className="ref-input">
@@ -118,6 +147,7 @@ class HopFieldsSet extends React.Component {
 
 const mapStateToProps = state => {
   return {
+    // cannot access props here, so set defaults in a wrapper function (getParams)
     hopParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params")
   }
 }

@@ -5,6 +5,8 @@ import Select from '../shared/groups/Select';
 
 import classes from './scss/diagram-options-form.scss'
 import HopFieldsSet from "./HopFieldsSet"
+import _ from "lodash"
+import { connect } from 'react-redux'
 
 import {
   bookOptions,
@@ -48,29 +50,50 @@ class DiagramOptionsForm extends React.Component {
     }
   }
 
+  setFilterBy (e, value) {
+    e.preventDefault && e.preventDefault()
+
+    const newState = {}
+    const paramOverrides = {}
+
+    if (value === "verse") {
+      if (!value && this.state.hopsCount.value > 2) {
+        newState.hopsCount = hopsCountOptions[1] 
+        paramOverrides.hopsCount = 2 
+      }
+      
+    } else if (value === "chapter") {
+      if (!value && this.state.hopsCount.value > 1) {
+        newState.hopsCount = hopsCountOptions[0] 
+        paramOverrides.hopsCount = 1 
+        console.log("setting as", newState)
+      }
+
+    } else if (value === "book") {
+    }
+
+    // max of 0 hops count when filtering by book
+    this.setState(newState)
+    this.refreshData(paramOverrides)
+  }
+
   render () {
-    const { startingBook, startingChapter, startingVerse, chapterOptions, verseOptions, allusionDirection, dataSet, hopsCount, filterByChapter, filterByVerse } = this.props
+    const { startingBook, startingChapter, startingVerse, allusionDirection, dataSet, hopsCount, filterByChapter, filterByVerse } = this.props
 
     console.log("now filtering by chapter?", filterByChapter)
-
 
     return (
       <div className={"configForm"}>
         <Form>
           <HopFieldsSet 
-            startingBook={startingBook} 
-            startingChapter={startingChapter} 
-            startingVerse={startingVerse} 
-            chapterOptions={chapterOptions} 
-            verseOptions={verseOptions} 
             allusionDirection={allusionDirection} 
-            dataSet={dataSet} 
-            hopsCount={hopsCount} 
             filterByChapter={filterByChapter} 
             filterByVerse={filterByVerse}  
             selectStartingBook={this.props.selectStartingBook}
             selectStartingChapter={this.props.selectStartingChapter}
             selectStartingVerse={this.props.selectStartingVerse}
+            // simply hard coding for now
+            index={0}
           />
           <div className="other-configs">
             <div>
@@ -97,4 +120,10 @@ class DiagramOptionsForm extends React.Component {
   }
 }
 
-export default DiagramOptionsForm
+const mapStateToProps = state => {
+  return {
+    alerts: _.values(state.alerts) || [],
+  }
+}
+
+export default connect(mapStateToProps)(DiagramOptionsForm)

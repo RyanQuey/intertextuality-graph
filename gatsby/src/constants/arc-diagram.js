@@ -4,6 +4,7 @@ import bookData from '../data/books';
 // immutable stuff
 export const initialChapterOption = () => ({label: 1, value: 1})
 export const initialVerseOption = () => ({label: 1, value: 1})
+export const initialBookOption = () => ({label: "Genesis", value: "Genesis"})
 
 export const bookOptions = bookData.map(b => ({
   label: b, 

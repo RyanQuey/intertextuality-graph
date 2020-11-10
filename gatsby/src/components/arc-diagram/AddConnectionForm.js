@@ -4,11 +4,11 @@ import { Link } from "gatsby"
 import Image from "../image"
 
 
+import books from '../../data/books';
+
 import {getBookData, osisToBookName} from '../../helpers/book-helpers'
 import {getChapterData} from '../../helpers/chapter-helpers'
 import {
-  osisDataValue, 
-  osisDataIsValid,
   startingBookFromOsis,
   startingChapterFromOsis,
   startingVerseFromOsis,
@@ -24,16 +24,9 @@ import Form from '../shared/elements/Form';
 import Button from '../shared/elements/Button';
 import Input from '../shared/elements/Input';
 import Select from '../shared/groups/Select';
-import books from '../../data/books';
-import { bcv_parser as eng_bcv_parser } from "bible-passage-reference-parser/js/en_bcv_parser"
-import { bcv_parser as heb_bcv_parser } from "bible-passage-reference-parser/js/he_bcv_parser"
+import TextReferenceInput from '../shared/groups/TextReferenceInput';
 
 import classes from './scss/add-connection-form.scss'
-
-// TODO note that this might actually only change the language of the book names, might not impact
-// versification at all
-var eng_bcv = new eng_bcv_parser;
-var heb_bcv = new heb_bcv_parser;
 
 class AddConnectionForm extends React.Component {
   constructor (props) {
@@ -52,45 +45,17 @@ class AddConnectionForm extends React.Component {
 
   }
 
-  changeAlludingText (value) {
-    let parser
-    if (this.state.versification == "English") {
-      parser = eng_bcv
-    } else {
-      parser = heb_bcv
-    }
-
-    //const osisVal = parser.parse(value).osis() 
-    const parsed = parser.parse(value).parsed_entities() 
-    const alludingText = {
-      referenceData: parsed,
-      valid: osisDataIsValid(parsed),
-      osis: osisDataValue(parsed),
-    }
+  changeAlludingText (alludingText) {
+    // TODO move into redux store later
     this.setState({alludingText, formResult: false})
   }
 
-  changeSourceText (value) {
-    let parser
-    if (this.state.versification == "English") {
-      // TODO might need to try
-      // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser#versification
-      parser = eng_bcv
-    } else {
-      parser = heb_bcv
-    }
-
-    const parsed = parser.parse(value).parsed_entities() 
-    const isValid = osisDataIsValid(parsed)
-    const sourceText = {
-      referenceData: parsed,
-      valid: isValid,
-      osis: osisDataValue(parsed),
-    }
+  changeSourceText (sourceText) {
+    // TODO move into redux store later
     this.setState({sourceText, formResult: false})
 
-    if (isValid) {
-      this.props.onChangeSource(parsed)
+    if (sourceText.valid) {
+      this.props.onChangeSource(sourceText.parsed)
     }
   }
 
@@ -100,24 +65,8 @@ class AddConnectionForm extends React.Component {
     console.log("submitting data to create connection", sourceText, alludingText )
 
     createConnection({
-      sourceText: {
-        startingBook: startingBookFromOsis(sourceText.referenceData),
-        startingChapter: startingChapterFromOsis(sourceText.referenceData),
-        startingVerse: startingVerseFromOsis(sourceText.referenceData),
-        endingBook: endingBookFromOsis(sourceText.referenceData),
-        endingChapter: endingChapterFromOsis(sourceText.referenceData),
-        endingVerse: endingVerseFromOsis(sourceText.referenceData),
-        parsed: sourceText.referenceData,
-      },
-      alludingText: {
-        startingBook: startingBookFromOsis(alludingText.referenceData),
-        startingChapter: startingChapterFromOsis(alludingText.referenceData),
-        startingVerse: startingVerseFromOsis(alludingText.referenceData),
-        endingBook: endingBookFromOsis(alludingText.referenceData),
-        endingChapter: endingChapterFromOsis(alludingText.referenceData),
-        endingVerse: endingVerseFromOsis(alludingText.referenceData),
-        parsed: alludingText.referenceData,
-      },
+      sourceText,
+      alludingText,
       confidenceLevel: 70.0,
     }).then(r => {
       console.log("saved to db: ", r)
@@ -144,9 +93,9 @@ class AddConnectionForm extends React.Component {
     const message = invalid ? "invalid" : `${alludingText.osis} alludes to ${sourceText.osis}`
 
     // heb bible for ot, SBL GNT for NT
-    const alludingTestament = alludingText.valid && osisDataToTestament(alludingText.referenceData)
+    const alludingTestament = alludingText.testament
     const alludingStepBibleVersion = alludingTestament == "Old Testament" ? "OHB" : "SBLG"
-    const sourceTestament = sourceText.valid && osisDataToTestament(sourceText.referenceData)
+    const sourceTestament = sourceText.testament
     const sourceStepBibleVersion = sourceTestament == "Old Testament" ? "OHB" : "SBLG"
 
     return (
@@ -158,31 +107,23 @@ class AddConnectionForm extends React.Component {
           <div className="connection-form-fields">
 
             <div className="connection-form-field-ctn">
-              Source text: ({sourceText.valid ? sourceText.osis : "invalid"}): 
-              <div className="input-wrapper">
-                <Input
-                  onChange={this.changeSourceText}
-                />
-              </div>
-              {sourceText.valid ? (
-                <iframe src={`https://www.stepbible.org/?q=version=${sourceStepBibleVersion}|reference=${sourceText.osis}&options=NUVGH`} height="400" width="450" title="Source Text STEP Bible Preview"></iframe>
-              ) : (
-                <div></div>
-              )}
+              <TextReferenceInput 
+                label="Source Text"
+                onChange={this.changeSourceText}
+                reference={sourceText}
+                textVersion={sourceStepBibleVersion}
+                showIframe={true}
+              />
             </div>
 
             <div className="connection-form-field-ctn">
-              Alluding Text: ({alludingText.valid ? alludingText.osis : "invalid"})
-              <div className="input-wrapper">
-                <Input
-                  onChange={this.changeAlludingText}
-                />
-              </div>
-              {alludingText.valid ? (
-                <iframe src={`https://www.stepbible.org/?q=version=${alludingStepBibleVersion}|reference=${alludingText.osis}&options=NUVGH`} height="400" width="450"  title="Alluding Text STEP Bible Preview"></iframe>
-              ) : (
-                <div></div>
-              )}
+              <TextReferenceInput 
+                label="Alluding Text"
+                onChange={this.changeAlludingText}
+                reference={alludingText}
+                textVersion={alludingStepBibleVersion}
+                showIframe={true}
+              />
             </div>
           </div>
           <Button

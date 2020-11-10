@@ -9,7 +9,7 @@ import Image from "../components/image"
 import SEO from "../components/seo"
 import Button from '../components/shared/elements/Button';
 
-import DiagramOptionsForm from '../components/arc-diagram/DiagramOptionsForm';
+import DiagramOptionsForm from '../components/arc-diagram/diagram-options-form/DiagramOptionsForm';
 import AddConnectionForm from '../components/arc-diagram/AddConnectionForm';
 import SelectedItemInfo from '../components/arc-diagram/SelectedItemInfo';
 import UploadCSVForm from '../components/arc-diagram/UploadCSVForm';
@@ -86,13 +86,10 @@ class IArcDiagram extends React.Component {
 
     // TODO when move to redux, can put a lot of this in store and move these functions to the child components
     this.selectDataSet = this.selectDataSet.bind(this)
-    this.selectAllusionDirection = this.selectAllusionDirection.bind(this)
-    this.changeHopsCount = this.changeHopsCount.bind(this)
     
     
     this.fetchVerticesAndEdges = this.fetchVerticesAndEdges.bind(this)
     this.refreshData = this.refreshData.bind(this)
-    this.triggerChangeSource = this.triggerChangeSource.bind(this)
     this.downloadAsCSV = this.downloadAsCSV.bind(this)
 
     this.onParseError = this.onParseError.bind(this)
@@ -101,7 +98,6 @@ class IArcDiagram extends React.Component {
     this.handleClickNode = this.handleClickNode.bind(this)
     this.handleClickEdge = this.handleClickEdge.bind(this)
     
-    this.toggleFilterByVerse = this.toggleFilterByVerse.bind(this)
     this.setTooltip = this.setTooltip.bind(this)
   }
 
@@ -117,8 +113,9 @@ class IArcDiagram extends React.Component {
     // now in react, you use this instead of componentWillReceiveProps to trigger side effects after
     // props change
 
-    if (!_.isEqual(previousProps.referenceFilterOptions, this.props.referenceFilterOptions)) {
-      this.refreshData()
+    if (!_.isEqual(previousProps.referenceFilterParams, this.props.referenceFilterParams)) {
+      // don't do it this way anymore, manually trigger instead
+      // this.refreshData()
     }
 
     // TODO if book or chapter change, refresh book data or chpater data
@@ -144,7 +141,9 @@ class IArcDiagram extends React.Component {
    * TODO not yet passing in verse
    */
   refreshData (paramOverrides = {}) {
-    const {hopSet0} = this.props.referenceFilterOptions
+    const {hopSet0} = this.props.referenceFilterParams
+
+
     const { 
       startingBook, 
       startingBookData, 
@@ -153,6 +152,12 @@ class IArcDiagram extends React.Component {
       startingVerse, 
     } = hopSet0
     
+    // don't bother refreshing anything if we don't have some basic params set
+    // just using starting book as a barometer see if anything is here yet
+    if (!startingBook) {
+      return 
+    }
+
     // merge current state with the options that are getting passed in
     // especially important if just barely recently setState
     const options = Object.assign({
@@ -162,8 +167,6 @@ class IArcDiagram extends React.Component {
       hopsCount: this.state.hopsCount.value, 
       dataSet: this.state.dataSet.value, 
       allusionDirection: this.state.allusionDirection.value,
-      //filterByChapter: this.state.filterByChapter,
-      //filterByVerse: this.state.filterByVerse,
     }, paramOverrides)
     
     // convert to format we can send to our api
@@ -174,12 +177,11 @@ class IArcDiagram extends React.Component {
       hopsCount: options.hopsCount, 
       dataSet: options.dataSet, 
       allusionDirection: options.allusionDirection,
-      //filterByChapter: options.filterByChapter,
-      //filterByVerse: options.filterByVerse,
     }
 
     bookActions.fetchBookData(options.startingBook.value, 0)
 
+    // TODO move this out of this component, into helpers and use store
     // start hitting our api
     if (queryOptions.chapter) {
       getChapterData(queryOptions.book, queryOptions.chapter)
@@ -206,20 +208,12 @@ class IArcDiagram extends React.Component {
   async fetchVerticesAndEdges (queryOptions) {
     // at this point, these are not select dropdown options, these should be real values
     const {book, chapter, verse, hopsCount, dataSet, allusionDirection, 
-      // these will always be undefined, as we refactor TODO need to reimplement
-      filterByChapter, filterByVerse 
     } = queryOptions
     this.setState({loadingEdges: true})
     
     const fetchFunc = allusionDirection == "alludes-to" ? getTextsRefAlludesTo : getTextsAlludedToByRef
 
-    const params = {book, hopsCount, dataSet}
-    if (filterByChapter) {
-      params.chapter = chapter
-      if (filterByVerse) {
-        params.verse = verse
-      }
-    }
+    const params = {book, chapter, verse, hopsCount, dataSet}
 
     // const [vertices, edges, pathsWithValues] = await Promise.all([
     const [pathsWithValues] = await Promise.all([
@@ -244,36 +238,6 @@ class IArcDiagram extends React.Component {
     })
   }
 
-  /*
-   * take osis data (full parsed object) of source text that is being added and show current
-   * allusions to it
-   *
-   */ 
-  triggerChangeSource (sourceOsisData) {
-    const startingBook = startingBookFromOsis(sourceOsisData)
-    const startingChapter = startingChapterFromOsis(sourceOsisData)
-    const startingVerse = startingVerseFromOsis(sourceOsisData)
-
-    console.log("changed source; setting diagram to ", startingBook)
-    // skipped the refresh in the next three, so can call manually all at once, to avoid raace conditions as well as do one instead of three queries
-    const skipRefresh = true
-    const startingBookOption = {value: startingBook, label: startingBook}
-    const startingChapterOption = {value: startingChapter, label: startingChapter}
-    const startingVerseOption = {value: startingVerse, label: startingVerse}
-    
-  }
-
- /*
-   * change number of times to go "out" on a connection edge
-   */ 
-  changeHopsCount (option, details, skipRefresh = false) {
-    this.setState({
-      hopsCount: option,
-    })
-
-    !skipRefresh && this.refreshData({hopsCount: option.value})
-  }
-
   selectDataSet (option, details, skipRefresh = false) {
     this.setState({
       dataSet: option,
@@ -282,14 +246,6 @@ class IArcDiagram extends React.Component {
     !skipRefresh && this.refreshData({dataSet: option.value})
   }
  
-  selectAllusionDirection (option, details, skipRefresh = false) {
-    this.setState({
-      allusionDirection: option,
-    })
-
-    !skipRefresh && this.refreshData({allusionDirection: option.value})
-  }
-
   /*
    * They say that this is included in the documentation, but I have not been able to get it to work
    * https://github.com/vega/react-vega/tree/master/packages/react-vega#event-listeners
@@ -334,13 +290,10 @@ class IArcDiagram extends React.Component {
 
 
   render () {
+
     const { 
       edges, 
       vertices, 
-      chapterOptions, 
-      verseOptions, 
-      filterByChapter,
-      filterByVerse,
       loadingEdges,
       allusionDirection,
       hopsCount,
@@ -348,7 +301,7 @@ class IArcDiagram extends React.Component {
       tooltip, 
     } = this.state
 
-    const {hopSet0} = this.props.referenceFilterOptions || {hopSet0: {}}
+    const {hopSet0} = this.props.referenceFilterParams
 
     const { 
       startingBook, 
@@ -356,6 +309,7 @@ class IArcDiagram extends React.Component {
       startingChapter, 
       startingChapterData, 
       startingVerse, 
+      osis,
     } = hopSet0
     
 
@@ -367,8 +321,7 @@ class IArcDiagram extends React.Component {
     
     const directionText = allusionDirection.value == "alludes-to" ? "allusions to " : "source texts for "
     // it would be better to have the book/ch/v information, but commenting out for now as we refactor this code
-    const downloadButtonText = true ? "Download as CSV" : 
-      `${directionText} ${this.state.startingBook.value} ${filterByChapter ? this.state.startingChapter.value : ""} ${filterByChapter && filterByVerse ? this.state.startingVerse.value : ""}`
+    const downloadButtonText = `Download as CSV ${directionText} ${osis}`
 
     return (
       <Layout>
@@ -392,10 +345,7 @@ class IArcDiagram extends React.Component {
               allusionDirection={allusionDirection}
               hopsCount={hopsCount}
               dataSet={dataSet}
-              chapterOptions={chapterOptions}
-              verseOptions={verseOptions}
               refreshData={this.refreshData}
-              filterByChapter={filterByChapter}
             />
             <Button onClick={this.downloadAsCSV} disabled={loadingEdges}>
               {downloadButtonText}
@@ -407,6 +357,7 @@ class IArcDiagram extends React.Component {
             selectedNode={this.state.selectedNode}
           />
         </div>
+
         <Vega 
           // note that you can pass in any of these props as well, e.g,. width="300" to set width of
           // view as 300px 
@@ -430,7 +381,7 @@ class IArcDiagram extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    referenceFilterOptions: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.options", {})
+    referenceFilterParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {hopSet0: {}})
   }
 }
 

@@ -132,6 +132,7 @@ object IntertextualConnectionEdge {
 
     // I'm not sure how to do this in setField and only use one case match thing...so making a separate one for fields
     // issue is related to this warning that I see when building: non-variable type argument List[String] in type pattern Some[List[String]] is unchecked since it is eliminated by erasure
+    // TODO extract this out into a helper, so can we use it for other places
     def setListField (col : String, field : Option[List[Any]]) = field match {
       //case list : Some[List[String]] => { query = query.value(col, literal(list.get.asJava))}
       case Some(_) => { query = query.value(col, literal(field.get.asJava))}

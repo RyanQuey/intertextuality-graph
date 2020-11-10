@@ -99,7 +99,7 @@ const Button = ({ style = 'primary', children, onClick, disabled, selected, type
       type={type || "button"}
       title={title}
     >
-      {!pending ? children : <Icon name="spinner" /> }
+      {!pending ? children : <Icon name="spinner" />}
     </button>
   )
 }

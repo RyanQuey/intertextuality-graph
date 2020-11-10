@@ -30,11 +30,11 @@ export const dataSetOptions = [
 
 export const allusionDirectionOptions = [
   {
-    label: "Texts that allude to", 
+    label: "alludes to", 
     value: "alludes-to",
   },
   {
-    label: "Texts alluded to by", 
+    label: "is alluded to by", 
     value: "alluded-to-by",
   },
   // {

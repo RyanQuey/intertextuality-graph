@@ -38,22 +38,28 @@ class HopFieldSetsContainer extends React.Component {
 	}
 
   componentDidMount () {
+    const base = this.props.hopsParams
+    if (base == null) {
+      const toSet = {
+        hopSet0: defaultHopSetParams(),
+        hopSet1: defaultHopSetParams(),
+      }
+      formActions.setParams("HopFieldsSet", "referenceFilter", toSet)
+    }
   }
 
   addHop (e) {
     e && e.preventDefault && e.preventDefault() 
     
 	  const {hopsParams} = this.props
-    const hopFieldSetsKeys = Object.keys(hopsParams)
-    const lastHopKey = hopFieldSetsKeys.length - 1
-    const firstHopKey = hopFieldSetsKeys[0]
+    const hopFieldSetsKeys = Object.keys(hopsParams || {})
+    const firstHopKey = hopFieldSetsKeys[0] || -1
+    const secondHopKey = hopFieldSetsKeys[1]
+    const lastHopIndex = hopFieldSetsKeys.length - 1
+    const lastHopKey = hopFieldSetsKeys[hopFieldSetsKeys.length - 1]
 
-    const toSet = {[`hopSet${lastHopKey + 1}`]: defaultHopSetParams()}
-    // if the first hop key (hopSet0) isn't real (ie, does not exist in the store) but is only being
-    // recognized here because of set defaults, persist to store now
-    if (_.isEqual(hopsParams[firstHopKey], {})) {
-      toSet[firstHopKey] = defaultHopSetParams()
-    }
+    const toSet = {[`hopSet${lastHopIndex + 1}`]: defaultHopSetParams()}
+
     console.log("adding 1", `hopSet${lastHopKey + 1}`)
     console.log("now setting", toSet)
 
@@ -62,15 +68,18 @@ class HopFieldSetsContainer extends React.Component {
 
   render () {
     const { hopsParams } = this.props
+    if (!hopsParams) {
+      return null
+    }
 
     const hopFieldSetsKeys = Object.keys(hopsParams)
     const hopCount = hopFieldSetsKeys.length
-    const canAddHop = hopCount < 3
+    const canAddHop = hopCount < 4
 
     return (
       <div className="hop-field-sets-container">
         <div >
-          {Object.keys(hopsParams).map((hopKey, index) => {
+          {hopsParams && Object.keys(hopsParams).map((hopKey, index) => {
             const value = hopsParams[hopKey]
 
             return (
@@ -99,9 +108,10 @@ class HopFieldSetsContainer extends React.Component {
 }
 
 const mapStateToProps = state => {
+
   return {
     // cannot access props here, so set defaults in a wrapper function (getParams)
-    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {hopSet0: {}})
+    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", null)
   }
 }
 

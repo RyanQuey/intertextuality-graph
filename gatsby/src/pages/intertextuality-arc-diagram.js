@@ -148,14 +148,23 @@ class IArcDiagram extends React.Component {
    */
   refreshData (paramOverrides = {}) {
     const {hopSet0} = this.props.referenceFilterParams
+
+    // Need at least one!
+    if (!hopSet0) {
+      return 
+    }
+    const { 
+      reference,
+      allusionDirection,
+    } = hopSet0
+
     const { 
       startingBook, 
       startingBookData, 
       startingChapter, 
       startingChapterData, 
       startingVerse, 
-      allusionDirection,
-    } = hopSet0
+    } = reference
     
     // don't bother refreshing anything if we don't have some basic params set
     // just using starting book as a barometer see if anything is here yet

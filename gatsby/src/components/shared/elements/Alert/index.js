@@ -7,7 +7,6 @@ import _ from "lodash"
 
 const Alert = ({ alert, className, color, ...props }) => {
   let borderStyle = {}
-  console.log(alert)
   //TODO: maybe create a parent component, that goes around all of the alerts
   let level
   if (["BUG", "DANGER"].includes(alert.level)) {

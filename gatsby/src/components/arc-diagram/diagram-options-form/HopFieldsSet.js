@@ -56,19 +56,26 @@ class HopFieldsSet extends React.Component {
 	getParams () {
 	  const {hopParams} = this.props
 
-    const params = Helpers.safeDataPath(hopParams, this.getParamKey(), {[this.getParamKey()]: {}})
-    console.log("current params:", params)
-    return params
+    // set some basic defaults here, to avoid having to have as many conditionals everywhere else
+    const params = Helpers.safeDataPath(hopParams, this.getParamKey(), {
+      reference: {},
+      allusionDirection: initialAllusionDirection().value,
+    })
+    const cloned = _.cloneDeep(params)
+    console.log("current cloned params:", cloned)
+
+    return cloned
   }
 
 	setParams (key, value) {
     const params = this.getParams()
 
     // set it on the specific key, not overwriting the whole object belonging to this hops set
-    _.set(params, `${this.getParamKey()}.${key}`, value)
+    _.set(params, key, value)
+    console.log("setting on", `${this.getParamKey()}.${key}`)
 
     // set to redux
-    formActions.setParams("HopFieldsSet", "referenceFilter", params)
+    formActions.setParams("HopFieldsSet", "referenceFilter", {[this.getParamKey()]: params})
   }
 
   changeAllusionDirection (option) {
@@ -82,40 +89,31 @@ class HopFieldsSet extends React.Component {
     const {startingBook, startingChapter, startingVerse} = reference
 
     // merge current reference data, into existing parameters
-    console.log("current params:", this.getParams())
-    const params = Object.assign(this.getParams(), {...reference})
-
-    formActions.setParams("HopFieldsSet", "referenceFilter", params)
-
+    this.setParams("reference", reference)
 
     if (reference.valid) {
       // TODO not yet implemented
       this.props.onChangeReference && this.props.onChangeReference(reference.referenceData)
     }
-
-    // TODO move into redux store later
-    this.setState({reference})
   }
 
   render () {
     const { 
-      chapterOptions, verseOptions, dataSet, hopsCount, filterByChapter, 
+      chapterOptions, verseOptions, dataSet, 
       index,
-      hopParams 
     } = this.props
 
-    let {
+    const {
+      allusionDirection,
+      reference,
+    } = this.getParams()
+    console.log("reference",reference)
+
+    const {
       startingChapter,
       startingBook,
       startingVerse,
-      allusionDirection
-    } = this.getParams()
-
-    if (!allusionDirection) {
-      allusionDirection = initialAllusionDirection().value
-    }
-
-    const {reference} = this.state
+    } = reference
 
     return (
         <div className="hop-fields-set">
@@ -148,7 +146,7 @@ class HopFieldsSet extends React.Component {
 const mapStateToProps = state => {
   return {
     // cannot access props here, so set defaults in a wrapper function (getParams)
-    hopParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params")
+    hopParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {})
   }
 }
 

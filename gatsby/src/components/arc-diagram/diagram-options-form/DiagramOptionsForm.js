@@ -41,16 +41,22 @@ class DiagramOptionsForm extends React.Component {
   
   render () {
     const { startingBook, startingChapter, startingVerse, allusionDirection, dataSet, hopsCount, hopsParams } = this.props
-    const invalid = !Helpers.safeDataPath(hopsParams, "hopSet0.valid", false)
+
+    const invalidParams = !Helpers.safeDataPath(hopsParams, "hopSet0.reference.valid", false)
 
     return (
       <div className={"configForm"}>
         <Form  onSubmit={this.submit}>
-          <HopFieldsSet 
-            allusionDirection={allusionDirection} 
-            // simply hard coding for now
-            index={0}
-          />
+          {Object.keys(hopsParams).map((hopKey, index) => {
+            const value = hopsParams[hopKey]
+
+            return (
+              <HopFieldsSet 
+                index={index}
+              />
+            )
+
+          })}
           <div className="other-configs">
             <div>
               Data Set
@@ -63,7 +69,7 @@ class DiagramOptionsForm extends React.Component {
           </div>
           <Button
             onClick={this.submit}
-            disabled={invalid}
+            disabled={invalidParams}
             type="submit"
           >
             Submit
@@ -77,7 +83,7 @@ class DiagramOptionsForm extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params")
+    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {hopSet0: {}})
   }
 }
 

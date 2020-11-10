@@ -35,6 +35,8 @@ class HopFieldsSet extends React.Component {
     this.setParams = this.setParams.bind(this)
     this.getParamKey = this.getParamKey.bind(this)
     this.changeAllusionDirection = this.changeAllusionDirection.bind(this)
+    this.isLastHopSet = this.isLastHopSet.bind(this)
+    this.isFirstHopSet = this.isFirstHopSet.bind(this)
 	}
 
   componentDidMount () {
@@ -88,6 +90,20 @@ class HopFieldsSet extends React.Component {
     }
   }
 
+  isLastHopSet () {
+	  const {index, hopsParams} = this.props
+    const hopFieldSetsKeys = Object.keys(hopsParams)
+    const lastHopIndex = Math.max(hopFieldSetsKeys.length - 1, 1)
+    console.log(lastHopIndex)
+
+    return index == lastHopIndex
+  }
+
+  isFirstHopSet () {
+	  const {index} = this.props
+    return index == 0
+  }
+
   render () {
     const { 
       chapterOptions, verseOptions, dataSet, 
@@ -111,13 +127,6 @@ class HopFieldsSet extends React.Component {
           <div className="ref-selects-configs">
             <div>
             </div>
-            <div>
-              <Select 
-                options={allusionDirectionOptions}
-                onChange={this.changeAllusionDirection}
-                currentOption={allusionDirectionOptions.find(op => op.value == allusionDirection)}
-              />
-            </div>
             <div className="ref-input">
               <TextReferenceInput 
                 label="Text"
@@ -125,6 +134,16 @@ class HopFieldsSet extends React.Component {
                 reference={reference}
               />
             </div>
+
+            {!this.isLastHopSet() && (
+              <div>
+                <Select 
+                  options={allusionDirectionOptions}
+                  onChange={this.changeAllusionDirection}
+                  currentOption={allusionDirectionOptions.find(op => op.value == allusionDirection)}
+                />
+              </div>
+            )}
           </div>
           <div className="other-configs">
           </div>
@@ -136,7 +155,7 @@ class HopFieldsSet extends React.Component {
 const mapStateToProps = state => {
   return {
     // cannot access props here, so set defaults in a wrapper function (getParams)
-    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {})
+    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", defaultHopSetParams())
   }
 }
 

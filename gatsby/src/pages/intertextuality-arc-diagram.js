@@ -397,7 +397,7 @@ class IArcDiagram extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {hopSet0: {}})
+    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {hopSet0: {}, hopSet1: {}})
   }
 }
 

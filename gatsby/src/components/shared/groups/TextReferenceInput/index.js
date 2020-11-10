@@ -24,7 +24,15 @@ import './style.scss'
 // TODO note that this might actually only change the language of the book names, might not impact
 // versification at all
 var eng_bcv = new eng_bcv_parser;
+eng_bcv.set_options({
+  // any books that appear on their own get parsed as the complete book ("Gen" → "Gen.1-Gen.50").
+  book_alone_strategy: "full",
+})
 var heb_bcv = new heb_bcv_parser;
+heb_bcv.set_options({
+  // any books that appear on their own get parsed as the complete book ("Gen" → "Gen.1-Gen.50").
+  book_alone_strategy: "full",
+})
 
 class TextReferenceInput extends React.Component {
   constructor (props) {

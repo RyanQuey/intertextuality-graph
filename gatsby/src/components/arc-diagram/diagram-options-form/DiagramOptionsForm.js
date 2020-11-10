@@ -50,6 +50,7 @@ class DiagramOptionsForm extends React.Component {
       <div className={"configForm"}>
         <Form  onSubmit={this.submit}>
 
+          <h2>Now showing:</h2>
           <HopFieldSetsContainer />
 
           <div className="other-configs">

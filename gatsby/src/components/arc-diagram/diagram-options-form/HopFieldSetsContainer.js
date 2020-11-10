@@ -6,7 +6,7 @@ import Select from '../../shared/groups/Select';
 import TextReferenceInput from '../../shared/groups/TextReferenceInput';
 import HopFieldsSet from "./HopFieldsSet"
 
-import classes from './scss/diagram-options-form.scss'
+import './scss/hop-field-sets-container.scss'
 
 import { connect } from 'react-redux'
 import {
@@ -16,6 +16,7 @@ import {
   hopsCountOptions,
   allusionDirectionOptions,
   initialAllusionDirection,
+  defaultHopSetParams, 
 } from '../../../constants/arc-diagram'
 
 import {
@@ -33,28 +34,30 @@ class HopFieldSetsContainer extends React.Component {
     this.state = {
     }
 
-    this.changeReference = this.changeReference.bind(this)
     this.addHop = this.addHop.bind(this)
 	}
 
   componentDidMount () {
   }
 
-  addHop () {
+  addHop (e) {
+    e && e.preventDefault && e.preventDefault() 
+    
+	  const {hopsParams} = this.props
+    const hopFieldSetsKeys = Object.keys(hopsParams)
+    const lastHopKey = hopFieldSetsKeys.length - 1
+    const firstHopKey = hopFieldSetsKeys[0]
 
-  }
-
-  changeReference (reference) {
-    console.log("reference:", reference)
-    const {startingBook, startingChapter, startingVerse} = reference
-
-    // merge current reference data, into existing parameters
-    this.setParams("reference", reference)
-
-    if (reference.valid) {
-      // TODO not yet implemented
-      this.props.onChangeReference && this.props.onChangeReference(reference.referenceData)
+    const toSet = {[`hopSet${lastHopKey + 1}`]: defaultHopSetParams()}
+    // if the first hop key (hopSet0) isn't real (ie, does not exist in the store) but is only being
+    // recognized here because of set defaults, persist to store now
+    if (_.isEqual(hopsParams[firstHopKey], {})) {
+      toSet[firstHopKey] = defaultHopSetParams()
     }
+    console.log("adding 1", `hopSet${lastHopKey + 1}`)
+    console.log("now setting", toSet)
+
+    formActions.setParams("HopFieldsSet", "referenceFilter", toSet)
   }
 
   render () {
@@ -65,14 +68,15 @@ class HopFieldSetsContainer extends React.Component {
     const canAddHop = hopCount < 3
 
     return (
-      <div>
-        <div>
+      <div className="hop-field-sets-container">
+        <div >
           {Object.keys(hopsParams).map((hopKey, index) => {
             const value = hopsParams[hopKey]
 
             return (
               <HopFieldsSet 
                 index={index}
+                key={index}
               />
             )
 
@@ -84,6 +88,7 @@ class HopFieldSetsContainer extends React.Component {
             disabled={!canAddHop}
             small={true}
             rectangle={true}
+            type="button"
           >
             Add Hop
           </Button>

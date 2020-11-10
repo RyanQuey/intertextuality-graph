@@ -15,6 +15,7 @@ import {
   hopsCountOptions,
   allusionDirectionOptions,
   initialAllusionDirection,
+  defaultHopSetParams, 
 } from '../../../constants/arc-diagram'
 
 import {
@@ -46,13 +47,11 @@ class HopFieldsSet extends React.Component {
 
 
 	getParams () {
-	  const {hopParams} = this.props
+	  const {hopsParams} = this.props
 
     // set some basic defaults here, to avoid having to have as many conditionals everywhere else
-    const params = Helpers.safeDataPath(hopParams, this.getParamKey(), {
-      reference: {},
-      allusionDirection: initialAllusionDirection().value,
-    })
+    const params = Helpers.safeDataPath(hopsParams, this.getParamKey(), defaultHopSetParams())
+
     const cloned = _.cloneDeep(params)
     console.log("current cloned params:", cloned)
 
@@ -99,7 +98,7 @@ class HopFieldsSet extends React.Component {
       allusionDirection,
       reference,
     } = this.getParams()
-    console.log("reference",reference)
+    console.log("index", index, "reference",reference)
 
     const {
       startingChapter,
@@ -110,7 +109,6 @@ class HopFieldsSet extends React.Component {
     return (
         <div className="hop-fields-set">
           <div className="ref-selects-configs">
-            <h2>Now showing:</h2>
             <div>
             </div>
             <div>
@@ -138,7 +136,7 @@ class HopFieldsSet extends React.Component {
 const mapStateToProps = state => {
   return {
     // cannot access props here, so set defaults in a wrapper function (getParams)
-    hopParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {})
+    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {})
   }
 }
 

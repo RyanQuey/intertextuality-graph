@@ -55,3 +55,8 @@ export const hopsCountOptions = [...Array(4).keys()].map(hopCount => ({
   label: hopCount + 1, 
   value: hopCount + 1}
 ))
+
+export const defaultHopSetParams = () => ({
+  reference: {},
+  allusionDirection: initialAllusionDirection().value,
+})

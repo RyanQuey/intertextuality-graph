@@ -108,7 +108,7 @@ class IArcDiagram extends React.Component {
     // now in react, you use this instead of componentWillReceiveProps to trigger side effects after
     // props change
 
-    if (!_.isEqual(previousProps.referenceFilterParams, this.props.referenceFilterParams)) {
+    if (!_.isEqual(previousProps.hopsParams, this.props.hopsParams)) {
       // don't do it this way anymore, manually trigger instead
       // this.refreshData()
     }
@@ -124,9 +124,10 @@ class IArcDiagram extends React.Component {
   
   
   downloadAsCSV () {
-    const {hopSet0} = this.props.referenceFilterParams
+    const {hopSet0} = this.props.hopsParams
     const { 
       startingBook, 
+      // not currently setting
       startingBookData, 
       startingChapter, 
       startingChapterData, 
@@ -147,7 +148,7 @@ class IArcDiagram extends React.Component {
    * TODO not yet passing in verse
    */
   refreshData (paramOverrides = {}) {
-    const {hopSet0} = this.props.referenceFilterParams
+    const {hopSet0} = this.props.hopsParams
 
     // Need at least one!
     if (!hopSet0) {
@@ -164,6 +165,7 @@ class IArcDiagram extends React.Component {
     }
     const { 
       startingBook, 
+      // not currently setting
       startingBookData, 
       startingChapter, 
       startingChapterData, 
@@ -318,28 +320,21 @@ class IArcDiagram extends React.Component {
       tooltip, 
     } = this.state
 
-    const {hopSet0} = this.props.referenceFilterParams
-
-    const { 
-      startingBook, 
-      startingBookData, 
-      startingChapter, 
-      startingChapterData, 
-      startingVerse, 
-      allusionDirection,
-      osis,
-    } = hopSet0
+    const {hopSet0} = this.props.hopsParams
     
+    const invalidHopSetParams = !Helpers.safeDataPath(this.props.hopsParams, "hopSet0.reference.valid", false)
 
     //for using intertextual-arc-spec-data-assumed
     //const spec = specBuilder({edges, nodes: vertices, books})
-    const loading = !startingBookData || !startingChapterData || loadingEdges
+    // not currently setting
+    const loading = loadingEdges
 
     // keep this in a place that will work for server side rendering...it might not be here
     
-    const directionText = allusionDirection == "alludes-to" ? "allusions to " : "source texts for "
+    const canDownload = !invalidHopSetParams && !loading
+    const directionText = hopSet0.allusionDirection == "alludes-to" ? "allusions to " : "source texts for "
     // it would be better to have the book/ch/v information, but commenting out for now as we refactor this code
-    const downloadButtonText = `Download as CSV ${directionText} ${osis}`
+    const downloadButtonText = canDownload ? `Download as CSV ${directionText} ${hopSet0.reference.osis}` : "Download as CSV"
 
     return (
       <Layout>
@@ -402,7 +397,7 @@ class IArcDiagram extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    referenceFilterParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {hopSet0: {}})
+    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {hopSet0: {}})
   }
 }
 

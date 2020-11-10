@@ -1,7 +1,7 @@
 import React from "react"
-import Form from '../shared/elements/Form';
-import Button from '../shared/elements/Button';
-import Select from '../shared/groups/Select';
+import Form from '../../shared/elements/Form';
+import Button from '../../shared/elements/Button';
+import Select from '../../shared/groups/Select';
 
 import classes from './scss/diagram-options-form.scss'
 
@@ -12,18 +12,22 @@ import {
   bookOptions,
   hopsCountOptions,
   allusionDirectionOptions,
-} from '../../constants/arc-diagram'
+} from '../../../constants/arc-diagram'
 
 
 import {
   alertActions,
   formActions,
-} from "../../actions"
+} from "../../../actions"
 
-import Helpers from '../../helpers/base-helpers'
+import Helpers from '../../../helpers/base-helpers'
 import _ from "lodash"
 
-class HopFieldsSet extends React.Component {
+/*
+ * NOTE currently not using, but keeping on hand in case we switch from a simple input field back to
+ * the selects
+ */
+class SelectReferenceFields extends React.Component {
   constructor (props) {
     super(props)
 
@@ -93,24 +97,6 @@ class HopFieldsSet extends React.Component {
     } = this.getSetOptions()
 
     return (
-        <div className="hop-fields-set">
-          <div className="ref-selects-configs">
-            <h2>Now showing:</h2>
-            <div>
-              {chapterOptions && (
-                <Button onClick={this.props.toggleFilterByChapter}>{filterByChapter ? "Filter by Book Only" : "Filter by Chapter"}</Button>
-              )}
-              {filterByChapter && verseOptions && (
-                <Button onClick={this.props.toggleFilterByVerse}>{filterByVerse ? "Filter by Chapter Only" : "Filter by Verse"}</Button>
-              )}
-            </div>
-            <div>
-              <Select 
-                options={allusionDirectionOptions}
-                onChange={this.props.selectAllusionDirection}
-                currentOption={allusionDirection}
-              />
-            </div>
             <div className="ref-selects">
               <Select 
                 options={bookOptions}
@@ -134,10 +120,6 @@ class HopFieldsSet extends React.Component {
                 />
               )}
             </div>
-          </div>
-          <div className="other-configs">
-          </div>
-        </div>
     )
   }
 }
@@ -148,4 +130,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect(mapStateToProps)(HopFieldsSet)
+export default connect(mapStateToProps)(SelectReferenceFields)

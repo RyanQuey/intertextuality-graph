@@ -4,11 +4,15 @@
  * See: https://www.gatsbyjs.org/docs/browser-apis/
  */
 
-// You can delete this file if you're not using it
+
+// needed for using redux
+// https://github.com/gatsbyjs/gatsby/blob/master/examples/using-redux/gatsby-browser.js
+import wrapWithProvider from "./wrap-with-provider"
+export const wrapRootElement = wrapWithProvider
 
 // TODO not working
-const lodash = require("lodash") 
-exports.onClientEntry = () => {
+const _ = require("lodash") 
+export const onClientEntry = () => {
   //window._ = lodash
 }
 //

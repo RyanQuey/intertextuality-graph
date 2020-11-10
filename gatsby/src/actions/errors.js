@@ -1,10 +1,13 @@
 import {
   CLEAR_ERRORS,
   HANDLE_ERRORS,
-} from 'constants/actionTypes'
+} from '../constants/action-types'
+import store from "../reducers"
+import Helpers from '../helpers/base-helpers'
+import _ from "lodash"
 import {
   newAlert
-} from 'shared/actions/alerts'
+} from './alerts'
 
 export const clearErrors = (templateName, templatePart) => {
   // do not pass in templatePart to clear the errors for all of the template

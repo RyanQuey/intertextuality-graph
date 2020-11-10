@@ -1,7 +1,10 @@
+import Helpers from '../helpers/base-helpers'
+import _ from "lodash"
 import {
   NEW_ALERT,
   CLOSE_ALERTS,
-} from 'constants/actionTypes'
+} from '../constants/action-types'
+import store from "../reducers"
 
 
 //alerts should be an array of alert ids, or 'all' to close all
@@ -62,4 +65,6 @@ export const newAlert = (alert) => {
       closeAlerts(newId)
     }, 5000)
   }
+
+  console.log("should have an alert now")
 }

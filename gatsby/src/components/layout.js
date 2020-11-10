@@ -11,6 +11,7 @@ import { useStaticQuery, graphql } from "gatsby"
 
 import Header from "./header"
 import "./layout.scss"
+import Alerts from "./shared/groups/Alerts"
 
 const Layout = ({ children }) => {
   // grabs title from gatsby-config.js
@@ -34,6 +35,7 @@ const Layout = ({ children }) => {
           padding: `0 1.0875rem 1.45rem`,
         }}
       >
+        <Alerts />
         <main>{children}</main>
         <footer>
           © {new Date().getFullYear()} See the source code at

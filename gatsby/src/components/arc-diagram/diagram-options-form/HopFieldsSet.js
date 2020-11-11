@@ -155,7 +155,7 @@ class HopFieldsSet extends React.Component {
 const mapStateToProps = state => {
   return {
     // cannot access props here, so set defaults in a wrapper function (getParams)
-    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", defaultHopSetParams())
+    hopsParams: Helpers.safeDataPath(state.forms, "HopFieldsSet.referenceFilter.params", {})
   }
 }
 

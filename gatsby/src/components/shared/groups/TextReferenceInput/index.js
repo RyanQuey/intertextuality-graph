@@ -23,16 +23,17 @@ import './style.scss'
 
 // TODO note that this might actually only change the language of the book names, might not impact
 // versification at all
+const osisParserOptions = {
+  // any books that appear on their own get parsed as the complete book ("Gen" → "Gen.1-Gen.50").
+  book_alone_strategy: "full",
+  // if book is used in range, count it as starting at first chapter (e.g., "Matt-Mark 2" →
+  // "Matt.1-Mark.2", Matt-Mark → matt.1-mark.16)
+  book_range_strategy: "include",
+}
 var eng_bcv = new eng_bcv_parser;
-eng_bcv.set_options({
-  // any books that appear on their own get parsed as the complete book ("Gen" → "Gen.1-Gen.50").
-  book_alone_strategy: "full",
-})
 var heb_bcv = new heb_bcv_parser;
-heb_bcv.set_options({
-  // any books that appear on their own get parsed as the complete book ("Gen" → "Gen.1-Gen.50").
-  book_alone_strategy: "full",
-})
+eng_bcv.set_options(osisParserOptions)
+heb_bcv.set_options(osisParserOptions)
 
 class TextReferenceInput extends React.Component {
   constructor (props) {

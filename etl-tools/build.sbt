@@ -19,7 +19,24 @@ resolvers += Resolver.mavenLocal
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
   Resolver.sonatypeRepo("snapshots")
+
 )
+
+// I want to parse osis refs. 
+// This library helps me do it: https://github.com/crosswire/jsword/blob/master/src/main/java/org/crosswire/jsword/passage/OsisParser.java#L51
+// why am not just using their mvn repo: https://github.com/crosswire/jsword/issues/113
+
+// option#1 (haven't tried yet): https://github.com/stupenrose/jsword-mvn
+// Approach using sbt instead of mvn: https://www.scala-sbt.org/1.x/docs/Resolvers.html#URL
+
+// Option#2: https://github.com/crosswire/jsword/issues/113#issuecomment-705641632
+// https://jitpack.io/#AndBible/jsword/2.3.10
+
+resolvers += "jitpack" at "https://jitpack.io"
+libraryDependencies += "com.github.AndBible" % "jsword" % "2.3.10"  
+
+
+libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.2"
 
 // https://github.com/scalaj/scalaj-http
 libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.2"

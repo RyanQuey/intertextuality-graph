@@ -44,6 +44,7 @@ object BookHelpers {
     allBooksFromFile.find((b) => b.getBookOrder() == bookNum).get
   }
 
+  // TODO use jsword instead; see TextVertex class for examples and helpers
   def getBookByOsis (osisName : String ) : Book = {
     allBooksFromFile.find((b) => b.getOsisAbbreviation() == osisName).get
   }

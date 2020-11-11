@@ -42,6 +42,7 @@ POST     /upload-csv           controllers.ConnectionsController.createFromCSV()
 #########################
 # texts 
 #########################
+POST     /texts/trace-paths-filtered-by-hop           controllers.TextsController.tracePathsFilteredByHop()
 GET     /texts/texts-starting-with-ref           controllers.TextsController.findTextsByStartingRef(dataSet : String ?= "all", book: String, chapter : Option[Int] ?= None, verse : Option[Int] ?= None)
 
 # Passed in Reference is alluding Text. Get all source texts alluded to by the passed in ref. Return paths for those texts. 

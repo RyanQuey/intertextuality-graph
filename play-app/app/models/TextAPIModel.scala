@@ -55,14 +55,42 @@ import constants.DatasetMetadata._
 case class HopParamsSet (
   // can be a single text, or a range, even range of books
   referenceOsis : String,
+
   // for now only allowing alludes-to or alluded-to-by. Maybe later also allowing "both"
   allusionDirection : String,
+
+  
+  // if true, that means that this really is not a hop, and is just the params for the starting point from where we will do traversals
+  // - does not allow expanding to ch/book/verses, since that should be specified within the referenceOsis already
+  // - probably more differences as well ...?
+  isInitialSet : Boolean = False,
+
+  // if true, means that there will be no hops after this
+  // - 
+  isFinalHop : Boolean = False,
+  
+  expandToChapter : Boolean = False,
+
   // implement later, when we start allowing extra biblical texts
   // canonical : Option[Boolean],  // BOOLEAN 
   // default to "all"
   dataSet : Option[String],
   // TODO allow filtering by author. eg, all the writings of Paul, or David. Could also just implement this on the frontend though, have js figure out how to request those books/those chapters
   // author : Option[String],  // TEXT
+  expandToChapter : Boolean = False,
+  expandToBook : Boolean = False,
+  // allow users to expand hits for this hop by certain number of verses (like accordance's little slider)
+  expandByNumVerses : Int = 0,
+
+  // make wrappers for this, since we'll change logic later, to include expanding to book/chapter or using expandByNumVerses, and also handling ranges for the osis (e.g., gen.1.1-gen.1.3). 
+  // for now though, keep it simple to get something working, so continue to just use starting book/ch/v only, but return as iterable to prepare for the future
+  getBooks() : List[String] = {osisToStartingBook(referenceOsis)}
+
+	// TODO how things are currently implemented, this will actually return a chapter and filter by chapter when none is specified
+  getChapters() : List[Int] = {
+    osisToStartingChapter(referenceOsis)
+  }
+  getVerses() : List[Int] = {osisToStartingVerse(referenceOsis)}
 ) 
 
 /**
@@ -99,17 +127,31 @@ object TextAPIModel {
    */ 
 	def addStepsForHop (traversal : GraphTraversal[Vertex, Vertex], hopParamsSet : HopParamsSet) = {
 	  // TODO add osis parsing to get ref
-	  val allusionDirection = hopParamsSet.allusionDirection
-	  val dataSet = hopParamsSet.dataSet.getOrElse("all")
+	  val allusionDirection : String = hopParamsSet.allusionDirection
+	  val dataSet : String = hopParamsSet.dataSet.getOrElse("all")
 	  val referenceOsis : String = hopParamsSet.referenceOsis
-	  val book = osisToStartingBook(referenceOsis)
-	  // TODO how things are currently implemented, this will actually return a chapter and filter by chapter when none is specified
-	  val chapter = osisToStartingChapter(referenceOsis)
-	  val verse = osisToStartingVerse(referenceOsis)
-    val hi = getPrimaryKeyFields()
+
+	  val book = hopParamsSet.getBooks
+	  val chapter = hopParamsSet.getChapters
+	  val verse = hopParamsSet.getVerses
+
+    // fields that have primary keys for text, which will be needed to do graph traversal
+    val textPks = getPrimaryKeyFields()
+
+    // TODO make helper to get range of verses or chapters...or books. 
 
 	  addTextFilterSteps(traversal.hasLabel("text"), dataSet, "Genesis", Some(1), None)
   }
+
+
+
+
+
+
+
+
+
+
 
   /*
    * return text traversal depending on how many args are passed in

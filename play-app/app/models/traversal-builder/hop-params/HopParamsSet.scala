@@ -42,7 +42,6 @@ import com.ryanquey.intertextualitygraph.models.books.BookRecord
 import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
 
 import com.ryanquey.intertextualitygraph.graphmodels.TextVertex.{
-  getPrimaryKeyFields, 
   osisToStartingBook,
   osisToStartingChapter,
   osisToStartingVerse,
@@ -58,7 +57,8 @@ import constants.DatasetMetadata._
 
 
 case class HopParamsSet (
-  // can be a single text, or a range, even range of books
+  // filter results for this hop to only include texts that overlap with these references
+  // can be a single verse (Gen.1.1), or a range, even range of books (Gen-Exod) OR EVEN multiple discrete ranges  (Gen-Exod; Lev.1.1-Lev.1.5; Rev.1-Rev.5)
   referenceOsis : String,
 
   /*
@@ -113,6 +113,7 @@ case class HopParamsSet (
   // make wrappers for this, since we'll change logic later, to include expanding to book/chapter or using expandByNumVerses, and also handling ranges for the osis (e.g., gen.1.1-gen.1.3). 
   // for now though, keep it simple to get something working, so continue to just use starting book/ch/v only, but return as iterable to prepare for the future
 
+  // TODO implement this correctly, so returns all books for params set
   def getBooks() : Set[String] = {
     println(s"getting starting book for $referenceOsis");
     val book = osisToStartingBook(referenceOsis)
@@ -125,7 +126,15 @@ case class HopParamsSet (
   def getChapters() : Set[Int] = {
     Set(osisToStartingChapter(referenceOsis))
   }
+
+  // TODO implement this correctly, so returns all verses for params set
   def getVerses() : Set[Int] = {Set(osisToStartingVerse(referenceOsis))}
+
+  // TODO implement using jsword helpers
+  def isFullBooks() : Boolean = {false}
+  // TODO implement using jsword helpers
+  def isFullChapters() : Boolean = {false}
+
 } 
 
 object HopParamsSet {
@@ -137,23 +146,62 @@ object HopParamsSet {
 	def addStepsForHop (traversal : GraphTraversal[Vertex, Vertex], hopParamsSet : HopParamsSet) : GraphTraversal[Vertex, Vertex] = {
 	  // TODO add osis parsing to get ref
 	  val referenceOsis : String = hopParamsSet.referenceOsis
+	  //TODO uncomment when ready
 	  //val allusionDirection : String = hopParamsSet.allusionDirection
-	  //val dataSet : String = hopParamsSet.dataSet.getOrElse("all")
+	  //TODO uncomment when ready
+	  //val dataSet : String = hopParamsSet.dataSet
 	  val dataSet = "all"
 
-	  val book = hopParamsSet.getBooks
-	  val chapter = hopParamsSet.getChapters
-	  val verse = hopParamsSet.getVerses
 
-    // fields that have primary keys for text, which will be needed to do graph traversal
-    val textPks = getPrimaryKeyFields()
+    // TODO (backlog, not urgent)
+    // next, expand texts returned by previous out step to book/ch if requested
+    // if (hopParamsSet.expandToBook) {
+    // ...
+    // } else if (hopParamsSet.expandToChapter) {
+    // ...
+    // } else if (hopParamsSet.expandByNumVerses) {
+    // ...
+    // }
 
-    // TODO make helper to get range of verses or chapters...or books. 
+    // next, filter those expanded text vertices by specified ref ranges
+    // TODO (or, perhaps expand first, then filter by ref filters? which way is better??)
+    val traversalWithRefFilters = addTextFilterByRefSteps(traversal.hasLabel("text"), hopParamsSet)
 
-    val traversalWithRefFilters = FilterByRefRanges.addTextFilterByRefSteps(traversal.hasLabel("text"), "Genesis", Some(1), Some(Set(1)))
+    // finally, filter by dataset
     val traversalWithDatasetFilters = TraversalBuilder.addTextFilterByDatasetSteps(traversalWithRefFilters, dataSet)
 
     traversalWithDatasetFilters
+  }
+
+  /*
+   * traverse through the reference vertices and get texts from there. 
+   * - if have to, traverse all verses related to this hop.
+   * - if is full chapter, can traverse through chapters instead, for better performance
+   * - if is full book, can traverse through books instead, for even better performance
+   */ 
+  def addTextFilterByRefSteps (initialTraversal : GraphTraversal[Vertex, Vertex], hopParamsSet : HopParamsSet) : GraphTraversal[Vertex, Vertex] = {
+
+    // TODO make helper to get range of verses or chapters...or books for osis. Will pass in ranges to the addTextFilterByRefSteps method instead
+    // val refRanges = hopParamsSet.getRefRanges
+
+    /*
+    // iterate over ref ranges and for each range, add whatever filters
+    for (range <- refRanges) {
+      if (range.isFullBooks) {
+        val books = range.getBooks
+        FilterByRefRanges.addTextFilterByBooksSteps(books)
+      } else if (range.isFullChapters) {
+        val chapters = range.getChapters
+        FilterByRefRanges.addTextFilterByChaptersSteps(chapters)
+      } else {
+        val verses = range.getVerses
+        FilterByRefRanges.addTextFilterByVersesSteps(verses)
+      }
+    }
+    */
+
+
+    initialTraversal
   }
 }
 

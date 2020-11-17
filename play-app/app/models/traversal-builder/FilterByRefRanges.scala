@@ -53,29 +53,80 @@ import com.ryanquey.intertextualitygraph.graphmodels.TextVertex.{
 import constants.DatasetMetadata._
 
 /*
- * Functions for adding filters to a graph traversal that filter by ranges of references
+ * Functions for adding filters to a graph traversal that filter by ranges of references (e.g., Gen.1-Gen.3 or Gen-Exod or Gen.1.1-Gen.1.3)
  *
  *
  */ 
 object FilterByRefRanges {
   /*
-   *
-   * - if verses not passed in, not filtering by verses. If passed in, will filter to only return texts who have those verses.
-   * - same is true for books and chapters.
+   * take a traversal and add steps to filter by books
+   * - initialTraversal should be on text vertices 
    *
    */ 
-  def addTextFilterByRefSteps (initialTraversal : GraphTraversal[Vertex, Vertex], book : String, chapter : Option[Int], verses : Option[Set[Int]])  : GraphTraversal[Vertex, Vertex]= {
+  def addTextFilterByBooksSteps (initialTraversal : GraphTraversal[Vertex, Vertex], books : Set[String])  : GraphTraversal[Vertex, Vertex]= {
     println(s"adding filter steps to traversal $initialTraversal");
 
-    val traversal = chapter match {
-      /*
-      case Some(ch) if verses.isDefined => fetchTextByStartingVerse(initialTraversal, book, ch, verses.get)
-      case Some(ch) => fetchTextByStartingChapter(initialTraversal, book, ch)
-      */
-     // just to get it to compile, will be totally different in the second
-      case None  => initialTraversal
-      case _  => initialTraversal
-    }
+    // find vertices for books
+    // https://kelvinlawrence.net/book/Gremlin-Graph-Guide.html#bool
+    // 
+    // but add each "or" clause recursively, iterating over books list
+    // (the gist is something like this, but will be different, .e.g., how we use initialTraversal)
+    // g.V(initialTraversal).hasLabel("book").where(values('name').is(eq(books(0).or(eq(books(...)))).
+
+
+    // dummy code to let it still compile until we implement this
+    val traversal = initialTraversal
+
+    traversal
+  }
+  
+  /*
+   * take a traversal and add steps to filter by chapters
+   * - initialTraversal should be on text vertices 
+   * - Potentially going to be very expensive. Need to implement different approaches to make this cheaper
+    // (the gist is something like this, but will be different, .e.g., how we use initialTraversal)
+   *
+   */ 
+  // TODO chapters probably should not be int, but instead use our Verse model/graph model or jsword's classes. 
+  // That way can easily extract book data out too and pass it around
+  def addTextFilterByChaptersSteps (initialTraversal : GraphTraversal[Vertex, Vertex], chapters : Set[Int])  : GraphTraversal[Vertex, Vertex]= {
+    println(s"adding filter steps to traversal $initialTraversal");
+
+    // find vertices for chapters
+    // https://kelvinlawrence.net/book/Gremlin-Graph-Guide.html#bool
+    //
+    // iterate over each book, and get chapters for that book using gt/lt ?? 
+    // (the gist is something like this, but will be different, .e.g., how we use initialTraversal)
+    // g.V(initialTraversal).hasLabel("chapter").where(values('book').is(eq((0).or(eq(name(...)))).
+
+
+    // dummy code to let it still compile until we implement this
+    val traversal = initialTraversal
+
+    traversal
+  }
+
+  /*
+   * take a traversal and add steps to filter by verses
+   * - initialTraversal should be on text vertices 
+   * - Potentially going to be very VERY expensive. Need to implement different approaches to make this cheaper
+   *
+   */ 
+
+  // TODO verses probably should not be int, but instead use our Verse model/graph model or jsword's classes
+  // That way can easily extract book and ch data out too and pass it around
+  def addTextFilterByVersesSteps (initialTraversal : GraphTraversal[Vertex, Vertex], verses : Set[Int])  : GraphTraversal[Vertex, Vertex]= {
+    println(s"adding filter steps to traversal $initialTraversal");
+
+    // find vertices for chapters
+    // https://kelvinlawrence.net/book/Gremlin-Graph-Guide.html#bool
+    //
+    // iterate over each book, and get chapters for that book using gt/lt ?? And then same for verses?
+    // g.V(initialTraversal).hasLabel("chapter").where(values('book').is(eq((0).or(eq(name(...)))).
+
+
+    // dummy code to let it still compile until we implement this
+    val traversal = initialTraversal
 
     traversal
   }

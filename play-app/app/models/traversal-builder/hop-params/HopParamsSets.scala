@@ -73,6 +73,7 @@ object HopParamsSets {
 
 		val initialTraversal : GraphTraversal[Vertex, Vertex] = g.V()
 
+    // recursively iterate over param sets to build a traversal with all filters set for each hop
     val traversal : GraphTraversal[Vertex, Vertex] = traverseHopsAccumulator(hopParamSets, initialTraversal)
 
     println(s"returning traversal: $traversal");

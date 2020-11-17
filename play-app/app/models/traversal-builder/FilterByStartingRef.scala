@@ -79,7 +79,11 @@ object FilterByStartingRef {
     traversal
   }
 
-  // NOTE returns traversal, doesn't actually hit the db yet until something is called on it
+  /*
+   * take a traversal and add steps to filter by starting Verse
+   * - initialTraversal should be on text vertices 
+   * - returns traversal, doesn't actually hit the db yet until something is called on it
+   */
   def filterTextByStartingVerse (initialTraversal : GraphTraversal[Vertex, Vertex], book : String, chapter : Int, verse : Int)  : GraphTraversal[Vertex, Vertex]= {
     println(s"getting by starting verse: $book $chapter:$verse");
     val texts : GraphTraversal[Vertex, Vertex] = initialTraversal

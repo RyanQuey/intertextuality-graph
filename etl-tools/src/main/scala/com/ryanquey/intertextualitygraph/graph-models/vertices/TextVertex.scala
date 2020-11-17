@@ -460,7 +460,7 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
    * - TODO add versification options
    */ 
   def parseOsisRange (osis : String) : VerseRange = {
-
+    println(s"about to parse $osis");
     osisParser.parseOsisRef(defaultV11n, osis)
   }
   /*
@@ -473,11 +473,23 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
   }
 
   /*
-   * note that parseOsisID cannot take e.g., Gen.4 and work. Needs a verse.
+   * Takes an osis string (which is potentially a range, but not necessarily) and returns the first reference for it
+   * - note that parseOsisID cannot take e.g., Gen.4 and work. Needs a verse. 
+   *  - Accordingly, we're getting verse for this osis range, and returning it
+   * - specifically the first verse, because this is starting range, so first verse will give starting book, starting chapter, and starting verse
+   *   (e.g., Gen.1 > Genesis 1:1, which is correct, that is the first verse of Genesis 1)
    *
    */ 
   def osisToStartingRef (osis : String) : JswordVerse = {
-    parseOsisRange(osis).toVerseArray()(0)
+    val parsedRange = parseOsisRange(osis)
+    val allVerses = parsedRange.toVerseArray()
+
+    if (allVerses.length == 0) {
+      throw new java.lang.IllegalArgumentException(s"No reference found for osis $osis")
+    }
+
+    // first verse will be starting ref
+    allVerses(0)
   }
 
   /*
@@ -489,6 +501,7 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
     //osisToStartingRef(osis).getBook // would be e.g., Gen
     // e.g., Gen.1.1 => Genesis 1:1 => (Genesis,1:1) => Genesis
     val bookInitials = osisToStartingRef(osis).getBook
+
     //Books.installed().getBook(bookInitials.toString);
     bibleNames.getLongName(bookInitials);
   }

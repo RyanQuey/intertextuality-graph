@@ -15,6 +15,9 @@ import scala.jdk.CollectionConverters._
 // import gremlin.scala._
 
 import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
+import org.apache.tinkerpop.gremlin.structure.{Vertex}
+import org.apache.tinkerpop.gremlin.process.traversal.{Path}
 
 import models.TextAPIModel._
 import models.HopParamsSet
@@ -59,7 +62,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     // https://stackoverflow.com/a/25194037/6952495
     val hopParamSets = hopParamSetsJSON.as[Seq[HopParamsSet]]
 
-    val traversal = hopParamSetsToTraversal(hopParamSets)
+    val traversal  : GraphTraversal[Vertex, Vertex] = hopParamSetsToTraversal(hopParamSets)
 
     // TODO
     //if (sourceTexts.size == 0) {
@@ -68,18 +71,21 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       //Ok(request.body)
     } else {
 
+
       // maybe can skip
       // passing in empty Seq for getting ALL fields
+      println("getting paths");
       val pathsWithValues = findPathsForTraversal(traversal, Seq()).toList
 
       // now we have gremlin output, that is roughly a list of lists of maps, and each map is a vertex with all values attached. 
       // we want to return this as two data items for use with our chart, one for nodes, one for edges
       // TODO convert stuff using scala; for now just sending to frontend and converting using js
       // possibly use gremlin-scala?
-      pathsWithValues.asScala.foreach{ pathWithValues => {
+      // pathsWithValues.asScala.foreach{ pathWithValues => {
         // println(pathWithValues.getClass)
-      }}
+      // }}
 
+      println("writing as json");
       val output = json_mapper.writeValueAsString(pathsWithValues)
 
       Ok(output)
@@ -93,6 +99,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
    * - go back hopsCount hops
    * - gets all values for all vertices along path
    * - For now, get all that start with this ref
+	  // 
    * - TODO eventually, will get all texts that include this verse, rather than all texts that start with this verse
   */ 
   def getPathsForTextsRefAlludesTo(dataSet : String, book : String, chapter : Option[Int], verse : Option[Int], hopsCount : Int) = Action { implicit request: Request[AnyContent] =>
@@ -109,7 +116,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     } else {
 
       // find what texts allude to the texts we found
-      val alludingTexts = textsAlludedToBy(sourceTexts, hopsCount)
+      val alludingTexts  : GraphTraversal[Vertex, Vertex] = textsAlludedToBy(sourceTexts, hopsCount)
 
       // passing in no args for getting ALL fields
       val pathsWithValues = findPathsForTraversal(alludingTexts, Seq()).toList

@@ -27,6 +27,8 @@ lazy val intertextualityPlayApi = (project in file("."))
     // allow my projects which are installed to local mvn work here. Should work after running packaging scripts in root of this git repo
     // https://stackoverflow.com/a/21628869/6952495
     resolvers += Resolver.mavenLocal,
+    resolvers += "jitpack" at "https://jitpack.io",
+
     libraryDependencies ++= Seq(
       guice,
       
@@ -41,6 +43,8 @@ lazy val intertextualityPlayApi = (project in file("."))
       "com.datastax.oss" % "java-driver-mapper-runtime" % cassandraJavaDriverVersion,
 
       "com.michaelpollmeier" %% "gremlin-scala" % "3.4.7.2",
+      // for etl-tools projecT
+      "com.github.AndBible" % "jsword" % "2.3.10"  
 
       // "com.ryanquey.intertextuality-graph" % "models" % modelsVersion.get,
       // for now just putting the jar in the libs dir, rather than installing from local mvn repo

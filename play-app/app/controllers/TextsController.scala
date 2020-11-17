@@ -20,7 +20,8 @@ import org.apache.tinkerpop.gremlin.structure.{Vertex}
 import org.apache.tinkerpop.gremlin.process.traversal.{Path}
 
 import models.TextAPIModel._
-import models.HopParamsSet
+import models.traversalbuilder.hopparams.{HopParamsSet, HopParamsSets}
+import models.traversalbuilder.{TraversalBuilder}
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -62,7 +63,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     // https://stackoverflow.com/a/25194037/6952495
     val hopParamSets = hopParamSetsJSON.as[Seq[HopParamsSet]]
 
-    val traversal  : GraphTraversal[Vertex, Vertex] = hopParamSetsToTraversal(hopParamSets)
+    val traversal  : GraphTraversal[Vertex, Vertex] = HopParamsSets.buildTraversal(hopParamSets)
 
     // TODO
     //if (sourceTexts.size == 0) {
@@ -75,7 +76,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       // maybe can skip
       // passing in empty Seq for getting ALL fields
       println("getting paths");
-      val pathsWithValues = findPathsForTraversal(traversal, Seq()).toList
+      val pathsWithValues = TraversalBuilder.findPathsForTraversal(traversal, Seq()).toList
 
       // now we have gremlin output, that is roughly a list of lists of maps, and each map is a vertex with all values attached. 
       // we want to return this as two data items for use with our chart, one for nodes, one for edges
@@ -119,7 +120,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       val alludingTexts  : GraphTraversal[Vertex, Vertex] = textsAlludedToBy(sourceTexts, hopsCount)
 
       // passing in no args for getting ALL fields
-      val pathsWithValues = findPathsForTraversal(alludingTexts, Seq()).toList
+      val pathsWithValues = TraversalBuilder.findPathsForTraversal(alludingTexts, Seq()).toList
 
       // now we have gremlin output, that is roughly a list of lists of maps, and each map is a vertex with all values attached. 
       // we want to return this as two data items for use with our chart, one for nodes, one for edges
@@ -160,7 +161,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       val sourceTexts = textsAlludeTo(alludingTexts, hopsCount)
 
       // passing in no args for getting ALL fields
-      val pathsWithValues = findPathsForTraversal(sourceTexts, Seq()).toList
+      val pathsWithValues = TraversalBuilder.findPathsForTraversal(sourceTexts, Seq()).toList
 
       // now we have gremlin output, that is roughly a list of lists of maps, and each map is a vertex with all values attached. 
       // we want to return this as two data items for use with our chart, one for nodes, one for edges

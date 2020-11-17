@@ -202,13 +202,28 @@ object TextAPIModel {
     textTraversal
   }
 
+
+
+
+
+
+
+
+
+
+
+
+  ///////////////////////////////////////////////
+  // builder helpers
+  ///////////////////////////////////////////////
+
   def addTextFilterSteps (initialTraversal : GraphTraversal[Vertex, Vertex], dataSet : String, book : String, chapter : Option[Int], verse : Option[Int])  : GraphTraversal[Vertex, Vertex]= {
     println(s"adding filter steps to traversal $initialTraversal");
 
     var traversal = chapter match {
       case Some(c) if verse.isDefined => fetchTextByStartingVerse(initialTraversal, book, c, verse.get)
       case Some(c) => fetchTextByStartingChapter(initialTraversal, book, c)
-      case None => fetchTextByStartingBook(initialTraversal, book)
+      case Some(c)  => fetchTextByStartingBook(initialTraversal, book)
     }
 
     // filter by dataSet (which is currently just filtering by created_by)

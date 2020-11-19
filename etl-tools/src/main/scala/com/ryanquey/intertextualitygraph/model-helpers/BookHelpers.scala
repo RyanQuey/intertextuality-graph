@@ -26,6 +26,7 @@ object BookHelpers {
    * - NOTE at least for now, there's not a strong reason to convert this over into the case class. 
    *   * It's hacky, but it works well, and provides and easy way to access basic information about our books. 
    *   * Also does not pollute our BookVertex companion object with all this stuff that mostly just interacts with constants
+   *   TODO use jsword instead?
    */
   val _dataFile = new TheographicDataFile("books", "books-Grid view.csv");
   val allBooksFromFile : Iterable[Book] = _dataFile.getModelInstances().asInstanceOf[Iterable[Book]]

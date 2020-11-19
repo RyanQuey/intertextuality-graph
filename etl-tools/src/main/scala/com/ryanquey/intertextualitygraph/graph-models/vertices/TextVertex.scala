@@ -7,16 +7,24 @@ import java.time.Instant;
 //import scala.collection.JavaConverters._ 
 import scala.jdk.CollectionConverters._
 
-import com.datastax.oss.driver.api.core.cql._;
 import scala.collection.immutable.List
 import scala.util.{Try, Success, Failure}
+import scala.reflect._
+import scala.reflect.runtime.universe._
+
 
 import com.datastax.oss.driver.api.core.servererrors.InvalidQueryException
+import com.datastax.oss.driver.api.core.cql._;
+// TODO these are just temp to test
+import com.datastax.dse.driver.api.core.graph._;
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder._;
+
 
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.structure.{Vertex, Edge}
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.unfold
+import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource;
 
 import gremlin.scala._
 
@@ -37,27 +45,13 @@ import com.ryanquey.intertextualitygraph.helpers.shapeless.{CaseClassFromMap}
 import com.ryanquey.datautils.models.{Model, Record}
 import com.ryanquey.intertextualitygraph.helpers.Reflection.{fromMap, getFieldsOfTypeForClass}
 
-// TODO these are just temp to test
-import com.datastax.dse.driver.api.core.graph._;
-import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource;
 
-import scala.reflect._
-import scala.reflect.runtime.universe._
-
-import com.datastax.oss.driver.api.querybuilder.QueryBuilder._;
-
-import org.crosswire.jsword.passage.OsisParser;
-import org.crosswire.jsword.passage.VerseRange;
-import org.crosswire.jsword.versification.Versification;
-import org.crosswire.jsword.versification.system.Versifications;
-import org.crosswire.jsword.passage.{Verse => JswordVerse}
-import org.crosswire.jsword.book.Books;
-import org.crosswire.jsword.versification.BibleNames
 
 /*
  * - NOTE make sure to keep fields in sync with com.ryanquey.intertextualitygraph.models.chapters.ChapterBase
  */
-// haven't gotten this to work at. from gremlin scala lib
+
+// haven't gotten this label to work at. from gremlin scala lib
 @label("text")
 case class TextVertex(
   // maybe use @id annotation, looks optional
@@ -404,14 +398,6 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
       )
   }
 
-  ///////////////////////////////////////////////////////////
-  // OSIS stuff
-  ///////////////////////////////////////////////////////////
-
-  // probably english?
-  val defaultV11n : Versification = Versifications.instance().getVersification(Versifications.DEFAULT_V11N);
-  val osisParser : OsisParser = new OsisParser();
-  val bibleNames = BibleNames.instance()
 
   ///////////////////////////////////////////////////////////
   // CRUD
@@ -451,83 +437,5 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
     traversal
   }
 
-  ///////////////////////////////////////////////////////////
-  // STRING HELPERS
-  ///////////////////////////////////////////////////////////
-
-  /*
-   * For parsing when there might or might not be a hyphen (e.g., Gen.1.1-Exod OR Gen.1.1)
-   * - TODO add versification options
-   */ 
-  def parseOsisRange (osis : String) : VerseRange = {
-    println(s"about to parse $osis");
-    osisParser.parseOsisRef(defaultV11n, osis)
-  }
-  /*
-   * For parsing a single verse (e.g., Gen.1.1)
-   * - does not work with e.g., Gen.1, needs a chapter
-   * - TODO add versification options
-   */ 
-  def parseOsisID (osis : String) : JswordVerse = {
-    osisParser.parseOsisID(defaultV11n, osis)
-  }
-
-  /*
-   * Takes an osis string (which is potentially a range, but not necessarily) and returns the first reference for it
-   * - note that parseOsisID cannot take e.g., Gen.4 and work. Needs a verse. 
-   *  - Accordingly, we're getting verse for this osis range, and returning it
-   * - specifically the first verse, because this is starting range, so first verse will give starting book, starting chapter, and starting verse
-   *   (e.g., Gen.1 > Genesis 1:1, which is correct, that is the first verse of Genesis 1)
-   *
-   */ 
-  def osisToStartingRef (osis : String) : JswordVerse = {
-    val parsedRange = parseOsisRange(osis)
-    val allVerses = parsedRange.toVerseArray()
-
-    if (allVerses.length == 0) {
-      throw new java.lang.IllegalArgumentException(s"No reference found for osis $osis")
-    }
-
-    // first verse will be starting ref
-    allVerses(0)
-  }
-
-  /*
-   *
-   * - http://www.crosswire.org/jsword/cobertura/org.crosswire.jsword.examples.APIExamples.html
-   */ 
-  def osisToStartingBook (osis : String) : String= {
-    // we want full, hopefully these are teh same as what theographic uses!
-    //osisToStartingRef(osis).getBook // would be e.g., Gen
-    // e.g., Gen.1.1 => Genesis 1:1 => (Genesis,1:1) => Genesis
-    val bookInitials = osisToStartingRef(osis).getBook
-
-    //Books.installed().getBook(bookInitials.toString);
-    bibleNames.getLongName(bookInitials);
-  }
-
-  def osisToStartingChapter (osis : String) : Int = {
-    osisToStartingRef(osis).getChapter 
-  }
-
-  def osisToStartingVerse (osis : String) : Int= {
-    osisToStartingRef(osis).getChapter 
-  }
-  def osisToEndingRef (osis : String) : JswordVerse = {
-    parseOsisRange(osis).toVerseArray().last 
-  }
-  def osisToEndingBook (osis : String) : String= {
-    // we want full, hopefully these are teh same as what theographic uses!
-    //osisToEndingRef(osis).getBook // would be e.g., Gen
-    // e.g., Gen.1.1 => Genesis 1:1 => (Genesis,1:1) => Genesis
-    val bookInitials = osisToEndingRef(osis).getBook
-    bibleNames.getLongName(bookInitials);
-  }
-  def osisToEndingChapter (osis : String) : Int = {
-    osisToEndingRef(osis).getChapter 
-  }
-  def osisToEndingVerse (osis : String) : Int = {
-    osisToEndingRef(osis).getVerse
-  }
 
 }

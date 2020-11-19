@@ -55,6 +55,7 @@ import constants.DatasetMetadata._
 /*
  * Functions for building a traversal
  * - these are the more generic functions, not specific to a certain category of traversal methods we're using
+ *   TODO probably eventually, all this will go into etl-tools. this whole package and all sub packages
  *
  */ 
 object TraversalBuilder {

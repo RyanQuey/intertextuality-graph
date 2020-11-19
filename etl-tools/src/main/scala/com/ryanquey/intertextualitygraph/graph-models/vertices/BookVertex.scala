@@ -142,6 +142,9 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
 
   ///////////////////////////////////////////////////////////
   // METADATA HELPERS
+  // TODO move away from these to jsword helpers when possible
+  // also move a lot of this to JswordUtil instead, so this kind of metadata finding all belongs in one spot
+  // - TODO or better yet, make a trait that is a book, and has some of the same fields as BookVertex, 
   ///////////////////////////////////////////////////////////
 
   /*

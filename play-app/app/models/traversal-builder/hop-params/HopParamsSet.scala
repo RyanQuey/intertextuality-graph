@@ -12,9 +12,6 @@ import com.google.common.collect.{ImmutableList, Lists}
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import play.api.mvc._
-import gremlin.scala._
-
-import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
 
 // way overkill, but just trying to find what works for method "out"
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -31,24 +28,25 @@ import org.apache.tinkerpop.gremlin.structure.{Vertex}
 import org.apache.tinkerpop.gremlin.structure.io.graphson.{GraphSONMapper, GraphSONVersion}
 
 // end over-importing tinkerpop classes
+import gremlin.scala._
+import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
 
 
 // use to get the global session
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
-import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
 import com.ryanquey.intertextualitygraph.models.texts.{Text => TextClass}
 import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.books.BookRecord
 import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
 
-import com.ryanquey.intertextualitygraph.graphmodels.TextVertex.{
+import com.ryanquey.intertextualitygraph.utils.JswordUtil.{
   osisToStartingBook,
-  osisToStartingChapter,
+  osisToStartingChapterNum,
   osisToStartingVerse,
 }
 
-
 import models.traversalbuilder.{FilterByRefRanges, TraversalBuilder}
+import models.traversalbuilder.reference.{ReferenceRange}
 
 // import models.Connection._
 import constants.DatasetMetadata._
@@ -58,7 +56,8 @@ import constants.DatasetMetadata._
 
 case class HopParamsSet (
   // filter results for this hop to only include texts that overlap with these references
-  // can be a single verse (Gen.1.1), or a range, even range of books (Gen-Exod) OR EVEN multiple discrete ranges  (Gen-Exod; Lev.1.1-Lev.1.5; Rev.1-Rev.5)
+  // can be a single verse (Gen.1.1), or a range, even range of books (Gen-Exod) OR EVEN multiple discrete ranges (comma separated) (Gen-Exod,Lev.1.1-Lev.1.5,Rev.1-Rev.5)
+  // note that jsword will want ranges to be a contiguous range, so would have to split the string to get to that osis style.
   referenceOsis : String,
 
   /*
@@ -135,6 +134,10 @@ case class HopParamsSet (
   // TODO implement using jsword helpers
   def isFullChapters() : Boolean = {false}
 
+  def getRefRanges() : List[ReferenceRange] = {
+    parseOsisRanges(referenceOsis).map(ReferenceRange(_))
+  }
+
 } 
 
 object HopParamsSet {
@@ -156,8 +159,11 @@ object HopParamsSet {
     // TODO (backlog, not urgent)
     // next, expand texts returned by previous out step to book/ch if requested
     // if (hopParamsSet.expandToBook) {
+    // - probably go out to book, then back in to all texts connected to that book
     // ...
     // } else if (hopParamsSet.expandToChapter) {
+    // - probably go out to chapter, then back in to all texts connected to that chapter
+    // - maybe for this, I'll want to connect adjacent chapters to each other so they know each other and traverse easily to each other...I'm not sure if this actually creates a performance gain however
     // ...
     // } else if (hopParamsSet.expandByNumVerses) {
     // ...
@@ -182,26 +188,119 @@ object HopParamsSet {
   def addTextFilterByRefSteps (initialTraversal : GraphTraversal[Vertex, Vertex], hopParamsSet : HopParamsSet) : GraphTraversal[Vertex, Vertex] = {
 
     // TODO make helper to get range of verses or chapters...or books for osis. Will pass in ranges to the addTextFilterByRefSteps method instead
-    // val refRanges = hopParamsSet.getRefRanges
+    val refRanges : List[ReferenceRange] = hopParamsSet.getRefRanges
 
-    /*
-    // iterate over ref ranges and for each range, add whatever filters
-    for (range <- refRanges) {
-      if (range.isFullBooks) {
-        val books = range.getBooks
-        FilterByRefRanges.addTextFilterByBooksSteps(books)
-      } else if (range.isFullChapters) {
-        val chapters = range.getChapters
-        FilterByRefRanges.addTextFilterByChaptersSteps(chapters)
-      } else {
-        val verses = range.getVerses
-        FilterByRefRanges.addTextFilterByVersesSteps(verses)
-      }
-    }
-    */
+    FilterByRefRanges.addTextFilterSteps(breakdownRefRanges(range))
 
+    // // iterate over ref ranges and for each range, add whatever filters
+    // for (range <- refRanges) {
 
-    initialTraversal
+    //   if (range.isWholeBooks) {
+    //     val bookNames = range.getBookNames
+    //     FilterByRefRanges.addTextFilterByBooksSteps(books)
+
+    //   } else if (range.isWholeChapters) {
+    //     val chapters = range.getChapters
+    //     FilterByRefRanges.addTextFilterByChaptersSteps(chapters)
+
+    //   } else {
+    //     val verses = range.getVerses
+    //     FilterByRefRanges.addTextFilterByVersesSteps(verses)
+    //   }
+    // }
   }
+
+  /*
+   *  takes ReferenceRange set and converts each one into either a set of book references, a ChapterRangeWithinBook, or a VerseRangeWithinChapter
+   * - the idea is to break it down into the greatest possible segments, since these will be used 
+   * - books don't need to/can't use ranges, since they use strings rather than integers. Probably could use integers if we wanted, but then would need to assign integers for extra biblical books as well... Which is also possible, but just do it with strings for now. There probably should not be that many, so should be fine.
+   *
+   */ 
+  def breakdownRefRanges (referenceRanges : Set[ReferenceRange]) : ((Set[BookReference], Set[ChapterRangeWithinBook]], Set[VerseRangeWithinChapter])) = {
+    val bookReferences : Set[BookReference] = Set()
+    val chapterRanges : Set[ChapterRangeWithinBook] = Set()
+    val verseRanges : Set[VerseRangeWithinChapter] = Set()
+    for (referenceRange <- referenceRanges) {
+      // 1) get out whatever whole books that are contained by this ref range that we can
+      // NOTE this should work, but might just use recursive function below to pull out everything we need
+      val wholeBooks = referenceRange.getWholeBooks
+      bookReferences ++ wholeBooks
+
+      // 2) with remainder, get out whatever will chapters we can
+      // 3) with remainder, set the rest to verseRanges. Should be at most two - one at the start, one at the end. Everything in the middle should be a whole chapter/book
+      // - since all whole books are gone, we can just look at the start and end book
+      val startingVerse : VerseReference = referenceRange.getStartingVerse
+      val endingVerse : VerseReference = referenceRange.getEndingVerse
+
+
+
+      /*
+       * - since doing this in multiple places, make a helper
+       */ 
+      def addVersesBetween (startingVerse : VerseReference, endingVerse : VerseReference) : Unit = {
+        // TODO 
+
+      }
+
+
+      // start with startingVerse and recursively iterate over chapters until we get to ending Verse
+      def breakdownRefRange (startingVerse : VerseReference, endingVerse : VerseReference) : Unit = {
+        val endOfBook : VerseReference = startingVerse.getLastVerseOfBook
+        val endOfChapter : VerseReference = startingVerse.getLastVerseOfChapter
+
+        // is whole book, and we've pulled those out already. We're done, no need to continue
+        val rangeIsWholeBook = startingVerse.book == endingVerse.book && endingVerse.isSameAs(endOfBook) && startingVerse.isStartOfBook
+        // we've made it to the end. Add this verse and we're done
+        // actually, this probably means they only identified one verse they wanted to filter by
+
+        if (rangeIsWholeBook) {
+          return
+        }
+
+        // temporarily setting here, but might overwrite
+        var newStartingVerse : VerseReference = startingVerse.getLastVerseOfChapter
+
+        // 1) CHECK IF WHOLE BOOK
+        // - at this point, only possible if there are multiple books left in this range
+        val hasWholeBookToAdd = startingVerse.isStartOfBook && startingVerse.book != endingVerse.book)
+        if (hasWholeBookToAdd) { 
+          // passing for now, already added
+          newStartingVerse = endOfBook + 1 verse // can't do this, but that's what it would be
+        }
+
+        // 2) CHECK IF WHOLE CHAPTER
+        // - true as long as we don't end before end of chapter and starting verse is start of chapter
+        val hasWholeChapterToAdd = startingVerse.isStartOfChapter && (!endingVerse.isSameChapterAs(startingVerse) || endingVerse.isSameAs(endOfChapter))
+        if (!hasWholeBookToAdd && hasWholeChapterToAdd) { 
+          chapterRanges ++ endingVerse.getChapterReference
+          newStartingVerse = endOfChapter + 1 verse // can't do this, but that's what it would be
+        }
+
+        // 3) ADD ALL VERSES OTHERWISE
+        if (!hasWholeBookToAdd && !hasWholeChapterToAdd) {
+
+          // make sure to not go past endVerse
+          val terminalVerseForIteration = earliestVerseBetween(endOfChapter.number, endingVerse.number)
+
+          addVersesBetween(startingVerse, terminalVerseForIteration) 
+          newStartingVerse = terminalVerseForIteration + 1 verse // can't do this, but that's what it would be
+        }
+
+        // 4) CHECK IF FINISHED SO KNOW IF SHOULD CONTINUE ITERATING
+        val finished = newStartingVerse >= endingVerse || rangeIsWholeBook
+
+        if (!done) {
+          // keep iterating
+          breakdownRefRange(newStartingVerse, endingVerse)
+        }
+      }
+
+      breakdownRefRange(startingVerse, endingVerse)
+
+      // now our sets are built out. Return as tuple
+      (bookReferences, chapterRanges, verseRanges)
+    }
+  }
+
 }
 

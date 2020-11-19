@@ -66,6 +66,42 @@ import constants.DatasetMetadata._
  *
  */ 
 object FilterByRefRanges {
+
+
+
+  /*
+   *
+   * - The idea is to use BookRanges when stuff can be grouped into books, ChapterRanges when can be grouped into chapters, VerseRanges when can't
+   * - I'm hoping this will be the single function that will replace them all
+   *
+   *
+   */ 
+  def addTextFilterSteps (initialTraversal : GraphTraversal[Vertex, Vertex], books : Set[BookReference], chapterRanges : Set[ChapterRangeWithinBook]], verseRanges : Set[VerseRangeWithinChapter])  : GraphTraversal[Vertex, Vertex]= {
+
+    // https://stackoverflow.com/a/59502635/6952495
+    // To begin, just do a simple traversal for each verse range. HOpefully there isn't an absurd amount of these anyways.
+    val verseIds : Set[List[Strings]] = verseRanges.map(verseIdsFromChapterRange)
+    val chapterIds : Set[List[Strings]] = verseRanges.map(chapterIdsFromChapterRange)
+
+    val bookNames = books.map(name)
+    val withinBookStatement = within(bookNames : _*)
+    val traversal = initialTraversal.or(
+      // either the text overlaps with one of these books...
+      _().has('starting_book', withinBookStatement), 
+      _().has('ending_book', withinBookStatement)
+      // ... or is connected to one of these chapters
+      // TODO could be faster perhaps if did outE and then queried the edge for the chapterId?? Same with verse below. But just get it working first...
+      __.out().hasLabel("chapter")(__.hasId(within(chapterIds)))
+      // ... or is connected to one of these verses. HOpefully there's not too many...
+      __.out().hasLabel("verse")(__.hasId(within(verseIds)))
+    )
+
+    traversal
+  }
+
+  /////////////////////////////////
+  // ARCHIVED / use for testing
+  // /////////////////////////////
   /*
    * take a traversal and add steps to filter by books
    * - initialTraversal should be on text vertices 
@@ -157,35 +193,8 @@ object FilterByRefRanges {
     traversal
   }
 
-  /*
-   *
-   * - The idea is to use BookRanges when stuff can be grouped into books, ChapterRanges when can be grouped into chapters, VerseRanges when can't
-   * - I'm hoping this will be the single function that will replace them all
-   *
-   *
-   */ 
-  def addTextFilterSteps (initialTraversal : GraphTraversal[Vertex, Vertex], books : Set[BookReference], chapterRanges : Set[ChapterRangeWithinBook]], verseRanges : Set[VerseRangeWithinChapter])  : GraphTraversal[Vertex, Vertex]= {
 
-    // https://stackoverflow.com/a/59502635/6952495
-    // To begin, just do a simple traversal for each verse range. HOpefully there isn't an absurd amount of these anyways.
-    val verseIds : Set[List[Strings]] = verseRanges.map(verseIdsFromChapterRange)
-    val chapterIds : Set[List[Strings]] = verseRanges.map(chapterIdsFromChapterRange)
 
-    val bookNames = books.map(name)
-    val withinBookStatement = within(bookNames : _*)
-    val traversal = initialTraversal.or(
-      // either the text overlaps with one of these books...
-      _().has('starting_book', withinBookStatement), 
-      _().has('ending_book', withinBookStatement)
-      // ... or is connected to one of these chapters
-      // TODO could be faster perhaps if did outE and then queried the edge for the chapterId?? Same with verse below. But just get it working first...
-      __.out().hasLabel("chapter")(__.hasId(within(chapterIds)))
-      // ... or is connected to one of these verses. HOpefully there's not too many...
-      __.out().hasLabel("verse")(__.hasId(within(verseIds)))
-    )
-
-    traversal
-  }
 
 
   

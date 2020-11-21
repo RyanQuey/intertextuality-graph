@@ -46,7 +46,7 @@ import com.ryanquey.intertextualitygraph.utils.JswordUtil.{
 }
 
 import models.traversalbuilder.{FilterByRefRanges, TraversalBuilder}
-import models.traversalbuilder.reference.{ReferenceRange}
+import com.ryanquey.intertextualitygraph.reference.{ReferenceRange, BookReference, ChapterReference, VerseReference}
 
 // import models.Connection._
 import constants.DatasetMetadata._
@@ -216,7 +216,7 @@ object HopParamsSet {
    * - books don't need to/can't use ranges, since they use strings rather than integers. Probably could use integers if we wanted, but then would need to assign integers for extra biblical books as well... Which is also possible, but just do it with strings for now. There probably should not be that many, so should be fine.
    *
    */ 
-  def breakdownRefRanges (referenceRanges : Set[ReferenceRange]) : ((Set[BookReference], Set[ChapterRangeWithinBook]], Set[VerseRangeWithinChapter])) = {
+  def breakdownRefRanges (referenceRanges : Set[ReferenceRange]) : ((Set[BookReference], Set[ChapterRangeWithinBook], Set[VerseRangeWithinChapter])) = {
     val bookReferences : Set[BookReference] = Set()
     val chapterRanges : Set[ChapterRangeWithinBook] = Set()
     val verseRanges : Set[VerseRangeWithinChapter] = Set()
@@ -262,10 +262,14 @@ object HopParamsSet {
 
         // 1) CHECK IF WHOLE BOOK
         // - at this point, only possible if there are multiple books left in this range
-        val hasWholeBookToAdd = startingVerse.isStartOfBook && startingVerse.book != endingVerse.book)
+        val hasWholeBookToAdd = startingVerse.isStartOfBook && startingVerse.book != endingVerse.book
         if (hasWholeBookToAdd) { 
           // passing for now, already added
-          newStartingVerse = endOfBook + 1 verse // can't do this, but that's what it would be
+          // move on to next book
+
+          // in this case, do get, since there should always be a next one unless our flow control didn't work...I think...
+          val nextBook : BookVertex = BookVertex.getBookAfter(endOfBook.book).get
+          newStartingVerse = VerseReference(nextBook.name, 1, 1)
         }
 
         // 2) CHECK IF WHOLE CHAPTER
@@ -273,7 +277,9 @@ object HopParamsSet {
         val hasWholeChapterToAdd = startingVerse.isStartOfChapter && (!endingVerse.isSameChapterAs(startingVerse) || endingVerse.isSameAs(endOfChapter))
         if (!hasWholeBookToAdd && hasWholeChapterToAdd) { 
           chapterRanges ++ endingVerse.getChapterReference
-          newStartingVerse = endOfChapter + 1 verse // can't do this, but that's what it would be
+          // in this case, do get, since there should always be a next one unless our flow control didn't work...I think...
+          val nextChapter : ChapterVertex = ChapterVertex.getChapterAfter(endOfChapter.number).get
+          newStartingVerse = VerseReference(nextChapter.book, nextChapter.number, 1)
         }
 
         // 3) ADD ALL VERSES OTHERWISE
@@ -283,13 +289,14 @@ object HopParamsSet {
           val terminalVerseForIteration = earliestVerseBetween(endOfChapter.number, endingVerse.number)
 
           addVersesBetween(startingVerse, terminalVerseForIteration) 
-          newStartingVerse = terminalVerseForIteration + 1 verse // can't do this, but that's what it would be
+          val nextVerse : VerseVertex = VerseVertex.getVerseAfter(endOfVerse.number).get
+          newStartingVerse = VerseReference(nextVerse.book, nextVerse.chapter, nextVerse.number)
         }
 
         // 4) CHECK IF FINISHED SO KNOW IF SHOULD CONTINUE ITERATING
         val finished = newStartingVerse >= endingVerse || rangeIsWholeBook
 
-        if (!done) {
+        if (!finished) {
           // keep iterating
           breakdownRefRange(newStartingVerse, endingVerse)
         }

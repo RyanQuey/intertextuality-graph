@@ -44,13 +44,6 @@ import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
 import models.traversalbuilder.{FilterByRefRanges, FilterByStartingRef, TraversalBuilder}
 import models.traversalbuilder.hopparams.{HopParamsSets}
 
-import com.ryanquey.intertextualitygraph.graphmodels.TextVertex.{
-  getPrimaryKeyFields, 
-  osisToStartingBook,
-  osisToStartingChapter,
-  osisToStartingVerse,
-}
-
 
 // import models.Connection._
 import constants.DatasetMetadata._

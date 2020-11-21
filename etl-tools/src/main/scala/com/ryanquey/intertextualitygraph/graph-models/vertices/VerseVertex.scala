@@ -173,6 +173,32 @@ object VerseVertex extends GraphReferenceVertexCompanion[VerseVertex] {
   }
   
   /*
+   * returns verse that follows the book provided here, or None if it's the last book
+   *
+   */ 
+  def getVerseAfter (bookName : String, chapterNumber : Int, verseNumber : Int) : Option[VerseVertex] = {
+    val thisBook = BookVertex.getBookByName(bookName)
+    val thisChapter = ChapterVertex.getChapterByName(chapterName)
+
+    if (thisChapter.verseCount > verseNumber) {
+      // simply increment the verseNumber
+      VerseVertex.getVerseByNum(thisBook, thisChapter, verseNumber +1)
+    } else {
+      if (thisBook.chapterCount > chapterNumber) {
+        // verse one of next chapter
+        ChapterVertex.getChapterByNum(thisBook, thisChapter.number +1, 1)
+      } else {
+        // the first chapter of the next book, if there's a next book
+        try {
+          val nextBook = BookVertex.getBookAfter(thisBook)
+          VerseVertex.getVerseByNum(nextBook, 1, 1)
+        } catch (e) {
+          None
+        }
+      }
+    }
+  }
+  /*
    * retrieve verse java model instance using for ALL chapters between the two provided
    * - uses the same name that we use as db primary keys
    *   TODO try not to use this one, use VerseVertex implementation instead

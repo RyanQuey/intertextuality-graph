@@ -41,14 +41,14 @@ import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.books.BookRecord
 import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
 
-import com.ryanquey.intertextualitygraph.graphmodels.TextVertex.{
-  getPrimaryKeyFields, 
+import com.ryanquey.intertextualitygraph.graphmodels.TextVertex
+import com.ryanquey.intertextualitygraph.utils.JswordUtil.{
   osisToStartingBook,
   osisToStartingChapter,
   osisToStartingVerse,
 }
 import com.ryanquey.intertextualitygraph.reference.{BookReference, ChapterReference, VerseReference}
-import com.ryanquey.intertextualitygraph.models.traversalbuilder.{
+import models.traversalbuilder.reference.{
   VerseRangeWithinChapter, 
   ChapterRangeWithinBook, 
 }
@@ -73,22 +73,27 @@ object FilterByRefRanges {
    *
    *
    */ 
-  def addTextFilterSteps (initialTraversal : GraphTraversal[Vertex, Vertex], books : Set[BookReference], chapterRanges : Set[ChapterRangeWithinBook]], verseRanges : Set[VerseRangeWithinChapter])  : GraphTraversal[Vertex, Vertex]= {
+  def addTextFilterSteps (
+    initialTraversal : GraphTraversal[Vertex, Vertex], 
+    books : Set[BookReference], 
+    chapterRanges : Set[ChapterRangeWithinBook], 
+    verseRanges : Set[VerseRangeWithinChapter]
+  ) : GraphTraversal[Vertex, Vertex] = {
 
     // https://stackoverflow.com/a/59502635/6952495
     // To begin, just do a simple traversal for each verse range. HOpefully there isn't an absurd amount of these anyways.
-    val verseIds : Set[List[Strings]] = verseRanges.map(verseIdsFromChapterRange)
-    val chapterIds : Set[List[Strings]] = verseRanges.map(chapterIdsFromChapterRange)
+    val verseIds : Seq[List[Strings]] = verseRanges.map(verseIdsFromChapterRange).flatten
+    val chapterIds : Seq[List[String]] = verseRanges.map(chapterIdsFromChapterRange).flatten
 
     val bookNames = books.map(name)
     val withinBookStatement = within(bookNames : _*)
     val traversal = initialTraversal.or(
       // either the text overlaps with one of these books...
-      _().has('starting_book', withinBookStatement), 
-      _().has('ending_book', withinBookStatement)
+      _().has("starting_book", withinBookStatement), 
+      _().has("ending_book", withinBookStatement),
       // ... or is connected to one of these chapters
       // TODO could be faster perhaps if did outE and then queried the edge for the chapterId?? Same with verse below. But just get it working first...
-      __.out().hasLabel("chapter")(__.hasId(within(chapterIds)))
+      __.out().hasLabel("chapter")(__.hasId(within(chapterIds))),
       // ... or is connected to one of these verses. HOpefully there's not too many...
       __.out().hasLabel("verse")(__.hasId(within(verseIds)))
     )
@@ -127,7 +132,7 @@ object FilterByRefRanges {
     val bookNames = books.map(name)
     val withinStatement = within(bookNames : _*)
 
-    val traversal = initialTraversal.has('starting_book', withinStatement)
+    val traversal = initialTraversal.has("starting_book", withinStatement)
 
     // maybe what it could look like to also filter with ending_book. TODO test later, get basic working first
     //val traversal = initialTraversal.or(_().has('starting_book', withinStatement), _().has('ending_book', withinStatement))
@@ -199,10 +204,28 @@ object FilterByRefRanges {
 
 
   private def verseIdsFromChapterRange (verseRange : VerseRangeWithinChapter) = {
-    g.V().hasLabel("verse").has("book", verseRange.book.name).has("chapter", verseRange.chapter.number).where(values('number').is(gt((verseRange.startingverse.number).and(lt(verseRange.endingverse.number))).toList 
+    g.V().hasLabel("verse")
+      .has("book", verseRange.book.name)
+      .has("chapter", verseRange.chapter.number)
+      .where(
+        values("number").is(
+          // TODO check the parentheses on this one, I think it might be wrong
+          gt((verseRange.startingverse.number)
+            .and(lt(verseRange.endingverse.number))
+            )
+          )
+        ).toList 
   }
 
   private def chapterIdsFromChapterRange (chapterRange : ChapterRangeWithinBook) = {
-    g.V().hasLabel("chapter").has("book", chapterRange.book.name).where(values('number').is(gt((chapterRange.startingChapter.number).and(lt(chapterRange.endingChapter.number))).toList
+    g.V().hasLabel("chapter")
+      .has("book", chapterRange.book.name)
+      .where(
+        values("number").is(
+          gt((chapterRange.startingChapter.number)
+            .and(
+              lt(chapterRange.endingChapter.number)))
+          )
+        ).toList
   }
 }

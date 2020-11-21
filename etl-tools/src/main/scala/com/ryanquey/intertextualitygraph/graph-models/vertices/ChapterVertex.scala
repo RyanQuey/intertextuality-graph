@@ -143,6 +143,25 @@ object ChapterVertex extends GraphReferenceVertexCompanion[ChapterVertex] {
     getChapterByRefData(verse.book, verse.chapter) 
   }
 
+  /*
+   * returns chapter that follows the book provided here, or None if it's the last book
+   *
+   */ 
+  def getChapterAfter (bookName : String, chapterNumber : Int) : Option[ChapterVertex] = {
+    val thisBook = BookVertex.getBookByName(bookName)
+    if (thisBook.chapterCount > chapterNumber) {
+      // simply increment the chapterNumber
+      ChapterVertex.getChapterByNum(thisBook, chapterNumber +1)
+    } else {
+      try {
+        // the first chapter of the next book, if there's a next book
+        val nextBook = BookVertex.getBookAfter(thisBook)
+        ChapterVertex.getChapterByNum(nextBook, 1)
+      } catch (e) {
+        None
+      }
+    }
+  }
 
   /*
    * retrieve chapter java model instance using for ALL chapters between the two provided

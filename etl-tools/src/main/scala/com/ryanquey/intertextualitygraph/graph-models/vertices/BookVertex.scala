@@ -172,14 +172,15 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
   }
 
   def getBookAfter (book : BookVertex) : Option[BookVertex] = {
-    val thisBookNum = book.bookOrder
-    val nextBookNum = BookVertex.getBookByOrderNumber(thisBookNum + 1)
+    val thisBookNum : Int = book.bookOrder.get
 
     // handle if book for num does not exist
     try {
-      Some(BookVertex.getBookByOrderNumber(nextBookNum))
-    } catch (e) {
-      None
+      val nextBook : BookVertex = BookVertex.getBookByOrderNumber(thisBookNum + 1)
+
+      Some(nextBook)
+    } catch {
+      case e: Exception => None
     }
   }
   /*
@@ -204,7 +205,7 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
   }
 
   def getBookByOrderNumber (orderNumber : Int) : BookVertex = {
-    allBooksFromFile.find((b) => b.bookOrder.get == orderNumber)
+    allBooksFromFile.find((b) => b.bookOrder.get == orderNumber).get
   }
 
   def getBooksBetween (startingBookName : String, endingBookName : String) : Iterable[BookVertex] = {

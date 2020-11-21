@@ -151,14 +151,14 @@ object ChapterVertex extends GraphReferenceVertexCompanion[ChapterVertex] {
     val thisBook = BookVertex.getBookByName(bookName)
     if (thisBook.chapterCount > chapterNumber) {
       // simply increment the chapterNumber
-      ChapterVertex.getChapterByNum(thisBook, chapterNumber +1)
+      Some(ChapterVertex.getChapterByNum(thisBook, chapterNumber +1))
     } else {
       try {
         // the first chapter of the next book, if there's a next book
-        val nextBook = BookVertex.getBookAfter(thisBook)
-        ChapterVertex.getChapterByNum(nextBook, 1)
-      } catch (e) {
-        None
+        val nextBook = BookVertex.getBookAfter(thisBook).get
+        Some(ChapterVertex.getChapterByNum(nextBook, 1))
+      } catch {
+        case e: Exception => None
       }
     }
   }

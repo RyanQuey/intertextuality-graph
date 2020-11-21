@@ -38,14 +38,19 @@ import com.ryanquey.intertextualitygraph.models.texts.{Text => TextClass}
 import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.books.BookRecord
 import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
+import com.ryanquey.intertextualitygraph.graphmodels.{BookVertex, ChapterVertex, VerseVertex}
 
 import com.ryanquey.intertextualitygraph.utils.JswordUtil.{
-  osisToStartingBook,
-  osisToStartingChapterNum,
-  osisToStartingVerse,
+  osisToStartingBookName,
+  osisToStartingVerseReference,
+  parseOsisRanges
 }
 
 import models.traversalbuilder.{FilterByRefRanges, TraversalBuilder}
+import models.traversalbuilder.reference.{
+  ChapterRangeWithinBook,  
+  VerseRangeWithinChapter
+}
 import com.ryanquey.intertextualitygraph.reference.{ReferenceRange, BookReference, ChapterReference, VerseReference}
 
 // import models.Connection._
@@ -115,7 +120,7 @@ case class HopParamsSet (
   // TODO implement this correctly, so returns all books for params set
   def getBooks() : Set[String] = {
     println(s"getting starting book for $referenceOsis");
-    val book = osisToStartingBook(referenceOsis)
+    val book = osisToStartingBookName(referenceOsis)
 
     // want it to be a set in the future, so just set it as a set
     Set(book)
@@ -127,7 +132,7 @@ case class HopParamsSet (
   }
 
   // TODO implement this correctly, so returns all verses for params set
-  def getVerses() : Set[Int] = {Set(osisToStartingVerse(referenceOsis))}
+  def getVerses() : Set[Int] = {Set(osisToStartingVerseReference(referenceOsis))}
 
   // TODO implement using jsword helpers
   def isFullBooks() : Boolean = {false}
@@ -229,8 +234,8 @@ object HopParamsSet {
       // 2) with remainder, get out whatever will chapters we can
       // 3) with remainder, set the rest to verseRanges. Should be at most two - one at the start, one at the end. Everything in the middle should be a whole chapter/book
       // - since all whole books are gone, we can just look at the start and end book
-      val startingVerse : VerseReference = referenceRange.getStartingVerse
-      val endingVerse : VerseReference = referenceRange.getEndingVerse
+      val startingVerse : VerseReference = referenceRange.getStartingVerseReference
+      val endingVerse : VerseReference = referenceRange.getEndingVerseReference
 
 
 
@@ -286,15 +291,16 @@ object HopParamsSet {
         if (!hasWholeBookToAdd && !hasWholeChapterToAdd) {
 
           // make sure to not go past endVerse
-          val terminalVerseForIteration = earliestVerseBetween(endOfChapter.number, endingVerse.number)
+          // get earliest verse between these 
+          val terminalVerseForIteration : VerseReference = if (endOfChapter.isAfter(endingVerse)) endingVerse else endOfChapter
 
           addVersesBetween(startingVerse, terminalVerseForIteration) 
-          val nextVerse : VerseVertex = VerseVertex.getVerseAfter(endOfVerse.number).get
-          newStartingVerse = VerseReference(nextVerse.book, nextVerse.chapter, nextVerse.number)
+          // we're at the end
+          newStartingVerse = endingVerse
         }
 
         // 4) CHECK IF FINISHED SO KNOW IF SHOULD CONTINUE ITERATING
-        val finished = newStartingVerse >= endingVerse || rangeIsWholeBook
+        val finished = newStartingVerse.isAfter(endingVerse) || newStartingVerse.isSameAs(endingVerse) || rangeIsWholeBook
 
         if (!finished) {
           // keep iterating

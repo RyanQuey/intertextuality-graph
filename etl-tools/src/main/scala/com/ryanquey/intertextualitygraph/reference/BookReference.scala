@@ -28,4 +28,5 @@ case class BookReference(
 
       VerseReference(name, lastChapterNumber, lastVerseNumber)
     }
+
   }

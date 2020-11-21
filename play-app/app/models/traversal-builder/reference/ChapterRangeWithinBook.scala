@@ -1,5 +1,6 @@
 package models.traversalbuilder.reference
 import org.crosswire.jsword.passage.VerseRange
+import com.ryanquey.intertextualitygraph.reference.{BookReference, ChapterReference}
 
 
 import com.ryanquey.intertextualitygraph.utils.JswordUtil._

@@ -7,8 +7,10 @@ import org.crosswire.jsword.versification.system.Versifications;
 import org.crosswire.jsword.passage.{Verse => JswordVerse}
 import org.crosswire.jsword.book.Books;
 import org.crosswire.jsword.versification.BibleNames
+import org.crosswire.jsword.versification.BibleBook
 
 import com.ryanquey.intertextualitygraph.graphmodels.BookVertex
+import com.ryanquey.intertextualitygraph.reference.{BookReference, ChapterReference, VerseReference, ReferenceRange}
 
 /*
  * Thin wrapper around jsword stuff
@@ -34,26 +36,27 @@ object JswordUtil {
    *  TODO rename to something involving "overlapping"
    *  - note that osis starts at 2 with Genesis, so exod is 3, lev is 4 etc
    */ 
-  def getBooksBetween(jswordVerseRange : VerseRange) : List[BookVertex]{
+  def getBooksBetween (jswordVerseRange : VerseRange) : List[BookVertex] = {
     // use ordinals fetch book names
-    val startingName = osisToStartingBookName(jswordVerseRange)
-    val endingName = osisToEndingBookName(jswordVerseRange)
+    val startingName : String = osisToStartingBookName(jswordVerseRange.getOsisRef)
+    val endingName : String = osisToEndingBookName(jswordVerseRange.getOsisRef)
 
     // TODO get off of this probably, just use jsword. Will probably get better performance
     val books : Iterable[BookVertex] = BookVertex.getBooksBetween(startingName, endingName)
+
     books.toList
   }
 
-  def getBookNamesBetween(jswordVerseRange : VerseRange): List[String] {
+  def getBookNamesBetween (jswordVerseRange : VerseRange): List[String] = {
     val books : List[BookVertex] = getBooksBetween(jswordVerseRange)
 
-    books.map(name)
+    books.map(_.name)
   }
 
-  def getBookOsisBetween(jswordVerseRange : VerseRange): List[String] {
+  def getBookOsisBetween (jswordVerseRange : VerseRange): List[String] = {
     val books : List[BookVertex] = getBooksBetween(jswordVerseRange)
 
-    books.map(osisAbbreviation)
+    books.map(_.osisAbbreviation.get)
   }
 
 
@@ -135,18 +138,22 @@ object JswordUtil {
     book.ordinal
   }
 
+  // TODO these should be implicits and so call as asInstanceOf for more of a scala style conversion
+  def osisToStartingChapter (osis : String) : ChapterReference = {
+    ChapterReference(osisToStartingBookName(osis), osisToStartingRef(osis).getChapter)
+  }
 
   def osisToStartingChapterNumber (osis : String) : Int = {
     osisToStartingRef(osis).getChapter 
   }
 
   def osisToStartingVerseReference (osis : String) : VerseReference = {
-    val refRange = ReferenceRange(osisToStartingRef(osis))
-    VerseReference(ReferenceRange)
+    val verse : JswordVerse = osisToStartingRef(osis)
+    VerseReference(verse)
   }
 
   def osisToStartingVerseNumber (osis : String) : Int= {
-    osisToStartingRef(osis).getChapter 
+    osisToStartingRef(osis).getVerse
   }
 
   def osisToEndingRef (osis : String) : JswordVerse = {
@@ -177,8 +184,8 @@ object JswordUtil {
   }
 
   def osisToEndingVerseReference (osis : String) : VerseReference = {
-    val refRange = ReferenceRange(osisToEndingRef(osis))
-    VerseReference(ReferenceRange)
+    val verse : JswordVerse = osisToEndingRef(osis)
+    VerseReference(verse)
   }
 
 

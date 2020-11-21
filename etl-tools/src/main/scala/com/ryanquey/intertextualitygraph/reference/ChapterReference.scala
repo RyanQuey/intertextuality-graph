@@ -1,16 +1,20 @@
-package models.traversalbuilder.reference
+package com.ryanquey.intertextualitygraph.reference
+
 import org.crosswire.jsword.passage.VerseRange
+import com.ryanquey.intertextualitygraph.graphmodels.ChapterVertex
 
 
 import com.ryanquey.intertextualitygraph.utils.JswordUtil._
 
 
 /*
- * represents a single reference that spans a book
+ * represents a single reference to a specific chapter, e.g., Rom 1
  * maybe will make a trait that BookVertex can inhereit from ??
  */ 
-case class BookReference(
-  name : String, // TEXT 
+case class ChapterReference(
+  book : String, // TEXT 
+  number : Int, 
+  // TODO can add heplers that set these later
   // testament : String, // TEXT 
   // canonical : Boolean, // BOOLEAN 
   // bookOrder : Integer, // INT
@@ -23,9 +27,8 @@ case class BookReference(
   ) {
     def getLastVerse () = {
       // when we implement VerseCount on ChapterReference  case class, won't have to get it from ChapterVertex
-      val lastChapterNumber = BookVertex.getBookByName(name).chapterCount
-      val lastVerseNumber = ChapterVertex.getChapterByRefData(name, lastChapterNumber).verseCount
-
-      VerseReference(name, lastChapterNumber, lastVerseNumber)
+      val lastVerseNumber = ChapterVertex.getChapterByRefData(book, number).verseCount
+      VerseReference(book, number, lastVerseNumber)
     }
+
   }

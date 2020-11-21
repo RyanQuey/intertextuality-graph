@@ -43,9 +43,9 @@ import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
 
 import com.ryanquey.intertextualitygraph.graphmodels.TextVertex
 import com.ryanquey.intertextualitygraph.utils.JswordUtil.{
-  osisToStartingBook,
-  osisToStartingChapter,
-  osisToStartingVerse,
+  osisToStartingBookReference,
+  osisToStartingChapterReference,
+  osisToStartingVerseReference,
 }
 import com.ryanquey.intertextualitygraph.reference.{BookReference, ChapterReference, VerseReference}
 import models.traversalbuilder.reference.{

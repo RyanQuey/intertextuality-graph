@@ -1,7 +1,7 @@
 package com.ryanquey.intertextualitygraph.reference
 import org.crosswire.jsword.passage.VerseRange
 import org.crosswire.jsword.passage.{Verse => JswordVerse}
-import com.ryanquey.intertextualitygraph.graphmodels.VerseVertex
+import com.ryanquey.intertextualitygraph.graphmodels.{BookVertex, ChapterVertex, VerseVertex}
 import com.ryanquey.intertextualitygraph.utils.JswordUtil._
 
 
@@ -46,6 +46,11 @@ case class VerseReference(
       otherVerse.chapter == chapter && 
       otherVerse.book == book
     } 
+    def isAfter (otherVerse : VerseReference) : Boolean = {
+      BookVertex.getBookByName(otherVerse.book).bookOrder.get >= BookVertex.getBookByName(this.book).bookOrder.get &&
+      otherVerse.chapter >= this.chapter && 
+      otherVerse.number > this.chapter
+    }
 
     def isStartOfBook () : Boolean = {chapter == 1 && number == 1}
   }

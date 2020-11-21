@@ -27,13 +27,13 @@ case class ReferenceRange(
     def isMultipleBooks : Boolean = jswordVerseRange.isMultipleBooks
     def getStartingBookName : String = osisToStartingBookName(jswordVerseRange.getOsisRef)
 
-    def getStartingVerse : VerseReference = osisToStartingVerseReference(jswordVerseRange.getOsisRef)
+    def getStartingVerseReference : VerseReference = osisToStartingVerseReference(jswordVerseRange.getOsisRef)
     def getStartingVerseNumber : Int = osisToStartingVerseNumber(jswordVerseRange.getOsisRef)
-    def getStartingChapter : ChapterReference = osisToStartingChapter(jswordVerseRange.getOsisRef)
+    def getStartingChapterReference : ChapterReference = osisToStartingChapterReference(jswordVerseRange.getOsisRef)
     def getStartingChapterNumber : Int = osisToStartingChapterNumber(jswordVerseRange.getOsisRef)
 
     def getEndingBookName : String = osisToEndingBookName(jswordVerseRange.getOsisRef)
-    def getEndingVerse : VerseReference = osisToEndingVerseReference(jswordVerseRange.getOsisRef)
+    def getEndingVerseReference : VerseReference = osisToEndingVerseReference(jswordVerseRange.getOsisRef)
     def getEndingVerseNumber : Int = osisToEndingVerseNumber(jswordVerseRange.getOsisRef)
     def getStartingBookOrdinal : Int = osisToStartingBookOrdinal(jswordVerseRange.getOsisRef)
     def getEndingBookOrdinal : Int = osisToEndingBookOrdinal(jswordVerseRange.getOsisRef)

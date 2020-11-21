@@ -178,22 +178,22 @@ object VerseVertex extends GraphReferenceVertexCompanion[VerseVertex] {
    */ 
   def getVerseAfter (bookName : String, chapterNumber : Int, verseNumber : Int) : Option[VerseVertex] = {
     val thisBook = BookVertex.getBookByName(bookName)
-    val thisChapter = ChapterVertex.getChapterByName(chapterName)
+    val thisChapter = ChapterVertex.getChapterByRefData(bookName, chapterNumber)
 
     if (thisChapter.verseCount > verseNumber) {
       // simply increment the verseNumber
-      VerseVertex.getVerseByNum(thisBook, thisChapter, verseNumber +1)
+      Some(VerseVertex.getVerseByNum(thisBook, thisChapter, verseNumber +1))
     } else {
       if (thisBook.chapterCount > chapterNumber) {
         // verse one of next chapter
-        ChapterVertex.getChapterByNum(thisBook, thisChapter.number +1, 1)
+        Some(VerseVertex.getVerseByRefData(thisBook.name, thisChapter.number +1, 1))
       } else {
         // the first chapter of the next book, if there's a next book
         try {
-          val nextBook = BookVertex.getBookAfter(thisBook)
-          VerseVertex.getVerseByNum(nextBook, 1, 1)
-        } catch (e) {
-          None
+          val nextBook = BookVertex.getBookAfter(thisBook).get
+          Some(VerseVertex.getVerseByRefData(nextBook.name, 1, 1))
+        } catch {
+          case e: Exception => None
         }
       }
     }

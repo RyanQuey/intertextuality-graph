@@ -139,7 +139,7 @@ object JswordUtil {
   }
 
   // TODO these should be implicits and so call as asInstanceOf for more of a scala style conversion
-  def osisToStartingChapter (osis : String) : ChapterReference = {
+  def osisToStartingChapterReference (osis : String) : ChapterReference = {
     ChapterReference(osisToStartingBookName(osis), osisToStartingRef(osis).getChapter)
   }
 

@@ -1,4 +1,4 @@
-package models.traversalbuilder.reference
+package com.ryanquey.intertextualitygraph.reference
 import org.crosswire.jsword.passage.VerseRange
 
 
@@ -25,32 +25,44 @@ case class ReferenceRange(
     def isWholeBook : Boolean = jswordVerseRange.isWholeBook
     def isWholeBooks : Boolean = jswordVerseRange.isWholeBooks
     def isMultipleBooks : Boolean = jswordVerseRange.isMultipleBooks
-    def getStartingBookName : String = osisToStartingBookName(jswordVerseRange)
+    def getStartingBookName : String = osisToStartingBookName(jswordVerseRange.getOsisRef)
 
-    def getStartingVerse : ReferenceVerse = osisToStartingVerseReference(jswordVerseRange)
-    def getStartingVerseNumber : ReferenceVerse = osisToStartingVerseNumber(jswordVerseRange)
-    def getStartingChapter : ReferenceChapter = osisToStartingChapter(jswordVerseRange)
+    def getStartingVerse : VerseReference = osisToStartingVerseReference(jswordVerseRange.getOsisRef)
+    def getStartingVerseNumber : Int = osisToStartingVerseNumber(jswordVerseRange.getOsisRef)
+    def getStartingChapter : ChapterReference = osisToStartingChapter(jswordVerseRange.getOsisRef)
+    def getStartingChapterNumber : Int = osisToStartingChapterNumber(jswordVerseRange.getOsisRef)
 
-    def getEndingBookName : String = osisToEndingBookName(jswordVerseRange)
-    def getEndingVerse : ReferenceVerse = osisToEndingVerseReference(jswordVerseRange)
-    def getStartingBookOrdinal : String = osisToStartingBookOrdinal(jswordVerseRange)
-    def getEndingBookOrdinal : String = osisToEndingBookOrdinal(jswrdVerseRange)
+    def getEndingBookName : String = osisToEndingBookName(jswordVerseRange.getOsisRef)
+    def getEndingVerse : VerseReference = osisToEndingVerseReference(jswordVerseRange.getOsisRef)
+    def getEndingVerseNumber : Int = osisToEndingVerseNumber(jswordVerseRange.getOsisRef)
+    def getStartingBookOrdinal : Int = osisToStartingBookOrdinal(jswordVerseRange.getOsisRef)
+    def getEndingBookOrdinal : Int = osisToEndingBookOrdinal(jswordVerseRange.getOsisRef)
 
-    def getOverlappingBookNames : List[String] = getBookNamesBetween(getEndingBook, getStartingBook)
-    def getOverlappingBookOsis : List[String] = getBookOsisBetween(getEndingBook, getStartingBook)
+    def getOverlappingBookNames : List[String] = getBookNamesBetween(jswordVerseRange)
+    def getOverlappingBookOsis : List[String] = getBookOsisBetween(jswordVerseRange)
 
     def getTotalVerseCount : Int = jswordVerseRange.getCardinality
 
     def overlapsWith(otherRefRange : ReferenceRange) : Boolean = jswordVerseRange.overlaps(otherRefRange.jswordVerseRange)
+
+    // check if book  fully contains this ref range
     def contains(otherRefRange : ReferenceRange) : Boolean = jswordVerseRange.contains(otherRefRange.jswordVerseRange)
+
+
     def adjacentTo(otherRefRange : ReferenceRange) : Boolean = jswordVerseRange.adjacentTo(otherRefRange.jswordVerseRange)
 
     // names of all books this range completely contains. E.g., Gen 3-Num 3 would return [Exodus, Leviticus]
     def getWholeBooks () : List[ReferenceRange] = {
-      val fullBooksContainedByRef = getOverlappingBookOsis.map(ReferenceRange(_))
-      fullBooksContainedByRef.filter(osis => {
-        val refRangeForFullBook = 
-        this.contains(refRangeForFullBook)
+      // get overlapping books as reference range, so can send to this.contains (which expects a reference range)
+      val overlappingBooks : List[ReferenceRange] = getOverlappingBookOsis.map(bookOsis => {
+        val jswordVerseRange = parseOsisRange(bookOsis)
+
+        ReferenceRange(jswordVerseRange)
+      })
+
+      // filter out books that this ref range doesn't contain
+      overlappingBooks.filter(refRange => {
+        this.contains(refRange)
       })
     }
 
@@ -66,5 +78,4 @@ object ReferenceRange {
       jswordVerseRange = range
     )
   }
-
 }

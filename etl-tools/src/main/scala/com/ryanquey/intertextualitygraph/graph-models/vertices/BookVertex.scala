@@ -182,6 +182,9 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
   def getBooksBetween (startingBook : BookVertex, endingBook : BookVertex) : Iterable[BookVertex] = {
     allBooksFromFile.filter((b) => b.bookOrder.get >= startingBook.bookOrder.get && b.bookOrder.get <= endingBook.bookOrder.get)
   }
+  def getBooksBetween (startingBookName : String, endingBookName : String) : Iterable[BookVertex] = {
+    getBooksBetween(getBookByName(startingBookName), getBookByName(endingBookName))
+  }
 
   ///////////////////////////////////////////////////////////
   // GRAPH HELPERS

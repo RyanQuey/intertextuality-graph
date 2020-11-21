@@ -47,13 +47,10 @@ import com.ryanquey.intertextualitygraph.graphmodels.TextVertex.{
   osisToStartingChapter,
   osisToStartingVerse,
 }
+import com.ryanquey.intertextualitygraph.reference.{BookReference, ChapterReference, VerseReference}
 import com.ryanquey.intertextualitygraph.models.traversalbuilder.{
-  VerseReference, 
-  ChapterReference, 
   VerseRangeWithinChapter, 
   ChapterRangeWithinBook, 
-  BookReference, 
-  ReferenceRange
 }
 
 

@@ -1,5 +1,8 @@
-package models.traversalbuilder.reference
+package com.ryanquey.intertextualitygraph.reference
 import org.crosswire.jsword.passage.VerseRange
+import org.crosswire.jsword.passage.{Verse => JswordVerse}
+import com.ryanquey.intertextualitygraph.graphmodels.VerseVertex
+import com.ryanquey.intertextualitygraph.utils.JswordUtil._
 
 
 /*
@@ -7,9 +10,9 @@ import org.crosswire.jsword.passage.VerseRange
  * maybe will make a trait that BookVertex can inhereit from ??
  */ 
 case class VerseReference(
-  number : Int, 
-  chapter : Int, 
   book : String, // TODO maybe make this a BookReference? or just make a helper that does that. 
+  chapter : Int, 
+  number : Int, 
   // TODO can add heplers that set these later
   // testament : String, // TEXT 
   // canonical : Boolean, // BOOLEAN 
@@ -22,8 +25,8 @@ case class VerseReference(
   //bookSeries : Option[String] = None, // TEXT 
   ) {
 
-    def getChapterReference () = {ChapterReference(chapter, book)}
-    def getChapterReference () = {BookReference(book)}
+    def getChapterReference () = {ChapterReference(book, chapter)}
+    def getBookReference () = {BookReference(book)}
     def getLastVerseOfChapter () : VerseReference = {getChapterReference.getLastVerse}
     def getLastVerseOfBook () : VerseReference = {getBookReference.getLastVerse}
 
@@ -50,9 +53,17 @@ case class VerseReference(
 object VerseReference {
   def apply(refRange : ReferenceRange) = {
     new VerseReference(
+      refRange.getStartingBookName,
+      refRange.getStartingChapterNumber,
       refRange.getStartingVerseNumber
-      refRange.getStartingChapterNumber
-      refRange.getStartingBookName
+      )
+
+  }
+  def apply(verse : JswordVerse) = {
+    new VerseReference(
+      osisToStartingBookName(verse.getOsisRef),
+      verse.getChapter,
+      verse.getVerse
       )
 
   }

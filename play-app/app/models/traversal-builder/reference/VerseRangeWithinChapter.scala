@@ -17,3 +17,12 @@ case class VerseRangeWithinChapter(
   startingVerse : VerseReference,
   endingVerse : VerseReference,
   )
+
+object VerseRangeWithinChapter {
+  def apply (startingVerse : VerseReference, endingVerse : VerseReference) : VerseRangeWithinChapter = { 
+
+    val book = startingVerse.book
+    val chapter = startingVerse.chapter
+    VerseRangeWithinChapter(BookReference(book), ChapterReference(book, chapter), startingVerse, endingVerse)
+  }
+}

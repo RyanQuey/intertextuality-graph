@@ -41,13 +41,6 @@ import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.books.BookRecord
 import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
 
-import com.ryanquey.intertextualitygraph.graphmodels.TextVertex.{
-  getPrimaryKeyFields, 
-  osisToStartingBook,
-  osisToStartingChapter,
-  osisToStartingVerse,
-}
-
 
 // import models.Connection._
 import constants.DatasetMetadata._

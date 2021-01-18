@@ -6,7 +6,7 @@ import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
 import javax.inject._
 import java.time.Instant;
-import java.util.{UUID, Collection, List};
+import java.util.{UUID};
 
 import com.google.common.collect.{ImmutableList, Lists}
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,8 +28,9 @@ import org.apache.tinkerpop.gremlin.structure.{Vertex}
 import org.apache.tinkerpop.gremlin.structure.io.graphson.{GraphSONMapper, GraphSONVersion}
 
 // end over-importing tinkerpop classes
+// I think you can do only one of the next two
 import gremlin.scala._
-import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
+//import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
 
 
 // use to get the global session
@@ -43,10 +44,12 @@ import com.ryanquey.intertextualitygraph.graphmodels.{BookVertex, ChapterVertex,
 import com.ryanquey.intertextualitygraph.utils.JswordUtil.{
   osisToStartingBookName,
   osisToStartingVerseReference,
+  osisToStartingBookReference,
+  osisToStartingChapterReference,
   parseOsisRanges
 }
 
-import models.traversalbuilder.{FilterByRefRanges, TraversalBuilder}
+import models.traversalbuilder.{FilterByRefRanges, TraversalBuilder, GroupedRangeSets}
 import models.traversalbuilder.reference.{
   ChapterRangeWithinBook,  
   VerseRangeWithinChapter
@@ -118,21 +121,21 @@ case class HopParamsSet (
   // for now though, keep it simple to get something working, so continue to just use starting book/ch/v only, but return as iterable to prepare for the future
 
   // TODO implement this correctly, so returns all books for params set
-  def getBooks() : Set[String] = {
+  def getBooks() : Set[BookReference] = {
     println(s"getting starting book for $referenceOsis");
-    val book = osisToStartingBookName(referenceOsis)
+    val book : BookReference = osisToStartingBookReference(referenceOsis)
 
     // want it to be a set in the future, so just set it as a set
     Set(book)
   }
 
 	// TODO how things are currently implemented, this will actually return a chapter and filter by chapter when none is specified
-  def getChapters() : Set[Int] = {
-    Set(osisToStartingChapter(referenceOsis))
+  def getChapters() : Set[ChapterReference] = {
+    Set(osisToStartingChapterReference(referenceOsis))
   }
 
   // TODO implement this correctly, so returns all verses for params set
-  def getVerses() : Set[Int] = {Set(osisToStartingVerseReference(referenceOsis))}
+  def getVerses() : Set[VerseReference] = {Set(osisToStartingVerseReference(referenceOsis))}
 
   // TODO implement using jsword helpers
   def isFullBooks() : Boolean = {false}
@@ -195,8 +198,9 @@ object HopParamsSet {
     // TODO make helper to get range of verses or chapters...or books for osis. Will pass in ranges to the addTextFilterByRefSteps method instead
     val refRanges : List[ReferenceRange] = hopParamsSet.getRefRanges
 
-    FilterByRefRanges.addTextFilterSteps(breakdownRefRanges(range))
+    FilterByRefRanges.addTextFilterSteps(initialTraversal, refRanges)
 
+    // Was doing it like this, but might as well add all at once, more efficient
     // // iterate over ref ranges and for each range, add whatever filters
     // for (range <- refRanges) {
 
@@ -221,7 +225,7 @@ object HopParamsSet {
    * - books don't need to/can't use ranges, since they use strings rather than integers. Probably could use integers if we wanted, but then would need to assign integers for extra biblical books as well... Which is also possible, but just do it with strings for now. There probably should not be that many, so should be fine.
    *
    */ 
-  def breakdownRefRanges (referenceRanges : Set[ReferenceRange]) : ((Set[BookReference], Set[ChapterRangeWithinBook], Set[VerseRangeWithinChapter])) = {
+  def breakdownRefRanges (referenceRanges : Set[ReferenceRange]) : RefRanges = {
     val bookReferences : Set[BookReference] = Set()
     val chapterRanges : Set[ChapterRangeWithinBook] = Set()
     val verseRanges : Set[VerseRangeWithinChapter] = Set()
@@ -237,14 +241,7 @@ object HopParamsSet {
       val startingVerse : VerseReference = referenceRange.getStartingVerseReference
       val endingVerse : VerseReference = referenceRange.getEndingVerseReference
 
-
-
-      /*
-       * - since doing this in multiple places, make a helper
-       */ 
-      def addVersesBetween (startingVerse : VerseReference, endingVerse : VerseReference) : Unit = {
-        // TODO 
-
+      def addChaptersBetween  : Unit = {
       }
 
 
@@ -278,12 +275,18 @@ object HopParamsSet {
         }
 
         // 2) CHECK IF WHOLE CHAPTER
-        // - true as long as we don't end before end of chapter and starting verse is start of chapter
+        // - true as long as we don't end before end of chapter (ie endingVerse is before end of ch) AND starting verse is start of chapter. 
+        // - checking by: 1) if endingVerse is a different chapter, it must be a later chapter, so this whole chapter is safe to add or 2) if endingVerse is the end of chapter, we can add this chapter also
         val hasWholeChapterToAdd = startingVerse.isStartOfChapter && (!endingVerse.isSameChapterAs(startingVerse) || endingVerse.isSameAs(endOfChapter))
         if (!hasWholeBookToAdd && hasWholeChapterToAdd) { 
-          chapterRanges ++ endingVerse.getChapterReference
-          // in this case, do get, since there should always be a next one unless our flow control didn't work...I think...
-          val nextChapter : ChapterVertex = ChapterVertex.getChapterAfter(endOfChapter.number).get
+
+          // check following chapters until we get all whole chapters that we can. 
+          // - We want ranges to include as much as possible, since in the end each range will hit db one more time! (ie., if one range per chapter, that's one db transaction per chapter, vs if all chapters are in one range, that's only one db transaction)
+          val chapterRange = startingVerse.getFullChaptersWithinBookUntil(endingVerse)
+          val nextChapter : ChapterVertex = ChapterVertex.getChapterAfter(chapterRange.endingChapter.book, chapterRange.endingChapter.number).get
+
+          chapterRanges ++ chapterRange
+
           newStartingVerse = VerseReference(nextChapter.book, nextChapter.number, 1)
         }
 
@@ -294,7 +297,7 @@ object HopParamsSet {
           // get earliest verse between these 
           val terminalVerseForIteration : VerseReference = if (endOfChapter.isAfter(endingVerse)) endingVerse else endOfChapter
 
-          addVersesBetween(startingVerse, terminalVerseForIteration) 
+          verseRanges ++ VerseRangeWithinChapter(startingVerse, terminalVerseForIteration) 
           // we're at the end
           newStartingVerse = endingVerse
         }
@@ -310,9 +313,10 @@ object HopParamsSet {
 
       breakdownRefRange(startingVerse, endingVerse)
 
-      // now our sets are built out. Return as tuple
-      (bookReferences, chapterRanges, verseRanges)
     }
+
+    // now our sets are built out. Return as tuple
+    GroupedRangeSets(bookReferences, chapterRanges, verseRanges)
   }
 
 }

@@ -138,7 +138,11 @@ object JswordUtil {
     book.ordinal
   }
 
-  // TODO these should be implicits and so call as asInstanceOf for more of a scala style conversion
+  // TODO these should be implicits or constructrs and so call as asInstanceOf for more of a scala style conversion
+  def osisToStartingBookReference (osis : String) : BookReference = {
+    BookReference(osisToStartingBookName(osis))
+  }
+
   def osisToStartingChapterReference (osis : String) : ChapterReference = {
     ChapterReference(osisToStartingBookName(osis), osisToStartingRef(osis).getChapter)
   }

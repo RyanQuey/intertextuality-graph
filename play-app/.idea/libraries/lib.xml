@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/models-0.3.0-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/data-utils-0.6.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/intertextuality-graph-etl-tools_2.13-0.1.0-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

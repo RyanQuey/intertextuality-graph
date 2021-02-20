@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-<<<<<<< HEAD
-      <module fileurl="file://$PROJECT_DIR$/.idea/play-app.iml" filepath="$PROJECT_DIR$/.idea/play-app.iml" />
-=======
       <module fileurl="file://$PROJECT_DIR$/play-app.iml" filepath="$PROJECT_DIR$/play-app.iml" />
->>>>>>> 1ffe75c66eecfd8679763366e3fcba92ca1e1769
     </modules>
   </component>
 </project>

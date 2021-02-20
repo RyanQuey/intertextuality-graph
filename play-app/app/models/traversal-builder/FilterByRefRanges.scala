@@ -49,7 +49,7 @@ import com.ryanquey.intertextualitygraph.utils.JswordUtil.{
   osisToStartingVerseReference,
 }
 import com.ryanquey.intertextualitygraph.reference.{BookReference, ChapterReference, VerseReference}
-import models.traversalbuilder.reference.{
+import com.ryanquey.intertextualitygraph.reference.{
   VerseRangeWithinChapter, 
   ChapterRangeWithinBook, 
 }
@@ -58,11 +58,7 @@ import models.traversalbuilder.reference.{
 // import models.Connection._
 import constants.DatasetMetadata._
 
-case class GroupedRangeSets(
-  bookReferences : Set[BookReference], 
-  chapterRanges : Set[ChapterRangeWithinBook], 
-  verseRanges : Set[VerseRangeWithinChapter]
-)
+
 
 /*
  * Functions for adding filters to a graph traversal that filter by ranges of references (e.g., Gen.1-Gen.3 or Gen-Exod or Gen.1.1-Gen.1.3)
@@ -94,8 +90,10 @@ object FilterByRefRanges {
     // does a traversal per range... oh well
     val chapterIds : Seq[List[String]] = verseRanges.map(chapterIdsFromChapterRange).flatten
 
+    val bookNamesSet = bookReferences.map(_.name)
+    // need it as sequence
+    val bookNames = Seq(bookNamesSet)
 
-    val bookNames = books.map(_.name)
     // destructures book names, one name per arg
     val withinBookStatement = within(bookNames : _*)
     val traversal = initialTraversal.or(
@@ -214,6 +212,11 @@ object FilterByRefRanges {
 
 
 
+  /**
+   * get list of verse vertex ids that are within specified chapter and book, between starting verse and ending verse (inclusive)
+   *
+   *
+   */
   private def verseIdsFromChapterRange (verseRange : VerseRangeWithinChapter) = {
     val g : GraphTraversalSource = CassandraDb.graph
     g.V().hasLabel("verse")
@@ -222,21 +225,21 @@ object FilterByRefRanges {
       .where(
         values("number").is(
           // TODO check the parentheses on this one, I think it might be wrong
-          gte((verseRange.startingVerse.number)
+          gte(verseRange.startingVerse.number)
             .and(lte(verseRange.endingVerse.number))
-            )
           )
         ).toList 
   }
 
   private def chapterIdsFromChapterRange (chapterRange : ChapterRangeWithinBook) = {
+    val g : GraphTraversalSource = CassandraDb.graph
     g.V().hasLabel("chapter")
       .has("book", chapterRange.book.name)
       .where(
         values("number").is(
-          gte((chapterRange.startingChapter.number)
+          gte(chapterRange.startingChapter.number)
             .and(
-              lte(chapterRange.endingChapter.number)))
+              lte(chapterRange.endingChapter.number))
           )
         ).toList
   }

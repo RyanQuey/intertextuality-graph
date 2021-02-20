@@ -50,11 +50,11 @@ import com.ryanquey.intertextualitygraph.utils.JswordUtil.{
 }
 
 import models.traversalbuilder.{FilterByRefRanges, TraversalBuilder, GroupedRangeSets}
-import models.traversalbuilder.reference.{
-  ChapterRangeWithinBook,  
+
+import com.ryanquey.intertextualitygraph.reference.{ReferenceRange, BookReference, ChapterReference, VerseReference,
+  ChapterRangeWithinBook,
   VerseRangeWithinChapter
 }
-import com.ryanquey.intertextualitygraph.reference.{ReferenceRange, BookReference, ChapterReference, VerseReference}
 
 // import models.Connection._
 import constants.DatasetMetadata._
@@ -196,11 +196,12 @@ object HopParamsSet {
   def addTextFilterByRefSteps (initialTraversal : GraphTraversal[Vertex, Vertex], hopParamsSet : HopParamsSet) : GraphTraversal[Vertex, Vertex] = {
 
     // TODO make helper to get range of verses or chapters...or books for osis. Will pass in ranges to the addTextFilterByRefSteps method instead
-    val refRanges : List[ReferenceRange] = hopParamsSet.getRefRanges
 
-    FilterByRefRanges.addTextFilterSteps(initialTraversal, refRanges)
+    val groupedRangeSets : GroupedRangeSets = hopParamsSet.breakdownRefRanges
+    FilterByRefRanges.addTextFilterSteps(initialTraversal, groupedRangeSets)
 
-    // Was doing it like this, but might as well add all at once, more efficient
+    // Was doing it like this, iterating over books and chapters and verses. But might as well add all at once using FilterByRefRanges.addTextFilterSteps, since it is more efficient
+    // val refRanges : List[ReferenceRange] = hopParamsSet.getRefRanges
     // // iterate over ref ranges and for each range, add whatever filters
     // for (range <- refRanges) {
 
@@ -225,7 +226,7 @@ object HopParamsSet {
    * - books don't need to/can't use ranges, since they use strings rather than integers. Probably could use integers if we wanted, but then would need to assign integers for extra biblical books as well... Which is also possible, but just do it with strings for now. There probably should not be that many, so should be fine.
    *
    */ 
-  def breakdownRefRanges (referenceRanges : Set[ReferenceRange]) : RefRanges = {
+  def breakdownRefRanges (referenceRanges : Set[ReferenceRange]) : GroupedRangeSets = {
     val bookReferences : Set[BookReference] = Set()
     val chapterRanges : Set[ChapterRangeWithinBook] = Set()
     val verseRanges : Set[VerseRangeWithinChapter] = Set()

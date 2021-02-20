@@ -13,13 +13,13 @@ case class VerseReference(
   book : String, // TODO maybe make this a BookReference? or just make a helper that does that. 
   chapter : Int, 
   number : Int, 
-  // TODO can add heplers that set these later
+  // TODO can add helpers that set these later
   // testament : String, // TEXT 
   // canonical : Boolean, // BOOLEAN 
   // bookOrder : Integer, // INT
   // osisAbbreviation : String, // TEXT
 
-  // TODO can add heplers that set these later
+  // TODO can add helpers that set these later
   //chapterCount : Integer, // INT
   //verseCount : Integer, // INT
   //bookSeries : Option[String] = None, // TEXT 

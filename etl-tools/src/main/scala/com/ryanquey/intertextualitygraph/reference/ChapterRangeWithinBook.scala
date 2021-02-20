@@ -1,4 +1,4 @@
-package models.traversalbuilder.reference
+package com.ryanquey.intertextualitygraph.reference
 import org.crosswire.jsword.passage.VerseRange
 import com.ryanquey.intertextualitygraph.reference.{BookReference, ChapterReference}
 
@@ -20,6 +20,6 @@ case class ChapterRangeWithinBook (
 object ChapterRangeWithinBook {
   def apply (startingChapter : ChapterReference, endingChapter : ChapterReference) : ChapterRangeWithinBook = { 
     val book = startingChapter.book
-    VerseRangeWithinChapter(BookReference(book), startingChapter, endingChapter)
+    ChapterRangeWithinBook(BookReference(book), startingChapter, endingChapter)
   }
 }

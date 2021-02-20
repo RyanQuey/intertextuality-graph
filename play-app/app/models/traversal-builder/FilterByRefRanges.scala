@@ -214,6 +214,11 @@ object FilterByRefRanges {
 
 
 
+  /**
+   * get list of verse vertex ids that are within specified chapter and book, between starting verse and ending verse (inclusive)
+   *
+   *
+   */
   private def verseIdsFromChapterRange (verseRange : VerseRangeWithinChapter) = {
     val g : GraphTraversalSource = CassandraDb.graph
     g.V().hasLabel("verse")

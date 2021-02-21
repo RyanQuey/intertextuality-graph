@@ -1,6 +1,14 @@
 
 ## 🚀 Quick start
 
+0. Requirements
+ - Make sure to have gatsby cli installed as global lib
+    ```shell
+    cd gatsby/
+    nvm use
+    npm install -g gatsby-cli
+    ```
+
 1.  **Start developing.**
 
     Navigate into your new site’s directory and start it up.

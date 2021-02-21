@@ -44,7 +44,8 @@ lazy val intertextualityPlayApi = (project in file("."))
 
       "com.michaelpollmeier" %% "gremlin-scala" % "3.4.7.2",
       // for etl-tools projecT
-      "com.github.AndBible" % "jsword" % "2.3.10",
+      "com.github.AndBible" % "jsword" % "2.3.10" exclude("de.psdev.slf4j-android-logger", "slf4j-android-logger"),
+
 
       // "com.ryanquey.intertextuality-graph" % "models" % modelsVersion.get,
       // for now just putting the jar in the libs dir, rather than installing from local mvn repo

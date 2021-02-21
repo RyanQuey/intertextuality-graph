@@ -206,7 +206,7 @@ object HopParamsSet {
     FilterByRefRanges.addTextFilterSteps(initialTraversal, groupedRangeSets)
 
     // Was doing it like this, iterating over books and chapters and verses. But might as well add all at once using FilterByRefRanges.addTextFilterSteps, since it is more efficient
-    // val refRanges : JavaList[ReferenceRange] = hopParamsSet.getRefRanges
+    // val refRanges : List[ReferenceRange] = hopParamsSet.getRefRanges
     // // iterate over ref ranges and for each range, add whatever filters
     // for (range <- refRanges) {
 

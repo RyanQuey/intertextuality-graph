@@ -53,9 +53,12 @@ case class VerseReference(
     } 
 
     def isAfter (otherVerse : VerseReference) : Boolean = {
-      BookVertex.getBookByName(otherVerse.book).bookOrder.get >= BookVertex.getBookByName(this.book).bookOrder.get &&
-      otherVerse.chapter >= this.chapter && 
-      otherVerse.number > this.chapter
+      val otherBookOrderNum = BookVertex.getBookByName(otherVerse.book).bookOrder.get
+      val thisBookOrderNum = BookVertex.getBookByName(this.book).bookOrder.get
+
+      thisBookOrderNum > otherBookOrderNum || 
+      thisBookOrderNum == otherBookOrderNum && otherVerse.chapter < this.chapter ||
+      thisBookOrderNum == otherBookOrderNum && otherVerse.chapter == this.chapter && otherVerse.number < this.number
     }
 
     def isStartOfBook () : Boolean = {chapter == 1 && number == 1}

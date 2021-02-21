@@ -6,7 +6,7 @@ import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
 import javax.inject._
 import java.time.Instant;
-import java.util.{UUID, Collection, List};
+import java.util.{UUID, Collection};
 
 import com.google.common.collect.{ImmutableList, Lists}
 import com.fasterxml.jackson.databind.ObjectMapper;

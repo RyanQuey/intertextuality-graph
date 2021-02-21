@@ -206,7 +206,7 @@ object HopParamsSet {
     FilterByRefRanges.addTextFilterSteps(initialTraversal, groupedRangeSets)
 
     // Was doing it like this, iterating over books and chapters and verses. But might as well add all at once using FilterByRefRanges.addTextFilterSteps, since it is more efficient
-    // val refRanges : List[ReferenceRange] = hopParamsSet.getRefRanges
+    // val refRanges : JavaList[ReferenceRange] = hopParamsSet.getRefRanges
     // // iterate over ref ranges and for each range, add whatever filters
     // for (range <- refRanges) {
 
@@ -288,7 +288,8 @@ object HopParamsSet {
         // - true as long as we don't end before end of chapter (ie endingVerse is before end of ch) AND starting verse is start of chapter. 
         // - checking by: 1) if endingVerse is a different chapter, it must be a later chapter, so this whole chapter is safe to add or 2) if endingVerse is the end of chapter, we can add this chapter also
         val hasWholeChapterToAdd = startingVerse.isStartOfChapter && (!endingVerse.isSameChapterAs(startingVerse) || endingVerse.isSameAs(endOfChapter))
-        if (!hasWholeBookToAdd && hasWholeChapterToAdd) { 
+        if (!hasWholeBookToAdd && hasWholeChapterToAdd) {
+          println("======= hasWholeChapterToAdd!! ======= ")
 
           // check following chapters until we get all whole chapters that we can. 
           // - We want ranges to include as much as possible, since in the end each range will hit db one more time! (ie., if one range per chapter, that's one db transaction per chapter, vs if all chapters are in one range, that's only one db transaction)
@@ -303,10 +304,13 @@ object HopParamsSet {
 
         // 3) ADD ALL VERSES OTHERWISE
         if (!hasWholeBookToAdd && !hasWholeChapterToAdd) {
+          println("======= has only verses.. ======= ")
 
           // make sure to not go past endVerse
-          // get earliest verse between these 
+          // get earliest verse between these
+          println(s"checking if $endOfChapter is after $endingVerse")
           val terminalVerseForIteration : VerseReference = if (endOfChapter.isAfter(endingVerse)) endingVerse else endOfChapter
+          println(s"terminal verse for this iteration is: $terminalVerseForIteration")
 
           // add a final verse range that includes the rest of the verses
           verseRanges += VerseRangeWithinChapter(startingVerse, terminalVerseForIteration)

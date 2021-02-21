@@ -116,6 +116,7 @@ case class TextVertex(
       createEdgeToBook(b.name)}) 
 
     chapters.foreach((c) => createEdgeToChapter(c.book, c.number)) 
+
     verses.foreach((v) => {
       println(s"creating verse edge for $v");
       createEdgeToVerse(v.book, v.chapter, v.number)
@@ -190,8 +191,9 @@ case class TextVertex(
     val chapters = ChapterVertex.getChaptersBetween(startingChapter, endingChapter)
     
     // if verses are not specified, then getting for the whole chapter
-    val startingVerseNumber : Int = if (this.startingVerse == None) 1 else startingChapter.verseCount
-    val endingVerseNumber : Int = if (this.endingVerse == None) 1 else endingChapter.verseCount
+    val startingVerseNumber : Int = if (this.startingVerse == None) 1 else this.startingVerse.get
+    val endingVerseNumber : Int = if (this.endingVerse == None) endingChapter.verseCount else this.endingVerse.get
+
     val startingVerse : VerseVertex = VerseVertex.getVerseByNum(startingBook, startingChapter, startingVerseNumber)
     val endingVerse : VerseVertex = VerseVertex.getVerseByNum(endingBook, endingChapter, endingVerseNumber)
 

@@ -33,7 +33,7 @@ resolvers ++= Seq(
 // https://jitpack.io/#AndBible/jsword/2.3.10
 
 resolvers += "jitpack" at "https://jitpack.io"
-libraryDependencies += "com.github.AndBible" % "jsword" % "2.3.10"  
+libraryDependencies += "com.github.AndBible" % "jsword" % "2.3.10" exclude("de.psdev.slf4j-android-logger", "slf4j-android-logger") 
 
 
 libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.2"

@@ -4,6 +4,7 @@ import scala.annotation.tailrec
 // they don't like after 2.12
 // import collection.JavaConverters._
 import scala.jdk.CollectionConverters._
+import scala.collection.mutable
 import javax.inject._
 import java.time.Instant;
 import java.util.{UUID};
@@ -187,17 +188,19 @@ object HopParamsSet {
     traversalWithDatasetFilters
   }
 
-  /*
+  /**
    * traverse through the reference vertices and get texts from there. 
    * - if have to, traverse all verses related to this hop.
    * - if is full chapter, can traverse through chapters instead, for better performance
    * - if is full book, can traverse through books instead, for even better performance
+   *
+   * @return the traversal as returned by FilterByRefRanges.addTextFilterSteps
    */ 
   def addTextFilterByRefSteps (initialTraversal : GraphTraversal[Vertex, Vertex], hopParamsSet : HopParamsSet) : GraphTraversal[Vertex, Vertex] = {
 
     // TODO make helper to get range of verses or chapters...or books for osis. Will pass in ranges to the addTextFilterByRefSteps method instead
 
-    val groupedRangeSets : GroupedRangeSets = hopParamsSet.breakdownRefRanges
+    val groupedRangeSets : GroupedRangeSets = HopParamsSet.breakdownRefRanges(hopParamsSet.getRefRanges.toSet)
     FilterByRefRanges.addTextFilterSteps(initialTraversal, groupedRangeSets)
 
     // Was doing it like this, iterating over books and chapters and verses. But might as well add all at once using FilterByRefRanges.addTextFilterSteps, since it is more efficient
@@ -227,14 +230,14 @@ object HopParamsSet {
    *
    */ 
   def breakdownRefRanges (referenceRanges : Set[ReferenceRange]) : GroupedRangeSets = {
-    val bookReferences : Set[BookReference] = Set()
-    val chapterRanges : Set[ChapterRangeWithinBook] = Set()
-    val verseRanges : Set[VerseRangeWithinChapter] = Set()
+    val bookReferences : mutable.Set[BookReference] = mutable.Set.empty
+    val chapterRanges : mutable.Set[ChapterRangeWithinBook] = mutable.Set.empty
+    val verseRanges : mutable.Set[VerseRangeWithinChapter] = mutable.Set.empty
     for (referenceRange <- referenceRanges) {
       // 1) get out whatever whole books that are contained by this ref range that we can
       // NOTE this should work, but might just use recursive function below to pull out everything we need
       val wholeBooks = referenceRange.getWholeBooks
-      bookReferences ++ wholeBooks
+      bookReferences ++= wholeBooks.asInstanceOf[mutable.Set[BookReference]]
 
       // 2) with remainder, get out whatever will chapters we can
       // 3) with remainder, set the rest to verseRanges. Should be at most two - one at the start, one at the end. Everything in the middle should be a whole chapter/book
@@ -286,7 +289,8 @@ object HopParamsSet {
           val chapterRange = startingVerse.getFullChaptersWithinBookUntil(endingVerse)
           val nextChapter : ChapterVertex = ChapterVertex.getChapterAfter(chapterRange.endingChapter.book, chapterRange.endingChapter.number).get
 
-          chapterRanges ++ chapterRange
+          // add this range to the chapterRanges set
+          chapterRanges += chapterRange
 
           newStartingVerse = VerseReference(nextChapter.book, nextChapter.number, 1)
         }
@@ -298,7 +302,9 @@ object HopParamsSet {
           // get earliest verse between these 
           val terminalVerseForIteration : VerseReference = if (endOfChapter.isAfter(endingVerse)) endingVerse else endOfChapter
 
-          verseRanges ++ VerseRangeWithinChapter(startingVerse, terminalVerseForIteration) 
+          // add a final verse range that includes the rest of the verses
+          verseRanges += VerseRangeWithinChapter(startingVerse, terminalVerseForIteration)
+
           // we're at the end
           newStartingVerse = endingVerse
         }
@@ -317,7 +323,7 @@ object HopParamsSet {
     }
 
     // now our sets are built out. Return as tuple
-    GroupedRangeSets(bookReferences, chapterRanges, verseRanges)
+    GroupedRangeSets(bookReferences.toSet, chapterRanges.toSet, verseRanges.toSet)
   }
 
 }

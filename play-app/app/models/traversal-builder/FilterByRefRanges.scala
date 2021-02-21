@@ -1,8 +1,6 @@
 package models.traversalbuilder
 
 import scala.annotation.tailrec
-// they don't like after 2.12
-// import collection.JavaConverters._
 import scala.jdk.CollectionConverters._
 import javax.inject._
 import java.time.Instant;
@@ -21,7 +19,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal
 import org.apache.tinkerpop.gremlin.process.traversal.{Path}
 import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.Order.{asc}
-import org.apache.tinkerpop.gremlin.process.traversal.P.{within, gte, lte}
+import org.apache.tinkerpop.gremlin.process.traversal.P.{within, gte, lte, between}
 
 import org.apache.tinkerpop.gremlin.structure.Column.{values};
 //import org.apache.tinkerpop.gremlin.structure.T._;
@@ -30,8 +28,11 @@ import org.apache.tinkerpop.gremlin.structure.{Vertex}
 import org.apache.tinkerpop.gremlin.structure.io.graphson.{GraphSONMapper, GraphSONVersion}
 
 // I think you can do only one of the next two
-import gremlin.scala._
+//import gremlin.scala._
 //import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__._;
+// let's force ourselves to do declare anonymous traversals explicitly
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
+
 // end over-importing tinkerpop classes
 
 
@@ -54,11 +55,9 @@ import com.ryanquey.intertextualitygraph.reference.{
   ChapterRangeWithinBook, 
 }
 
-
 // import models.Connection._
 import constants.DatasetMetadata._
-
-
+import models.traversalbuilder.GroupedRangeSets
 
 /*
  * Functions for adding filters to a graph traversal that filter by ranges of references (e.g., Gen.1-Gen.3 or Gen-Exod or Gen.1.1-Gen.1.3)
@@ -80,31 +79,33 @@ object FilterByRefRanges {
     initialTraversal : GraphTraversal[Vertex, Vertex], 
     groupedRangeSets : GroupedRangeSets
   ) : GraphTraversal[Vertex, Vertex] = {
-    val bookReferences : Set[BookReference] = groupedRangeSets.bookReferences
-    val chapterRanges : Set[ChapterRangeWithinBook] = groupedRangeSets.chapterRanges 
-    val verseRanges : Set[VerseRangeWithinChapter] = groupedRangeSets.verseRanges
+    // TODO do these need to maintain order? If so, make it Seq not Set
+    val bookReferences: Set[BookReference] = groupedRangeSets.bookReferences
+    val chapterRanges: Set[ChapterRangeWithinBook] = groupedRangeSets.chapterRanges
+    val verseRanges: Set[VerseRangeWithinChapter] = groupedRangeSets.verseRanges
 
     // https://stackoverflow.com/a/59502635/6952495
     // To begin, just do a simple traversal for each verse range. HOpefully there isn't an absurd amount of these anyways.
-    val verseIds : Seq[List[String]] = verseRanges.map(verseIdsFromChapterRange).flatten
+    // order doesn't matter, we're not doing range here, but going to check each manually
+    val verseIds: Set[Vertex] = verseRanges.map(verseIdsFromChapterRange).flatten
     // does a traversal per range... oh well
-    val chapterIds : Seq[List[String]] = verseRanges.map(chapterIdsFromChapterRange).flatten
+    val chapterIds: Set[Vertex] = chapterRanges.map(chapterIdsFromChapterRange).flatten
 
-    val bookNamesSet = bookReferences.map(_.name)
+    val bookNamesSet: Set[String] = bookReferences.map(_.name)
     // need it as sequence
-    val bookNames = Seq(bookNamesSet)
+    val bookNames: Seq[String] = bookNamesSet.toSeq
 
     // destructures book names, one name per arg
-    val withinBookStatement = within(bookNames : _*)
+    val withinBookStatement = within(bookNames: _*)
     val traversal = initialTraversal.or(
       // either the text overlaps with one of these books...
-      _().has("starting_book", withinBookStatement), 
-      _().has("ending_book", withinBookStatement),
+      __.has("starting_book", withinBookStatement),
+      __.has("ending_book", withinBookStatement),
       // ... or is connected to one of these chapters
       // TODO could be faster perhaps if did outE and then queried the edge for the chapterId?? Same with verse below. But just get it working first...
-      __.out().hasLabel("chapter")(__.hasId(within(chapterIds))),
+      __.out().hasLabel("chapter").hasId(within(chapterIds)),
       // ... or is connected to one of these verses. HOpefully there's not too many...
-      __.out().hasLabel("verse")(__.hasId(within(verseIds)))
+      __.out().hasLabel("verse").hasId(within(verseIds))
     )
 
     traversal
@@ -174,7 +175,7 @@ object FilterByRefRanges {
 
 
     // TODO totally untested
-    val traversal = initialTraversal.filter(__.out().hasLabel("chapter")(__.hasId(within(chapterIds))))
+    val traversal = initialTraversal.filter(__.out().hasLabel("chapter").hasId(within(chapterIds)))
 
     traversal
   }
@@ -199,12 +200,10 @@ object FilterByRefRanges {
 
 
     // TODO totally untested
-    val traversal = initialTraversal.filter(__.out().hasLabel("verse")(__.hasId(within(verseIds))))
+    val traversal = initialTraversal.filter(__.out().hasLabel("verse").hasId(within(verseIds)))
 
     traversal
   }
-
-
 
 
 
@@ -213,34 +212,35 @@ object FilterByRefRanges {
 
 
   /**
-   * get list of verse vertex ids that are within specified chapter and book, between starting verse and ending verse (inclusive)
+   * get list of verse vertex ids that are within specified chapter and book, between starting verse (inclusive) and ending verse (exclusive)
    *
-   *
+   * @param chapterRange
+   * @return
    */
-  private def verseIdsFromChapterRange (verseRange : VerseRangeWithinChapter) = {
+  private def verseIdsFromChapterRange (verseRange : VerseRangeWithinChapter): List[Vertex]  = {
     val g : GraphTraversalSource = CassandraDb.graph
     g.V().hasLabel("verse")
       .has("book", verseRange.book.name)
       .has("chapter", verseRange.chapter.number)
-      .where(
-        values("number").is(
-          // TODO check the parentheses on this one, I think it might be wrong
-          gte(verseRange.startingVerse.number)
-            .and(lte(verseRange.endingVerse.number))
-          )
-        ).toList 
+      .has("number", between(
+        verseRange.startingVerse.number,
+        verseRange.endingVerse.number + 1)
+      ).toList.asScala.toList
   }
 
-  private def chapterIdsFromChapterRange (chapterRange : ChapterRangeWithinBook) = {
+  /**
+   *
+   * - between is inclusive for starting number, exclusive for ending, so add one
+   * @param chapterRange
+   * @return
+   */
+  private def chapterIdsFromChapterRange (chapterRange : ChapterRangeWithinBook) : List[Vertex] = {
     val g : GraphTraversalSource = CassandraDb.graph
     g.V().hasLabel("chapter")
       .has("book", chapterRange.book.name)
-      .where(
-        values("number").is(
-          gte(chapterRange.startingChapter.number)
-            .and(
-              lte(chapterRange.endingChapter.number))
-          )
-        ).toList
+      .has("number", between(
+        chapterRange.startingChapter.number,
+        chapterRange.endingChapter.number + 1)
+      ).toList.asScala.toList
   }
 }

@@ -44,12 +44,15 @@ lazy val intertextualityPlayApi = (project in file("."))
 
       "com.michaelpollmeier" %% "gremlin-scala" % "3.4.7.2",
       // for etl-tools projecT
-      "com.github.AndBible" % "jsword" % "2.3.10"  
+      "com.github.AndBible" % "jsword" % "2.3.10",
 
       // "com.ryanquey.intertextuality-graph" % "models" % modelsVersion.get,
       // for now just putting the jar in the libs dir, rather than installing from local mvn repo
       // but maybe jar is better
+      // just throwing the jar in the directory is easier in the short run, but I think it means we don't do transient dependencies, so can have runtime errors
       // "com.ryanquey" % "data-utils" % dataUtilsVersion.get,
+      // for now, just add the dependencies we need here...this is awful but works for now. 
+      "org.apache.commons" % "commons-csv" % "1.8"
 
       // if this doesn't work, make sure to run ./scripts/sbt/sbt.sh publishLocal from the etl-tools dir
       // play app will only see changes made that get published using publishLocal

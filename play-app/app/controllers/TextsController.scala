@@ -63,7 +63,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     // https://stackoverflow.com/a/25194037/6952495
     val hopParamSets = hopParamSetsJSON.as[Seq[HopParamsSet]]
 
-    val traversal  : GraphTraversal[Vertex, Vertex] = HopParamsSets.buildTraversal(hopParamSets)
+    val traversal : GraphTraversal[Vertex, Vertex] = HopParamsSets.buildTraversal(hopParamSets)
 
     // TODO
     //if (sourceTexts.size == 0) {
@@ -75,8 +75,14 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
       // maybe can skip
       // passing in empty Seq for getting ALL fields
-      println("getting paths");
-      val pathsWithValues = TraversalBuilder.findPathsForTraversal(traversal, Seq()).toList
+      println("~~~getting paths~~~");
+      val pathsWithValues = TraversalBuilder.findPathsForTraversal(traversal, Seq())
+      println(s"and then....")
+      println(s"=== paths: $pathsWithValues ===\n\n");
+
+      // this is where it fails!! TODO but I call .toList in the other route and it works...why does it fail here?
+      // error is: Serializer for type scala.collection.immutable.Set$EmptySet$ not found
+      val pathsWithValuesList = pathsWithValues.toList
 
       // now we have gremlin output, that is roughly a list of lists of maps, and each map is a vertex with all values attached. 
       // we want to return this as two data items for use with our chart, one for nodes, one for edges
@@ -87,7 +93,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
       // }}
 
       println("writing as json");
-      val output = json_mapper.writeValueAsString(pathsWithValues)
+      val output = json_mapper.writeValueAsString(pathsWithValuesList)
 
       Ok(output)
     }

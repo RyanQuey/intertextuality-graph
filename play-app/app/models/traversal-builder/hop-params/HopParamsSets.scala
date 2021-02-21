@@ -84,7 +84,7 @@ object HopParamsSets {
   def traverseHopsAccumulator (hopParamSets : Seq[HopParamsSet], traversal : GraphTraversal[Vertex, Vertex]) : GraphTraversal[Vertex, Vertex] = {
 		hopParamSets match {
 		  case Nil => traversal
-        // pulls the 
+        // pulls the next set off the hopParamSets Set, and add steps required for that hop
 		  case firstRemainingSet :: tail => traverseHopsAccumulator(tail, HopParamsSet.addStepsForHop(traversal, firstRemainingSet))
 	  }
   }

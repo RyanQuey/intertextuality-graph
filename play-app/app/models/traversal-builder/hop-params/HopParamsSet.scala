@@ -151,9 +151,11 @@ case class HopParamsSet (
 
 object HopParamsSet {
 
-  /*
+  /**
    * take a single hopParamsSet and apply the steps associated with these parameters onto the graph traversal
    *  - TODO can move to instance method
+   *
+   *  @return the original traversal, but now with all the steps needed to filter on this hop
    */ 
 	def addStepsForHop (traversal : GraphTraversal[Vertex, Vertex], hopParamsSet : HopParamsSet) : GraphTraversal[Vertex, Vertex] = {
 	  // TODO add osis parsing to get ref
@@ -182,7 +184,7 @@ object HopParamsSet {
     // TODO (or, perhaps expand first, then filter by ref filters? which way is better??)
     val traversalWithRefFilters = addTextFilterByRefSteps(traversal.hasLabel("text"), hopParamsSet)
 
-    // finally, filter by dataset
+    // finally, filter by dataset (as of 02/21 only sending in dataset "all" though, so shouldn't do anything)
     val traversalWithDatasetFilters = TraversalBuilder.addTextFilterByDatasetSteps(traversalWithRefFilters, dataSet)
 
     traversalWithDatasetFilters
@@ -237,7 +239,9 @@ object HopParamsSet {
       // 1) get out whatever whole books that are contained by this ref range that we can
       // NOTE this should work, but might just use recursive function below to pull out everything we need
       val wholeBooks = referenceRange.getWholeBooks
-      bookReferences ++= wholeBooks.asInstanceOf[mutable.Set[BookReference]]
+      if (!wholeBooks.isEmpty) {
+        bookReferences ++= wholeBooks.asInstanceOf[mutable.Set[BookReference]]
+      }
 
       // 2) with remainder, get out whatever will chapters we can
       // 3) with remainder, set the rest to verseRanges. Should be at most two - one at the start, one at the end. Everything in the middle should be a whole chapter/book
@@ -245,6 +249,8 @@ object HopParamsSet {
       val startingVerse : VerseReference = referenceRange.getStartingVerseReference
       val endingVerse : VerseReference = referenceRange.getEndingVerseReference
 
+
+      // I think I can remove this? TODO
       def addChaptersBetween  : Unit = {
       }
 

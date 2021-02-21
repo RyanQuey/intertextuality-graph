@@ -68,11 +68,12 @@ object FilterByRefRanges {
 
 
 
-  /*
+  /**
    *
    * - The idea is to use BookRanges when stuff can be grouped into books, ChapterRanges when can be grouped into chapters, VerseRanges when can't
    * - I'm hoping this will be the single function that will replace them all
    *
+   * @initialTraversal should be traversal with vertices of label "text"
    *
    */ 
   def addTextFilterSteps (
@@ -87,33 +88,70 @@ object FilterByRefRanges {
     // https://stackoverflow.com/a/59502635/6952495
     // To begin, just do a simple traversal for each verse range. HOpefully there isn't an absurd amount of these anyways.
     // order doesn't matter, we're not doing range here, but going to check each manually
-    val verseIds: Set[Vertex] = verseRanges.map(verseIdsFromChapterRange).flatten
-    // does a traversal per range... oh well
-    val chapterIds: Set[Vertex] = chapterRanges.map(chapterIdsFromChapterRange).flatten
+    // needs to be list, since we have to pull first out to pass into hasId, and then pass the rest, so there has to be order
+    val verseIds: List[String] = verseRanges.map(verseIdsFromChapterRange).flatten.toList
+    // does a traversal per range...pretty expensive. oh well
+    val chapterIds: List[String] = chapterRanges.map(chapterIdsFromChapterRange).flatten.toList
 
     val bookNamesSet: Set[String] = bookReferences.map(_.name)
     // need it as sequence
     val bookNames: Seq[String] = bookNamesSet.toSeq
 
     // destructures book names, one name per arg
-    val withinBookStatement = within(bookNames: _*)
-    val traversal = initialTraversal.or(
-      // either the text overlaps with one of these books...
-      __.has("starting_book", withinBookStatement),
-      __.has("ending_book", withinBookStatement),
-      // ... or is connected to one of these chapters
-      // TODO could be faster perhaps if did outE and then queried the edge for the chapterId?? Same with verse below. But just get it working first...
-      __.out().hasLabel("chapter").hasId(within(chapterIds)),
-      // ... or is connected to one of these verses. HOpefully there's not too many...
-      __.out().hasLabel("verse").hasId(within(verseIds))
-    )
+    var orStatements : scala.collection.mutable.Seq[GraphTraversal[Vertex,Vertex]] = scala.collection.mutable.Seq()
+
+    // filter by booknames if there are some specified
+    if (bookNames.length > 0) {
+      // check if the text overlaps with one of these books...
+      val withinBookStatement = within(bookNames: _*)
+
+      orStatements = orStatements ++ Set(
+        __.has("ending_book", withinBookStatement),
+        __.has("starting_book", withinBookStatement)
+      )
+    }
+
+    // if there are chapterIds, allow matches to those too
+    if (chapterIds.length > 0) {
+//      val chapterFilterTraversal = if (chapterIds.length == 1) {
+//        __.out().hasLabel("chapter").hasId(chapterIds(0), chapterIds.drop(1):_*)
+//      } else {
+//        __.out().hasLabel("chapter").hasId(chapterIds(0)
+//      }
+      val chapterFilterTraversal = __.out().hasLabel("chapter").hasId(chapterIds(0), chapterIds.drop(1):_*)
+
+      // hasId takes only ids, not vertices. First arg is first id, then can take the deconstructed arg using _*, so passing in the rest after that
+      // I'm not sure why +: is not working for this, so making chapterFilterTraversal a Set and using ++ instead
+      orStatements = orStatements ++ Set(chapterFilterTraversal)
+    }
+
+    // if there are verseIds, allow matches to those too
+    if (verseIds.length > 0) {
+      // check if the text overlaps with one of these books...
+      //      val chapterFilterTraversal = if (chapterIds.length == 1) {
+      //        __.out().hasLabel("chapter").hasId(chapterIds(0), chapterIds.drop(1):_*)
+      //      } else {
+      //        __.out().hasLabel("chapter").hasId(chapterIds(0)
+      //      }
+      val verseFilterTraversal = __.out().hasLabel("verse").hasId(verseIds(0), verseIds.drop(1):_*)
+
+      // hasId takes only ids, not vertices. First arg is first id, then can take the deconstructed arg using _*, so passing in the rest after that
+      orStatements = orStatements ++ Set(verseFilterTraversal)
+    }
+
+
+    // make immutable Seq, so can deconstruct into args
+    // TODO could be faster perhaps if did outE and then queried the edge for the chapterId?? Same with verse below. But just get it working first...
+    val traversal = initialTraversal.or(orStatements.toSeq:_*)
 
     traversal
   }
 
-  /////////////////////////////////
+
+
+  /////////////////////////////////////////////
   // ARCHIVED / use for testing
-  // /////////////////////////////
+  // ///////////////////////////////////////
   /*
    * take a traversal and add steps to filter by books
    * - initialTraversal should be on text vertices 
@@ -213,11 +251,12 @@ object FilterByRefRanges {
 
   /**
    * get list of verse vertex ids that are within specified chapter and book, between starting verse (inclusive) and ending verse (exclusive)
+   * - converts first to Java list, then to scala, then calls toList (now converts to Scala list), then maps to ids (NOTE: this is required. Cannot pass in vertices to .hasId() step
    *
    * @param chapterRange
    * @return
    */
-  private def verseIdsFromChapterRange (verseRange : VerseRangeWithinChapter): List[Vertex]  = {
+  private def verseIdsFromChapterRange (verseRange : VerseRangeWithinChapter): Set[String]  = {
     val g : GraphTraversalSource = CassandraDb.graph
     g.V().hasLabel("verse")
       .has("book", verseRange.book.name)
@@ -225,22 +264,25 @@ object FilterByRefRanges {
       .has("number", between(
         verseRange.startingVerse.number,
         verseRange.endingVerse.number + 1)
-      ).toList.asScala.toList
+      ).toList.asScala.toSet.map((v : Vertex) => v.id.toString)
   }
 
   /**
    *
    * - between is inclusive for starting number, exclusive for ending, so add one
+   * - converts first to Java list, then to scala, then calls toList (now converts to Scala list), then maps to ids (NOTE: this is required. Cannot pass in vertices to .hasId() step
    * @param chapterRange
    * @return
    */
-  private def chapterIdsFromChapterRange (chapterRange : ChapterRangeWithinBook) : List[Vertex] = {
+  private def chapterIdsFromChapterRange (chapterRange : ChapterRangeWithinBook) : Set[String] = {
     val g : GraphTraversalSource = CassandraDb.graph
-    g.V().hasLabel("chapter")
+    val traversal = g.V().hasLabel("chapter")
       .has("book", chapterRange.book.name)
       .has("number", between(
         chapterRange.startingChapter.number,
         chapterRange.endingChapter.number + 1)
-      ).toList.asScala.toList
+      )
+
+      traversal.toList.asScala.toSet.map((v : Vertex) => v.id.toString)
   }
 }

@@ -26,6 +26,7 @@ case class ReferenceRange(
     def isWholeBooks : Boolean = jswordVerseRange.isWholeBooks
     def isMultipleBooks : Boolean = jswordVerseRange.isMultipleBooks
     def getStartingBookName : String = osisToStartingBookName(jswordVerseRange.getOsisRef)
+    def getStartingBook : BookReference = BookReference(getStartingBookName)
 
     def getStartingVerseReference : VerseReference = osisToStartingVerseReference(jswordVerseRange.getOsisRef)
     def getStartingVerseNumber : Int = osisToStartingVerseNumber(jswordVerseRange.getOsisRef)
@@ -51,19 +52,27 @@ case class ReferenceRange(
 
     def adjacentTo(otherRefRange : ReferenceRange) : Boolean = jswordVerseRange.adjacentTo(otherRefRange.jswordVerseRange)
 
-    // names of all books this range completely contains. E.g., Gen 3-Num 3 would return [Exodus, Leviticus]
-    def getWholeBooks () : List[ReferenceRange] = {
+    /**
+     *
+     *
+     * @return names of all books this range completely contains. E.g., Gen 3-Num 3 would return [Exodus, Leviticus]
+     */
+    def getWholeBooks () : List[BookReference] = {
+
       // get overlapping books as reference range, so can send to this.contains (which expects a reference range)
-      val overlappingBooks : List[ReferenceRange] = getOverlappingBookOsis.map(bookOsis => {
+      val overlappingBooksAsRanges : List[ReferenceRange] = this.getOverlappingBookOsis.map(bookOsis => {
         val jswordVerseRange = parseOsisRange(bookOsis)
 
         ReferenceRange(jswordVerseRange)
       })
 
       // filter out books that this ref range doesn't contain
-      overlappingBooks.filter(refRange => {
+      val containedBooks : List[ReferenceRange] = overlappingBooksAsRanges.filter(refRange => {
         this.contains(refRange)
       })
+
+      // now convert to List of BookReferences. Since each containedBook has only one book in its range, can getStartingBook or getEndingBook, should not make a difference. 
+      containedBooks.map(_.getStartingBook)
     }
 
 

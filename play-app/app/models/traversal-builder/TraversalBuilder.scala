@@ -78,11 +78,12 @@ object TraversalBuilder {
    * - https://stackoverflow.com/a/1832288/6952495
    */
   def findPathsForTraversal (initialTraversal : GraphTraversal[Vertex, Vertex], valuesToReturn : Seq[String]) : GraphTraversal[Vertex, Path] = {
-    val path = initialTraversal.path()
-    println("got path");
+    val pathForTraversal = initialTraversal.path()
+    println(s"got path for traversal: $pathForTraversal");
 
     // destructure the sequence of strings (using _*). 
-    val valuesForPaths = path.by(valueMap(valuesToReturn:_*))
+    val valuesForPaths = pathForTraversal.by(valueMap(valuesToReturn:_*))
+    println(s"values for paths: $valuesForPaths");
     valuesForPaths
   }
 

@@ -61,36 +61,26 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
 
     // typecast to Seq
     // https://stackoverflow.com/a/25194037/6952495
-    val hopParamSets = hopParamSetsJSON.as[Seq[HopParamsSet]]
+    val hopParamSetsSeq = hopParamSetsJSON.as[Seq[HopParamsSet]]
+    val hopParamSets = HopParamsSets(paramsSets = hopParamSetsSeq)
 
-    val traversal : GraphTraversal[Vertex, Vertex] = HopParamsSets.buildTraversal(hopParamSets)
+    val traversal : GraphTraversal[Vertex, Vertex] = hopParamSets.buildTraversal()
 
-    // TODO
+    // TODO...? maybe there's no equivalent to this for this route?
     //if (sourceTexts.size == 0) {
     if (false) {
       Ok("[]")
-      //Ok(request.body)
     } else {
 
 
-      // maybe can skip
       // passing in empty Seq for getting ALL fields
       println("~~~getting paths~~~");
-      val pathsWithValues = TraversalBuilder.findPathsForTraversal(traversal, Seq())
+      val pathsWithValuesTraversal = TraversalBuilder.findPathsForTraversal(traversal, Seq())
       println(s"and then....")
-      println(s"=== paths: $pathsWithValues ===\n\n");
+      println(s"=== paths Traversal: $pathsWithValuesTraversal ===\n\n");
 
-      // this is where it fails!! TODO but I call .toList in the other route and it works...why does it fail here?
-      // error is: Serializer for type scala.collection.immutable.Set$EmptySet$ not found
-      val pathsWithValuesList = pathsWithValues.toList
+      val pathsWithValuesList = pathsWithValuesTraversal.toList
 
-      // now we have gremlin output, that is roughly a list of lists of maps, and each map is a vertex with all values attached. 
-      // we want to return this as two data items for use with our chart, one for nodes, one for edges
-      // TODO convert stuff using scala; for now just sending to frontend and converting using js
-      // possibly use gremlin-scala?
-      // pathsWithValues.asScala.foreach{ pathWithValues => {
-        // println(pathWithValues.getClass)
-      // }}
 
       println("writing as json");
       val output = json_mapper.writeValueAsString(pathsWithValuesList)

@@ -3,15 +3,12 @@ package models.traversalbuilder
 import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
 import javax.inject._
-import java.time.Instant;
-import java.util.{UUID};
-
+import java.time.Instant
+import java.util.UUID
 import com.google.common.collect.{ImmutableList, Lists}
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import play.api.mvc._
-
-import com.datastax.dse.driver.api.core.graph.DseGraph.g._;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.datastax.dse.driver.api.core.graph.DseGraph.g._
+import com.ryanquey.intertextualitygraph.reference.ReferenceRange;
 
 // way overkill, but just trying to find what works for method "out"
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -49,15 +46,17 @@ import com.ryanquey.intertextualitygraph.utils.JswordUtil.{
   osisToStartingChapterReference,
   osisToStartingVerseReference,
 }
-import com.ryanquey.intertextualitygraph.reference.{BookReference, ChapterReference, VerseReference}
 import com.ryanquey.intertextualitygraph.reference.{
+  BookReference,
+  ChapterReference,
+  VerseReference,
+  GroupedRangeSets,
   VerseRangeWithinChapter, 
   ChapterRangeWithinBook, 
 }
 
 // import models.Connection._
 import constants.DatasetMetadata._
-import models.traversalbuilder.GroupedRangeSets
 
 /*
  * Functions for adding filters to a graph traversal that filter by ranges of references (e.g., Gen.1-Gen.3 or Gen-Exod or Gen.1.1-Gen.1.3)
@@ -66,17 +65,45 @@ import models.traversalbuilder.GroupedRangeSets
  */ 
 object FilterByRefRanges {
 
-
-
   /**
    *
+   * - convert ref ranges into a starting and ending ref indexes
+   * - add step to filter texts using their starting_ref_index and ending_ref_index for each one
+   *
+   * @refRanges list of reference ranges, each ReferenceRange representing a passage that is allowed to be found for this hop
+   */
+  def addFilterByRefIndexSteps(
+    initialTraversal : GraphTraversal[Vertex, Vertex],
+    refRanges : List[ReferenceRange]
+  ) : GraphTraversal[Vertex, Vertex] = {
+    val refRangeIndexes : List[(Int, Int)] = refRanges.map(_.asRefIndices)
+
+    // List of anonymous traversals we will use to filter text vertices for this hop
+    // order doesn't really matter much though, but refRangeIndexes is a list so keeping it that way
+    val orStatements : List[GraphTraversal[Vertex,Vertex]] = refRangeIndexes.map(refRangeIndexSet => {
+      // start and end ref for the filter
+      val filterStartingRefIndex : Int = refRangeIndexSet._1
+      val filterEndingRefIndex : Int = refRangeIndexSet._2
+
+      // https://stackoverflow.com/a/325964/6952495
+      // overlapping means (StartA <= EndB) and (EndA >= StartB)
+      __.has("starting_ref_index", lte(filterEndingRefIndex)).has("ending_ref_index", gte(filterStartingRefIndex))
+    })
+
+    val traversal = initialTraversal.or(orStatements.toSeq:_*)
+
+    traversal
+  }
+
+  /**
+   *  DEPRECATED working (ish) but really slow
    * - The idea is to use BookRanges when stuff can be grouped into books, ChapterRanges when can be grouped into chapters, VerseRanges when can't
    * - I'm hoping this will be the single function that will replace them all
    *
    * @initialTraversal should be traversal with vertices of label "text"
    *
    */ 
-  def addTextFilterSteps (
+  def addFilterByConnectedRefEdgesSteps (
     initialTraversal : GraphTraversal[Vertex, Vertex], 
     groupedRangeSets : GroupedRangeSets
   ) : GraphTraversal[Vertex, Vertex] = {

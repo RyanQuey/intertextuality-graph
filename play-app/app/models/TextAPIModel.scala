@@ -49,6 +49,7 @@ import models.traversalbuilder.hopparams.{HopParamsSets}
 import constants.DatasetMetadata._
 
 /**
+ * I'm not sure how this particular class functions relative to classes defined in traversalbuilder...TODO
  */
 object TextAPIModel {
   //////////////////////////////////////////////////

@@ -26,7 +26,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.P.{within}
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__._;
 import org.apache.tinkerpop.gremlin.structure.Column._;
 import org.apache.tinkerpop.gremlin.structure.T._;
-// 
 import org.apache.tinkerpop.gremlin.structure.{Vertex}
 import org.apache.tinkerpop.gremlin.structure.io.graphson.{GraphSONMapper, GraphSONVersion}
 
@@ -42,51 +41,46 @@ import com.ryanquey.intertextualitygraph.models.books.BookRecord
 import com.ryanquey.intertextualitygraph.modelhelpers.TextHelpers
 
 
-
 // import models.Connection._
 import constants.DatasetMetadata._
-
-
 
 
 case class HopParamsSets (
   // can be a single text, or a range, even range of books
   paramsSets : Seq[HopParamsSet],
 ) {
-
-} 
-
-
-object HopParamsSets {
-  /*
-   *
-   * - TODO convert to instance method probably
-   */ 
-  def buildTraversal(hopParamSets : Seq[HopParamsSet]) : GraphTraversal[Vertex, Vertex] = {
+  def buildTraversal() : GraphTraversal[Vertex, Vertex] = {
     val g : GraphTraversalSource = CassandraDb.graph
 
-		val initialTraversal : GraphTraversal[Vertex, Vertex] = g.V()
+    val initialTraversal : GraphTraversal[Vertex, Vertex] = g.V()
 
     // recursively iterate over param sets to build a traversal with all filters set for each hop
-    val traversal : GraphTraversal[Vertex, Vertex] = traverseHopsAccumulator(hopParamSets, initialTraversal)
+    val traversal : GraphTraversal[Vertex, Vertex] = HopParamsSets.traverseHopsAccumulator(this.paramsSets, initialTraversal, true)
 
     println(s"returning traversal: $traversal");
     traversal
   }
 
 
+} 
+
+object HopParamsSets {
+
+   // TODO convert to instance method maybe?
   /*
    * recursively iterate over hopParamSets (a sequence of param sets, each set representing a single hop) to build out a graph traversal.
    * - TODO  convert hopParamSets into instance of associated case class
    *
-   */ 
+   */
   @tailrec
-  def traverseHopsAccumulator (hopParamSets : Seq[HopParamsSet], traversal : GraphTraversal[Vertex, Vertex]) : GraphTraversal[Vertex, Vertex] = {
-		hopParamSets match {
-		  case Nil => traversal
-        // pulls the next set off the hopParamSets Set, and add steps required for that hop
-		  case firstRemainingSet :: tail => traverseHopsAccumulator(tail, HopParamsSet.addStepsForHop(traversal, firstRemainingSet))
-	  }
+  def traverseHopsAccumulator (hopParamSets : Seq[HopParamsSet], traversal : GraphTraversal[Vertex, Vertex], isInitialRun : Boolean) : GraphTraversal[Vertex, Vertex] = {
+    val isFinalHop = hopParamSets.length == 1
+
+    hopParamSets match {
+      case Nil => traversal
+      // pulls the next set off the hopParamSets Set, and add steps required for that hop
+      case firstRemainingSet :: tail => traverseHopsAccumulator(tail, HopParamsSet.addStepsForHop(traversal, firstRemainingSet, isInitialRun, isFinalHop), false)
+    }
   }
 
 

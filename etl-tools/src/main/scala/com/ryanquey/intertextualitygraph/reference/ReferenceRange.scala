@@ -1,5 +1,5 @@
 package com.ryanquey.intertextualitygraph.reference
-import com.ryanquey.intertextualitygraph.graphmodels.{BookVertex, ChapterVertex}
+import com.ryanquey.intertextualitygraph.graphmodels.{BookVertex, ChapterVertex, TextVertex}
 import org.crosswire.jsword.passage.VerseRange
 import com.ryanquey.intertextualitygraph.utils.JswordUtil._
 
@@ -35,6 +35,7 @@ case class ReferenceRange(
     def getStartingChapterNumber : Int = osisToStartingChapterNumber(jswordVerseRange.getOsisRef)
 
     def getEndingBookName : String = osisToEndingBookName(jswordVerseRange.getOsisRef)
+    def getEndingChapterNumber : Int = osisToEndingChapterNumber(jswordVerseRange.getOsisRef)
     def getEndingVerseReference : VerseReference = osisToEndingVerseReference(jswordVerseRange.getOsisRef)
     def getEndingVerseNumber : Int = osisToEndingVerseNumber(jswordVerseRange.getOsisRef)
     def getStartingBookOrdinal : Int = osisToStartingBookOrdinal(jswordVerseRange.getOsisRef)
@@ -53,7 +54,26 @@ case class ReferenceRange(
 
     def adjacentTo(otherRefRange : ReferenceRange) : Boolean = jswordVerseRange.adjacentTo(otherRefRange.jswordVerseRange)
 
-    /**
+  /**
+   * return 2 item tuple, one as startingRefIndex one as endingRefIndex
+   *
+   * TODO make sure I can do Some(this.getStartingVerseNumber)) and not have to check if
+   */
+  def asRefIndices () = {
+    val startingRefIndex : Int = TextVertex.getIndexForStartingRef(
+      this.getStartingBookName,
+      this.getStartingChapterNumber,
+      Some(this.getStartingVerseNumber))
+
+    val endingRefIndex : Int = TextVertex.getIndexForEndingRef(
+      this.getEndingBookName,
+      this.getEndingChapterNumber,
+      Some(this.getEndingVerseNumber))
+
+    (startingRefIndex, endingRefIndex)
+  }
+
+  /**
      *
      *
      * @return names of all books this range completely contains. E.g., Gen 3-Num 3 would return [Exodus, Leviticus]

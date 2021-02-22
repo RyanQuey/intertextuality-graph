@@ -39,4 +39,6 @@ class Initialize {
   // we like putting it on our CassandraDb class, so the inventoryMapper intance only needs to be built once and then is globally accesible by importing CassandraDb.
   // I'm sure there is a better system, but this will work for now
   InventoryMapperObj.inventoryMapper = inventoryMapper
+
+  CreateGraphSearchIndices.createIndices()
 }

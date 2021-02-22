@@ -5,6 +5,8 @@ import scala.annotation.tailrec
 // import collection.JavaConverters._
 import scala.jdk.CollectionConverters._
 import scala.collection.mutable
+import scala.util.{Try,Success,Failure}
+
 import javax.inject._
 import java.time.Instant;
 import java.util.{UUID};
@@ -142,7 +144,20 @@ case class HopParamsSet (
   def isFullChapters() : Boolean = {false}
 
   def getRefRanges() : List[ReferenceRange] = {
-    parseOsisRanges(referenceOsis).map(ReferenceRange(_))
+    println(s"getting ref ranges")
+    try {
+      parseOsisRanges(referenceOsis).map(ReferenceRange(_))
+
+    } catch {
+      case e: NoSuchElementException => {
+        println(s"failed to parse osis for HopParams with reference: $referenceOsis")
+        throw e
+      }
+      case e: Throwable => {
+        println(s"Unknown error: $e.printStackTrace")
+        throw e
+      }
+    }
   }
 
 } 

@@ -229,6 +229,7 @@ object HopParamsSet {
   /**
    * add step to go out the edge
    * - assumes this is not the final hop params set of the hop params sets
+   * - make sure to do outE() then inV(), not just `out()` or else the path does not return info on the edge, it only returns the vertices, and our frontend wants the edge info
    *
    * @return traversal with step added to filter based on reference queries
    */
@@ -236,7 +237,7 @@ object HopParamsSet {
     // now trying to filter references using ref index numbers
 
     if (hopParamsSet.allusionDirection == "alludes-to") {
-      return initialTraversal.out("alludes_to")
+      return initialTraversal.outE().hasLabel("alludes_to").inV().hasLabel("text")
     } else if (hopParamsSet.allusionDirection == "alluded-to-by") {
       return initialTraversal.inE().hasLabel("alludes_to").outV().hasLabel("text")
     } else {

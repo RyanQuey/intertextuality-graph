@@ -56,7 +56,6 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
   */ 
   def tracePathsFilteredByHop = Action(parse.json) { request =>
 
-    println(s"body: ${request.body}");
     // expecting an array here
     val hopParamSetsJSON : JsArray = (request.body \ "hopParamsSets").get.as[JsArray]
 

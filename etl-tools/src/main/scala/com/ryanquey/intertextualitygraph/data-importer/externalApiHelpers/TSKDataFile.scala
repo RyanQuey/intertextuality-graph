@@ -103,14 +103,18 @@ class TSKDataFile (table : String, filename : String) {
         val atOsisBookName = BookHelpers.bookNumToOsisName(bookNum)
         val splitPassages = List(s"$atOsisBookName.$atChapter.$atVerse").asJava
         
-        // set ref indices (both will be the same)
-        val refIndex = TextVertex.getIndexForRef(
+        val startingRefIndex = TextVertex.getIndexForStartingRef(
           atBook, 
           atChapter, 
           Some(atVerse)
         )
-        alludingText.setStartingRefIndex(refIndex)
-        alludingText.setEndingRefIndex(refIndex)
+        val endingRefIndex = TextVertex.getIndexForEndingRef(
+          atBook, 
+          atChapter, 
+          Some(atVerse)
+        )
+        alludingText.setStartingRefIndex(startingRefIndex)
+        alludingText.setEndingRefIndex(endingRefIndex)
 
 
         alludingText.setSplitPassages(splitPassages)

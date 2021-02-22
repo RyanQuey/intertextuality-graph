@@ -98,7 +98,7 @@ case class TextVertex(
    *
    */ 
   def getStartingRefIndex() : Int = {
-    TextVertex.getIndexForRef(startingBook, startingChapter, startingVerse)
+    TextVertex.getIndexForStartingRef(startingBook, startingChapter, startingVerse)
   }
 
   /**
@@ -107,7 +107,7 @@ case class TextVertex(
    *
    */ 
   def getEndingRefIndex() : Int = {
-    TextVertex.getIndexForRef(endingBook, endingChapter, endingVerse)
+    TextVertex.getIndexForEndingRef(endingBook, endingChapter, endingVerse)
   }
 
   ///////////////////////////////////////////////////////////
@@ -428,13 +428,32 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
    * take a book, chapter, and verse and return unique integer index num
    *
    * - see scrollmapper's system for basically what I'm doing here https://github.com/scrollmapper/bible_databases#verse-id-system
+   * - e.g., Gen 1:1 is 1001001, Exod 4.4 is 2004004
+   *
    *   @ch Int (if nothing, pass in 0)
    *   @verse Int (if no verse, pass in 0)
    */ 
-  def getIndexForRef(book : String, ch : Integer, v : Option[Integer]) : Integer = {
+  def getIndexForStartingRef(book : String, ch : Integer, v : Option[Integer]) : Integer = {
     val bookIndex = BookVertex.getOrderForBook(book) *1000*1000
     val chapterIndex = ch * 1000
-    val verseIndex : Integer = if (v == None) 0 else v.get
+    val verseIndex : Integer = v match {
+      case None => 0
+      case _ => v.get
+    }
+
+    bookIndex + chapterIndex + verseIndex
+  }
+
+  /**
+   * the same as getIndexForStartingRef, except if no verse, set to 999 so that marks it as end of chapter. This makes it easy to do searches for overlapping verses. 
+   */ 
+  def getIndexForEndingRef(book : String, ch : Integer, v : Option[Integer]) : Integer = {
+    val bookIndex = BookVertex.getOrderForBook(book) *1000*1000
+    val chapterIndex = ch * 1000
+    val verseIndex : Integer = v match {
+      case None => 999
+      case _ => v.get
+    }
 
     bookIndex + chapterIndex + verseIndex
   }

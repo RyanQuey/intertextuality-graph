@@ -214,7 +214,7 @@ object TextHelpers {
       val startingVerse = startingRefData(2).toInt
       text.setStartingVerse(startingVerse)
     }
-    val startingRefIndex = TextVertex.getIndexForRef(
+    val startingRefIndex = TextVertex.getIndexForStartingRef(
       startingBookName, 
       startingChapter, 
       if (!hasStartingVerse) None else Some(text.getStartingVerse)
@@ -236,7 +236,7 @@ object TextHelpers {
       val endingVerse = endingRefData(2).toInt
       text.setEndingVerse(endingVerse)
     }
-    val endingRefIndex = TextVertex.getIndexForRef(
+    val endingRefIndex = TextVertex.getIndexForEndingRef(
       endingBookName, 
       endingChapter, 
       if (!hasEndingVerse) None else Some(text.getEndingVerse)

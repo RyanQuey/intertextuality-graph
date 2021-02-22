@@ -162,6 +162,10 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
     allBooksFromFile.find((b) => b.name == bookName).get
   }
 
+  def getOrderForBook (bookName : String) : Int = {
+    getBookByName(bookName).bookOrder.get 
+  }
+
   /*
    * returns book that follows the book provided here, or None if it's the last book
    *

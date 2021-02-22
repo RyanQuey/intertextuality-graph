@@ -208,11 +208,19 @@ object TextHelpers {
     println(s"starting ch is: ${startingRefData(1).toInt}")
     val startingChapter = startingRefData(1).toInt
     text.setStartingChapter(startingChapter)
-    if (startingRefData.length > 2) {
+    val hasStartingVerse = startingRefData.length > 2
+    if (hasStartingVerse) {
       // has a verse (most do for TSK)
       val startingVerse = startingRefData(2).toInt
       text.setStartingVerse(startingVerse)
     }
+    val startingRefIndex = TextVertex.getIndexForRef(
+      startingBookName, 
+      startingChapter, 
+      if (!hasStartingVerse) None else Some(text.getStartingVerse)
+    )
+
+    text.setStartingRefIndex(startingRefIndex)
 
     // parse endingRef
     val endingRefData = endingRef.split("\\.")
@@ -222,11 +230,18 @@ object TextHelpers {
     val endingChapter = endingRefData(1).toInt
     text.setEndingChapter(endingChapter)
     
-    if (endingRefData.length > 2) {
+    val hasEndingVerse = endingRefData.length > 2
+    if (hasEndingVerse) {
       // has a verse (most do for TSK)
       val endingVerse = endingRefData(2).toInt
       text.setEndingVerse(endingVerse)
     }
+    val endingRefIndex = TextVertex.getIndexForRef(
+      endingBookName, 
+      endingChapter, 
+      if (!hasEndingVerse) None else Some(text.getEndingVerse)
+    )
+    text.setEndingRefIndex(endingRefIndex)
     
     // NOTE for TSK data at least, should not have any semicolon at this point, so will just be a single split passage.
     val splitPassages = osisRangeList.split(";").toList.asJava

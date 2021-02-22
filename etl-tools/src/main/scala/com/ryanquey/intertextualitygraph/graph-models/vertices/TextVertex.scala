@@ -57,16 +57,19 @@ case class TextVertex(
   // maybe use @id annotation, looks optional
   id : UUID,  
   startingBook : String,  
-  splitPassages : List[String],  // LIST<TEXT>
   startingChapter : Integer,  
+  startingRefIndex : Integer,  
+  splitPassages : List[String],  // LIST<TEXT>
   endingBook : String,  
   endingChapter : Integer, 
+  endingRefIndex : Integer,
   testament : String,  // TEXT 
   canonical : Boolean,  // BOOLEAN 
   updatedAt : Instant, // TIMESTAMP, 
   createdBy : String,
   updatedBy : String, 
 
+  // if not necessarily in the db, make Option instead
   startingVerse : Option[Integer],  
   endingVerse : Option[Integer],  
   yearWritten : Option[Integer],  // INT 
@@ -87,6 +90,24 @@ case class TextVertex(
       this.startingBook,
       this.id,
       )
+  }
+
+  /**
+   * generates based on refernces
+   * - generally, just get from the field starting_ref_index on the instance. But use this to generate those values!
+   *
+   */ 
+  def getStartingRefIndex() : Int = {
+    TextVertex.getIndexForRef(startingBook, startingChapter, startingVerse)
+  }
+
+  /**
+   * generates based on refernces
+   * - generally, just get from the field ending_ref_index on the instance. But use this to generate those values!
+   *
+   */ 
+  def getEndingRefIndex() : Int = {
+    TextVertex.getIndexForRef(endingBook, endingChapter, endingVerse)
   }
 
   ///////////////////////////////////////////////////////////
@@ -342,8 +363,10 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
       canonical = javabean.getCanonical,
       splitPassages = javabean.getSplitPassages.asScala.toList,
       startingChapter = javabean.getStartingChapter,
+      startingRefIndex = javabean.getStartingRefIndex,
       endingBook = javabean.getEndingBook,
       endingChapter = javabean.getEndingChapter,
+      endingRefIndex = javabean.getEndingRefIndex,
       testament = javabean.getTestament,
 
       endingVerse = Option(javabean.getEndingVerse),
@@ -389,6 +412,7 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
 
   def getFieldsOfType[T: TypeTag: ClassTag] () : List[String] = getFieldsOfTypeForClass[TextVertex, T]
 
+
   /*
    *
    * - needs to maintain order, since we will pass in primary key in order sometimes (C* generally requires knowing the primary key in order). So use a list, not set
@@ -400,6 +424,20 @@ object TextVertex extends GraphReferenceVertexCompanion[TextVertex] {
       )
   }
 
+  /**
+   * take a book, chapter, and verse and return unique integer index num
+   *
+   * - see scrollmapper's system for basically what I'm doing here https://github.com/scrollmapper/bible_databases#verse-id-system
+   *   @ch Int (if nothing, pass in 0)
+   *   @verse Int (if no verse, pass in 0)
+   */ 
+  def getIndexForRef(book : String, ch : Integer, v : Option[Integer]) : Integer = {
+    val bookIndex = BookVertex.getOrderForBook(book) *1000*1000
+    val chapterIndex = ch * 1000
+    val verseIndex : Integer = if (v == None) 0 else v.get
+
+    bookIndex + chapterIndex + verseIndex
+  }
 
   ///////////////////////////////////////////////////////////
   // CRUD

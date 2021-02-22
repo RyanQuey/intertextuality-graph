@@ -18,6 +18,7 @@ import com.ryanquey.intertextualitygraph.models.books.Book
 import com.ryanquey.intertextualitygraph.models.chapters.Chapter
 import com.ryanquey.intertextualitygraph.models.verses.Verse
 import com.ryanquey.intertextualitygraph.models.texts.Text
+import com.ryanquey.intertextualitygraph.graphmodels.TextVertex
 import com.ryanquey.datautils.cassandraHelpers.CassandraDb
 
 // needed so I can call .asScala
@@ -102,6 +103,16 @@ class TSKDataFile (table : String, filename : String) {
         val atOsisBookName = BookHelpers.bookNumToOsisName(bookNum)
         val splitPassages = List(s"$atOsisBookName.$atChapter.$atVerse").asJava
         
+        // set ref indices (both will be the same)
+        val refIndex = TextVertex.getIndexForRef(
+          atBook, 
+          atChapter, 
+          Some(atVerse)
+        )
+        alludingText.setStartingRefIndex(refIndex)
+        alludingText.setEndingRefIndex(refIndex)
+
+
         alludingText.setSplitPassages(splitPassages)
 
         // don't want dupes, so find or create

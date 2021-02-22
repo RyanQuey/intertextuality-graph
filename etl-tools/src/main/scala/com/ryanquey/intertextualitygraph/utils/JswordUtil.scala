@@ -15,6 +15,7 @@ import com.ryanquey.intertextualitygraph.reference.{BookReference, ChapterRefere
 /*
  * Thin wrapper around jsword stuff
  * - we can say that one goal is to keep all jsword imports out of other files...or almost all
+ * - that way, all direct interation with jsword goes here, but other classes can and should import this and use it
  */ 
 object JswordUtil {
   ///////////////////////////////////////////////////////////

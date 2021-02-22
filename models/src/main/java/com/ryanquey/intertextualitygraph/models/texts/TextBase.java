@@ -22,17 +22,37 @@ public class TextBase extends ModelBase {
   private String canonicalText;  // TEXT
   private List<String> splitPassages;  // LIST<TEXT>
   private Integer startingChapter;  
-  private Integer startingVerse;  
-  private String endingBook;  
-  private Integer endingChapter; 
-  private Integer endingVerse;  
-  private String testament;  // TEXT 
+  private Integer startingVerse;
+  private Integer startingRefIndex;
+  private String endingBook;
+  private Integer endingChapter;
+  private Integer endingVerse;
+  private Integer endingRefIndex;
+  private String testament;  // TEXT
   private String greekTranslation;  // TEXT 
   private String englishTranslation;  // TEXT 
   private String comments;  // TEXT
   private String createdBy;
   private String updatedBy; 
-  private Instant updatedAt; // TIMESTAMP, 
+  private Instant updatedAt; // TIMESTAMP,
+
+  public TextBase() {
+  }
+
+  public Integer getStartingRefIndex() {
+    return startingRefIndex;
+  }
+  public void setStartingRefIndex(Integer startingRefIndex) {
+    this.startingRefIndex = startingRefIndex;
+  }
+
+  public Integer getEndingRefIndex() {
+    return endingRefIndex;
+  }
+
+  public void setEndingRefIndex(Integer endingRefIndex) {
+    this.endingRefIndex = endingRefIndex;
+  }
 
   public Integer getYearWritten() {
     return yearWritten;

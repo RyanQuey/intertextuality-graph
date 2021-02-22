@@ -30,11 +30,13 @@ public class Text extends TextBase implements Model {
     schema.put("canonical", "String"); // BOOLEAN 
     schema.put("canonicalText", "String"); // TEXT
     schema.put("startingBook", "String"); // UUID
-    schema.put("startingChapter", "Integer"); // UUID
-    schema.put("startingVerse", "Integer"); // UUID
+    schema.put("startingChapter", "Integer"); // INT
+    schema.put("startingVerse", "Integer"); // INT
+    schema.put("startingRefIndex", "Integer"); // INT
     schema.put("endingBook", "String"); // UUID
     schema.put("endingChapter", "Integer"); // UUID
     schema.put("endingVerse", "Integer"); // UUID
+    schema.put("endingRefIndex", "Integer"); // INT
     schema.put("splitPassages", "List<String>"); // LIST<TEXT>
     schema.put("testament", "String"); // TEXT 
     schema.put("greekTranslation", "String"); // TEXT 

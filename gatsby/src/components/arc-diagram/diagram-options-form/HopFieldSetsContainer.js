@@ -67,16 +67,12 @@ class HopFieldSetsContainer extends React.Component {
     laterKeys.forEach(key => {
       const indexForKey = parseInt(key.slice(-1))
       // set it with new key
-      console.log("== adding", newHopsParams[key], "on key", `hopSet${indexForKey - 1}`)
       newHopsParams[`hopSet${indexForKey - 1}`] = newHopsParams[key]
 
       // delete the key/value on the original location
-      console.log("== cleaning up ", key)
       delete newHopsParams[key] 
     })
 
-    console.log("removing key:", `hopSet${hopSetIndex}`)
-    console.log("now setting", newHopsParams)
 
     const markAsDirty = true
     const overrideOldValues = true
@@ -95,9 +91,6 @@ class HopFieldSetsContainer extends React.Component {
 
     const toSet = {[`hopSet${lastHopIndex + 1}`]: defaultHopSetParams()}
 
-    console.log("adding 1", lastHopKey)
-    console.log("now setting", toSet)
-
     formActions.setParams("HopFieldsSet", "referenceFilter", toSet)
   }
 
@@ -108,8 +101,10 @@ class HopFieldSetsContainer extends React.Component {
     }
 
     const hopFieldSetsKeys = Object.keys(hopsParams)
-    const hopCount = hopFieldSetsKeys.length
-    const canAddHop = hopCount < 4
+    const hopSetCount = hopFieldSetsKeys.length
+    const hopMax = 3
+    // add one, since the first hopset is not a hop really
+    const canAddHop = hopSetCount < hopMax + 1
 
     return (
       <div className="hop-field-sets-container">
@@ -122,7 +117,7 @@ class HopFieldSetsContainer extends React.Component {
                 index={index}
                 key={index}
                 removeHop={this.removeHop}
-                canRemove={hopCount > 2}
+                canRemove={hopSetCount > 2}
               />
             )
 
@@ -135,6 +130,7 @@ class HopFieldSetsContainer extends React.Component {
             small={true}
             rectangle={true}
             type="button"
+            title={canAddHop ? "Add a hop to the diagram" : `Cannot have more than ${hopMax} hops`}
           >
             Add Hop
           </Button>

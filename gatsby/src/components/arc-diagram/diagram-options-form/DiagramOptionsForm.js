@@ -35,7 +35,7 @@ class DiagramOptionsForm extends React.Component {
 
   submit (e) {
     e && e.preventDefault && e.preventDefault() 
-    this.props.refreshData()
+    this.props.refreshChartData()
   }
 
   componentDidMount () {
@@ -44,6 +44,7 @@ class DiagramOptionsForm extends React.Component {
   render () {
     const { startingBook, startingChapter, startingVerse, allusionDirection, dataSet, hopsCount, hopsParams } = this.props
 
+    // TODO check all hops
     const invalidParams = !Helpers.safeDataPath(hopsParams, "hopSet0.reference.valid", false)
 
     return (

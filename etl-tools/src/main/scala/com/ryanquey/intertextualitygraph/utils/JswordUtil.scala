@@ -171,7 +171,6 @@ object JswordUtil {
   def osisToEndingRef (osis : String) : JswordVerse = {
     // parseOsisRange(osis).toVerseArray().last 
     parseOsisRange(osis).getEnd
-
   }
 
   def osisToEndingBookName (osis : String) : String= {

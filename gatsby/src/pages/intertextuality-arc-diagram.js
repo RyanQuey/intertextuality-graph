@@ -41,7 +41,14 @@ import allVerticesData from '../data/intertextuality-all-vertices.json';
 */
 import {getBookData} from '../helpers/book-helpers'
 import {getChapterData} from '../helpers/chapter-helpers'
-import { getTextsRefAlludesTo, getTextsAlludedToByRef, extractNodesAndEdgesFromMixedPaths} from '../helpers/connection-helpers'
+import { 
+  tracePathsFilteredByHop,
+  getTextsRefAlludesTo, 
+  getTextsAlludedToByRef, 
+  extractNodesAndEdgesFromMixedPaths,
+  convertHopSetFormValuesToPostBody, 
+} from '../helpers/connection-helpers'
+
 import {downloadGraphDataAsCSV} from '../helpers/file-io-helpers'
 import {
   startingBookFromOsis,
@@ -84,7 +91,7 @@ class IArcDiagram extends React.Component {
     
     
     this.fetchVerticesAndEdges = this.fetchVerticesAndEdges.bind(this)
-    this.refreshData = this.refreshData.bind(this)
+    this.refreshChartData = this.refreshChartData.bind(this)
     this.downloadAsCSV = this.downloadAsCSV.bind(this)
 
     this.onParseError = this.onParseError.bind(this)
@@ -97,7 +104,7 @@ class IArcDiagram extends React.Component {
   }
 
   componentDidMount () {
-    this.refreshData()
+    this.refreshChartData()
 
   // we have to do this after mounting component, so it runs client side, not server side
     this.setTooltip()
@@ -110,7 +117,7 @@ class IArcDiagram extends React.Component {
 
     if (!_.isEqual(previousProps.hopsParams, this.props.hopsParams)) {
       // don't do it this way anymore, manually trigger instead
-      // this.refreshData()
+      // this.refreshChartData()
     }
 
     // TODO if book or chapter change, refresh book data or chpater data
@@ -147,7 +154,8 @@ class IArcDiagram extends React.Component {
    * @param optionOverrides object to override current state
    * TODO not yet passing in verse
    */
-  refreshData (paramOverrides = {}) {
+  refreshChartData (paramOverrides = {}) {
+    // does several operations based just on the initial params set (hopSet0)
     const {hopSet0} = this.props.hopsParams
 
     // Need at least one!
@@ -222,10 +230,15 @@ class IArcDiagram extends React.Component {
     }
 
     // get edges and vertices one-time
-    this.fetchVerticesAndEdges(queryOptions)
+    this.fetchVerticesAndEdges()
   }
 
-  async fetchVerticesAndEdges (queryOptions) {
+  /**
+   * older method we used, keeping around in case we want to use it again later. 
+   * - only could specify a single reference (either book, book and ch, or book, ch, and verse)
+   * - could only specify a single direction (alludes to or alluded to by)
+   */ 
+  async simpleFetchVerticesAndEdges (queryOptions) {
     // at this point, these are not select dropdown options, these should be real values
     const {book, chapter, verse, hopsCount, dataSet, allusionDirection, 
     } = queryOptions
@@ -258,12 +271,60 @@ class IArcDiagram extends React.Component {
     })
   }
 
+  /**
+   *
+   *
+   *
+   */ 
+  async fetchVerticesAndEdges () {
+    // at this point, these are not select dropdown options, these should be real values
+    const {hopsParams} = this.props
+    // Need at least two!
+    if (!hopsParams.hopSet1) {
+      return 
+    }
+
+
+    //const {book, chapter, verse, hopsCount, dataSet, allusionDirection} = queryOptions
+    // TODO change obj to arr
+    const queryParams = convertHopSetFormValuesToPostBody(hopsParams)
+    console.log("hop set params to send", queryParams)
+    const hopsCount = queryParams.length
+
+    this.setState({loadingEdges: true})
+    
+    const fetchFunc = tracePathsFilteredByHop
+
+    // const [vertices, edges, pathsWithValues] = await Promise.all([
+    const [pathsWithValues] = await Promise.all([
+      // getVerticesForRef(book, chapter, verse, hopsCount),
+      // getPathsForRef(book, chapter, verse, hopsCount),
+      fetchFunc(queryParams),
+    ])
+
+    const [ edges, vertices ] = extractNodesAndEdgesFromMixedPaths(pathsWithValues)
+    alertActions.newAlert({
+      title: "Success:",
+      message: `${pathsWithValues.length} connections found`,
+      level: "SUCCESS",
+      options: {timer: true},
+    })
+
+    console.log("got data for params", `${queryParams}`, " with hopsCount:", hopsCount, "===== edges and vertices", {edges, vertices})
+
+    this.setState({
+      loadingEdges: false,
+      edges, 
+      vertices,
+    })
+  }
+
   selectDataSet (option, details, skipRefresh = false) {
     this.setState({
       dataSet: option,
     })
 
-    !skipRefresh && this.refreshData({dataSet: option.value})
+    !skipRefresh && this.refreshChartData({dataSet: option.value})
   }
  
   /*
@@ -341,10 +402,10 @@ class IArcDiagram extends React.Component {
         <SEO title="Intertextuality Arc Diagram" />
           <div>
             <UploadCSVForm 
-              triggerUpdateDiagram={this.refreshData}
+              triggerUpdateDiagram={this.refreshChartData}
             />
             <AddConnectionForm 
-              triggerUpdateDiagram={this.refreshData}
+              triggerUpdateDiagram={this.refreshChartData}
               onChangeSource={this.triggerChangeSource}
             />
           </div>
@@ -356,7 +417,7 @@ class IArcDiagram extends React.Component {
               changeHopsCount={this.changeHopsCount}
               hopsCount={hopsCount}
               dataSet={dataSet}
-              refreshData={this.refreshData}
+              refreshChartData={this.refreshChartData}
             />
             <Button 
               onClick={this.downloadAsCSV} 

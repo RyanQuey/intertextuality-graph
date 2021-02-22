@@ -8,6 +8,7 @@ const verticesUrlBase = apiUrl + "/texts/sources-for-ref-with-alluding-texts"
 /*
  * receives a object with keys: alludingText, sourceText. Each of those keys is an object with keys
  * corresponding to our db fields, but in camelcase
+ * - older function, might not use at all in the future
  * params: {book, chapter, verse, hopsCount, dataSet}
  */
 export async function getTextsRefAlludesTo (params = {}) { 
@@ -28,6 +29,7 @@ export async function getTextsRefAlludesTo (params = {}) {
 
 /*
 * same api as getTextsRefAlludesTo
+* - older function, might not use at all in the future
 */
 export async function getTextsAlludedToByRef (params = {}) { 
   try {
@@ -44,6 +46,43 @@ export async function getTextsAlludedToByRef (params = {}) {
     throw err
   }
 }
+
+
+/**
+ * this is basically our advanced search
+ */
+export async function tracePathsFilteredByHop (params = {}) { 
+  try {
+    // filter out parts that don't exist
+    const result = await axios.post(`${apiUrl}/texts/trace-paths-filtered-by-hop`, params)
+
+    return result.data
+
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
+}
+
+/**
+ * takes the form param values we have in redux and converts to what we send to our play api
+ */
+export function convertHopSetFormValuesToPostBody (hopSetValues) {
+  const arr = _.values(hopSetValues)
+  const parsedArr = arr.map(hopSet => {
+    return {
+      allusionDirection: hopSet.allusionDirection,
+      dataset: hopSet.dataset || "all",
+      referenceOsis: hopSet.reference.osis,
+    }
+  })
+
+  return {
+    hopParamsSets: parsedArr
+  }
+}
+
+
 
 
 export async function createConnection (connectionData) { 

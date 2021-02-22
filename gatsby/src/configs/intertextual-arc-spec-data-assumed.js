@@ -48,6 +48,7 @@ export default (data) => ({
           ], 
           as: ["sourceId", "sourceSplitPassages", "sourceStartingBookName", "alludingId", "alludingSplitPassages", "alludingStartingBookName", "bealeCategories", "comments", "connectionSignificance", "connectionType", "sourceVersion", "sourceLanguage", "confidenceLevel", "volumeLevel"], 
         },
+        // get book data for source text and set to this edge
         {
 					"type": "lookup",
           "from": "books",
@@ -55,6 +56,7 @@ export default (data) => ({
           "fields": ["sourceStartingBookName"], 
           "as": ["sourceStartingBookData"],
 				},
+        // get book data for alluding text and set to this edge
         {
 					"type": "lookup",
           "from": "books",
@@ -135,10 +137,11 @@ export default (data) => ({
           "fields": ["starting_book"], 
           "as": ["startingBookData"],
 				},
+        // sort by starting ref of text
         {
 					"type": "collect",
 					"sort": {
-						// add another field to sort by something else as well
+						// NOTE can add another field to sort by something else as well
 						"field": ["startingBookData.bookOrder", "starting_chapter", "starting_verse"],
 						"order": ["ascending", "ascending", "ascending"]
 					}

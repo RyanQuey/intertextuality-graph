@@ -135,7 +135,7 @@ class HopFieldsSet extends React.Component {
     return (
         <div className="hop-fields-set">
           <div className="side-bucket">
-            <Icon className="remove-hop-btn" color={canRemove ? "black" : "gray"} name="times-circle" onClick={this.removeHop}/>
+            <Icon className={`remove-hop-btn ${canRemove ? "" : "disabled"}`} name="times-circle" onClick={this.removeHop} title={canRemove ? "Remove this hop" : "There needs to be at least one hop minimum, so cannot remove this"}/>
           </div>
 
           <div className="ref-selects-configs">

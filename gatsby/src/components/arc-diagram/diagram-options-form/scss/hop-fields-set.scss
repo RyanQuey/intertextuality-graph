@@ -5,6 +5,10 @@
   .side-bucket {
     padding: .5rem;
     .remove-hop-btn {
+      color: black;
+      &.disabled {
+        color: gray;
+      }
     }
   }
   .ref-selects-configs {

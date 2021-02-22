@@ -1,0 +1,22 @@
+.hop-fields-set {
+  margin-bottom: .5rem;
+
+  .ref-selects-configs {
+    .ref-selects {
+      display: flex;
+      justify-content: start;
+      input {
+        min-width: 25px;
+      }
+      .book-select {
+        input {
+
+          min-width: 100px;
+        }
+      }
+
+    }
+  }
+  .other-configs {
+  }
+}

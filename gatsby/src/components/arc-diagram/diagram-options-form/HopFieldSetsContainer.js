@@ -35,6 +35,7 @@ class HopFieldSetsContainer extends React.Component {
     }
 
     this.addHop = this.addHop.bind(this)
+    this.removeHop = this.removeHop.bind(this)
 	}
 
   componentDidMount () {
@@ -46,6 +47,40 @@ class HopFieldSetsContainer extends React.Component {
       }
       formActions.setParams("HopFieldsSet", "referenceFilter", toSet)
     }
+  }
+
+  /**
+   *
+   * removes selected hop from list, and then renames everything so back to hopSet1 hopSet2 etc in
+   * order, with no gaps
+   */ 
+  removeHop (hopSetIndex) {
+	  let newHopsParams = _.clone(this.props.hopsParams)
+    // get original keys
+    const hopFieldSetsKeys = Object.keys(this.props.hopsParams)
+
+	  // remove key to delete
+	  newHopsParams = _.omit(newHopsParams, [`hopSet${hopSetIndex}`]);
+
+    // change indexes of any hop sets that are above the chosen index
+    const laterKeys = hopFieldSetsKeys.slice(hopSetIndex + 1)
+    laterKeys.forEach(key => {
+      const indexForKey = parseInt(key.slice(-1))
+      // set it with new key
+      console.log("== adding", newHopsParams[key], "on key", `hopSet${indexForKey - 1}`)
+      newHopsParams[`hopSet${indexForKey - 1}`] = newHopsParams[key]
+
+      // delete the key/value on the original location
+      console.log("== cleaning up ", key)
+      delete newHopsParams[key] 
+    })
+
+    console.log("removing key:", `hopSet${hopSetIndex}`)
+    console.log("now setting", newHopsParams)
+
+    const markAsDirty = true
+    const overrideOldValues = true
+    formActions.setParams("HopFieldsSet", "referenceFilter", newHopsParams, markAsDirty, overrideOldValues)
   }
 
   addHop (e) {
@@ -60,7 +95,7 @@ class HopFieldSetsContainer extends React.Component {
 
     const toSet = {[`hopSet${lastHopIndex + 1}`]: defaultHopSetParams()}
 
-    console.log("adding 1", `hopSet${lastHopKey + 1}`)
+    console.log("adding 1", lastHopKey)
     console.log("now setting", toSet)
 
     formActions.setParams("HopFieldsSet", "referenceFilter", toSet)
@@ -86,6 +121,8 @@ class HopFieldSetsContainer extends React.Component {
               <HopFieldsSet 
                 index={index}
                 key={index}
+                removeHop={this.removeHop}
+                canRemove={hopCount > 2}
               />
             )
 

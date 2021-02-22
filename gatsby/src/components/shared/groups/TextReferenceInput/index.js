@@ -39,18 +39,10 @@ class TextReferenceInput extends React.Component {
   constructor (props) {
     super(props)
 
-    this.state = {
-      // use state for value of form, so we can change it manually if needed
-      inputValue: "",
-    }
     this.changeReference = this.changeReference.bind(this)
-
   }
 
   changeReference (value) {
-    // keep form up to date
-    this.setState({inputValue: value})
-
     let parser
     if (this.props.versification == "Hebrew") {
       // TODO might need to try
@@ -73,14 +65,15 @@ class TextReferenceInput extends React.Component {
       endingChapter: isValid && endingChapterFromOsis(parsed),
       endingVerse: isValid && endingVerseFromOsis(parsed),
       testament: isValid && osisDataToTestament(parsed),
+      inputValue: value,
     }
-    console.log("reference data", referenceData)
-    this.props.onChange(referenceData)
+
+    //console.log("reference data", referenceData)
+    this.props.onChange(referenceData, value)
   }
 
   componentDidMount () {
     const { reference } = this.props
-    console.log("mounting, do we have a ref?", reference)
     // make sure to only do this on Mount
     if (!reference || Object.keys(reference).length == 0) {
       this.changeReference("Gen.1-2")
@@ -89,6 +82,7 @@ class TextReferenceInput extends React.Component {
 
   render () {
     const { label, reference, textVersion, showIframe } = this.props
+    const inputValue = reference.inputValue
 
     // set text version by props, or default based on which testament
     const testament = reference.valid && osisDataToTestament(reference.parsed)
@@ -101,7 +95,7 @@ class TextReferenceInput extends React.Component {
           <div className="text-reference-input-wrapper input-wrapper">
             <Input
               onChange={this.changeReference}
-              value={this.state.inputValue}
+              value={inputValue}
             />
           </div>
           {showIframe && (

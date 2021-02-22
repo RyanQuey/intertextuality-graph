@@ -88,7 +88,7 @@ class AddConnectionForm extends React.Component {
   }
 
   render () {
-    const { sourceText, alludingText, formResult } = this.state
+    const { sourceText, sourceTextValue, alludingText, alludingTextValue, formResult } = this.state
     const invalid = !sourceText.valid || !alludingText.valid
     const message = invalid ? "invalid" : `${alludingText.osis} alludes to ${sourceText.osis}`
 

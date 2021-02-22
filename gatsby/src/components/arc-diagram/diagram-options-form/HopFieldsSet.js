@@ -3,9 +3,10 @@ import React from "react"
 import Form from '../../shared/elements/Form';
 import Button from '../../shared/elements/Button';
 import Select from '../../shared/groups/Select';
+import Icon from '../../shared/elements/Icon'
 import TextReferenceInput from '../../shared/groups/TextReferenceInput';
 
-import classes from './scss/diagram-options-form.scss'
+import './scss/hop-fields-set.scss'
 
 import { connect } from 'react-redux'
 import {
@@ -37,6 +38,7 @@ class HopFieldsSet extends React.Component {
     this.changeAllusionDirection = this.changeAllusionDirection.bind(this)
     this.isLastHopSet = this.isLastHopSet.bind(this)
     this.isFirstHopSet = this.isFirstHopSet.bind(this)
+    this.removeHop = this.removeHop.bind(this)
 	}
 
   componentDidMount () {
@@ -77,7 +79,7 @@ class HopFieldsSet extends React.Component {
 
   }
 
-  changeReference (reference) {
+  changeReference (reference, value) {
     console.log("reference:", reference)
     const {startingBook, startingChapter, startingVerse} = reference
 
@@ -104,10 +106,17 @@ class HopFieldsSet extends React.Component {
     return index == 0
   }
 
+  removeHop (e) {
+    e && e.preventDefault && e.preventDefault() 
+
+    this.props.canRemove && this.props.removeHop(this.props.index)
+  }
+
   render () {
     const { 
       chapterOptions, verseOptions, dataSet, 
       index,
+      canRemove
     } = this.props
 
     const {
@@ -122,8 +131,10 @@ class HopFieldsSet extends React.Component {
       startingVerse,
     } = reference
 
+
     return (
         <div className="hop-fields-set">
+          <Icon color={canRemove ? "black" : "gray"} name="times-circle" onClick={this.removeHop}/>
           <div className="ref-selects-configs">
             <div>
             </div>

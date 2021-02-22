@@ -154,12 +154,25 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
    */
   val allBooksFromFile = convertJavabeanModelInstances(BookHelpers.allBooksFromFile)
 
-  /*
+  /**
    * retrieve book case class instance using standard name
    * - uses the same name that we use as db primary keys
+   *
+   *
    */ 
   def getBookByName (bookName : String) : BookVertex = {
-    allBooksFromFile.find((b) => b.name == bookName).get
+    // this is horrible,...but for now, just adding some quick aliases here since theographic book names don't always line up with OSIS, though most of the time they do
+    // maybe better system is to do all of these kinds of lookups using mostly osis abbreviation, since theographic and osis use those consistently
+    try {
+      val theographicBookName = getTheographicLongName(bookName)
+
+      allBooksFromFile.find((b) => b.name == theographicBookName).get
+    } catch {
+      case e: Exception => {
+        println(s"No book found with name ${bookName}")
+        throw e
+      }
+    }
   }
 
   def getOrderForBook (bookName : String) : Int = {
@@ -236,5 +249,36 @@ object BookVertex extends GraphReferenceVertexCompanion[BookVertex] {
     traversal
   }
 
+
+  /**
+   * very rarely, there is a discrepancy between the book names in theographic and osis. In this case, need a helper to convert them real quick
+   *
+   * - for now, just doing manually
+   * - note that if this receives theographic book name as arg, will still work, will still return as theographic
+   *   TODO better, more dynamic way. Maybe use abbreviations, 
+   */
+  def getTheographicLongName(bookName : String) : String = {
+    if (bookName == "Revelation of John") {
+      return "Revelation"
+    } 
+
+    // otherwise, just return the same name back, because they're identical
+    return bookName
+  }
+  /**
+   * very rarely, there is a discrepancy between the book names in theographic and osis. In this case, need a helper to convert them real quick
+   *
+   * - for now, just doing manually
+   * - note that if this receives osis book name as arg, will still work, will still return as osis 
+   *   TODO better, more dynamic way. Maybe use abbreviations, 
+   */
+  def getOsisLongName(bookName : String) : String = {
+    if (bookName == "Revelation") {
+      return "Revelation of John"
+    } 
+
+    // otherwise, just return the same name back, because they're identical
+    return bookName
+  }
 }
 

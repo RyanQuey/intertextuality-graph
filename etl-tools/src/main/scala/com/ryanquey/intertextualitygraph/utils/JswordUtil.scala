@@ -83,8 +83,15 @@ object JswordUtil {
    * - 
    */ 
   def parseOsisRange (osis : String) : VerseRange = {
-    println(s"about to parse $osis");
-    osisParser.parseOsisRef(defaultV11n, osis)
+    println(s"attempting to parse osis $osis");
+    try {
+      osisParser.parseOsisRef(defaultV11n, osis)
+    } catch {
+      case e: Throwable => {
+        println(s"Failed to parse osis $osis")
+        throw e
+      }
+    }
   }
   /*
    * For parsing a single verse (e.g., Gen.1.1)

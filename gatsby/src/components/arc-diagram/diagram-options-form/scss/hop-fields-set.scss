@@ -1,6 +1,12 @@
 .hop-fields-set {
   margin-bottom: .5rem;
+  display: flex;
 
+  .side-bucket {
+    padding: .5rem;
+    .remove-hop-btn {
+    }
+  }
   .ref-selects-configs {
     .ref-selects {
       display: flex;

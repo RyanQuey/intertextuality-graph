@@ -134,7 +134,10 @@ class HopFieldsSet extends React.Component {
 
     return (
         <div className="hop-fields-set">
-          <Icon color={canRemove ? "black" : "gray"} name="times-circle" onClick={this.removeHop}/>
+          <div className="side-bucket">
+            <Icon className="remove-hop-btn" color={canRemove ? "black" : "gray"} name="times-circle" onClick={this.removeHop}/>
+          </div>
+
           <div className="ref-selects-configs">
             <div>
             </div>

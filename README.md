@@ -75,3 +75,7 @@ git submodule update --init --recursive
     ```
 
     TODO if this happens often enough, create a script for nuking.
+
+# Acknowledgements
+For related works that help to provide ideas and inspiration for this project, see also:
+- https://viz.bible/remaking-influential-cross-reference-visualization/

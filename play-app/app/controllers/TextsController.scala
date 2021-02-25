@@ -48,8 +48,7 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
  // see comment of https://stackoverflow.com/a/25194037/6952495, works if keys line up with case class fields
   implicit val hopParamsSetReads : Reads[HopParamsSet] = Json.reads[HopParamsSet]
 
-
-  /* 
+  /*
    * take an array of json objects, each object representing a "hop". Each hop has its own filters
    * - In reality, the first top is not a hop, but the starting text. But should still be sent in the same format as the hops, since it is the same in what kind of parameters it will have
    * - https://www.playframework.com/documentation/2.8.x/ScalaJsonHttp#Creating-a-new-entity-instance-in-JSON
@@ -71,23 +70,18 @@ class TextsController @Inject()(cc: ControllerComponents) extends AbstractContro
     if (false) {
       Ok("[]")
     } else {
-
-
       // passing in empty Seq for getting ALL fields
       println("~~~getting paths~~~");
       val pathsWithValuesTraversal = TraversalBuilder.findPathsForTraversal(traversal, Seq())
-      println(s"and then....")
       println(s"=== paths Traversal: $pathsWithValuesTraversal ===\n\n");
 
       val pathsWithValuesList = pathsWithValuesTraversal.toList
-
 
       println("writing as json");
       val output = json_mapper.writeValueAsString(pathsWithValuesList)
 
       Ok(output)
     }
-
   }
 
 

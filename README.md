@@ -1,6 +1,6 @@
 # Intertextuality graph
 Intertextuality Graph, a project using DSE Graph db, served over a Play Framework API, to chart biblical and extrabiblical intertextuality. Use case is as an aid in researching and presenting intertextual connections. 
-![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/2-hops.mal-1-1.png)
+![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/diagram.2-hops.mal-1-1.png)
 
 ## Setup Dev Env
 If you need to use a db password or change from localhost DSE instance:
@@ -18,6 +18,40 @@ For the first time this project is being ran on a box (in development)
 ```
 ./scripts/startup/start-every-compose.sh
 ```
+
+## Load seed data
+```
+# load books, chs, and verses (vertices)
+./etl-tools/scripts/import-theographic-data.sh
+
+# wait until complete.
+
+# Then, when import-theographic-data.sh is finished, load some edges
+./etl-tools/scripts/import-tsk-data.sh
+```
+
+## DSE Studio
+DSE Studio is set up to start in a docker container. It will be started when you run the `start-every-compose.sh` script. You can view it at http://localhost:9091.
+
+### Configure Connection to DSE 
+- You will have to change the connection to use host: `dse` instead of `127.0.0.1`, since dse is running over docker, and `dse` is the name given in the the docker-compose.yml file. No credential changes are required by default. 
+![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/dse-studio.instructions.configure-connection.png)
+
+### Add Starter Notebook
+Add some starter notebooks by uploading the tarballs from `intertextuality-graph/notebooks/dse-studio`.
+![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/dse-studio.instructions.import-notebook.png)
+
+Now find the notebook in the notebook index, and you can start playing around with the graph using Gremlin and CQL.
+
+
+![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/dse-studio.results.alludes_to_Ps_40.diagram.color-by-book.png)
+
+![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/dse-studio.results.alludes_to_Ps_50.diagram.color-by-book.zoomed-in.png)
+
+
+# Development
+
+TODO fill this out more
 
 ### ETL Tools
 

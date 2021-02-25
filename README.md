@@ -1,4 +1,6 @@
 # Intertextuality graph
+Intertextuality Graph, a project using DSE Graph db, served over a Play Framework API, to chart biblical and extrabiblical intertextuality. Use case is as an aid in researching and presenting intertextual connections. 
+![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/2-hops.mal-1-1.png)
 
 ## Setup Dev Env
 If you need to use a db password or change from localhost DSE instance:

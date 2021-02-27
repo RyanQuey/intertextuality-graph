@@ -1,6 +1,7 @@
 # Intertextuality graph
 Intertextuality Graph, a project using DSE Graph db, served over a Play Framework API, to chart biblical and extrabiblical intertextuality. Use case is as an aid in researching and presenting intertextual connections. 
-![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/diagram.2-hops.mal-1-1.png)
+![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/dse-studio.results.alludes_to.first-1000-results.png)
+
 
 ## Setup Dev Env
 If you need to use a db password or change from localhost DSE instance:
@@ -48,6 +49,9 @@ Now find the notebook in the notebook index, and you can start playing around wi
 
 ![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/dse-studio.results.alludes_to_Ps_50.diagram.color-by-book.zoomed-in.png)
 
+## View Arc Diagram in Gatsby
+If everything started properly, you should be able to navigate to localhost:8080 and see the arc diagram
+![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/diagram.2-hops.mal-1-1.png)
 
 # Development
 

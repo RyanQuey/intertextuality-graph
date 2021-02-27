@@ -50,14 +50,15 @@ Now find the notebook in the notebook index, and you can start playing around wi
 ![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/dse-studio.results.alludes_to_Ps_50.diagram.color-by-book.zoomed-in.png)
 
 ## View Arc Diagram in Gatsby
-If everything started properly, you should be able to navigate to localhost:8080 and see the arc diagram
+### If everything started properly, you should be able to navigate to localhost:8080 and see the arc diagram
 ![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/diagram.2-hops.mal-1-1.png)
 
-You can go out multiple hops, and add filters for each hop. 
+
+### You can go out multiple hops, and add filters for each hop. 
 ![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/diagram.2-hops.heb_to-Ps_to-Gen_1-2.png)
 
 
-The diagram is also itself interactive. Clicking on an edge or vertex shows properties for that graph element.
+### The diagram is also itself interactive. Clicking on an edge or vertex shows properties for that graph element.
 ![screenshot](https://github.com/RyanQuey/intertextuality-graph/raw/master/screenshots/diagram.1-hop.rev_alludes-to-isa_40-56.with-selected-connection.png)
 
 

@@ -124,6 +124,10 @@ git submodule update --init --recursive
 
     TODO if this happens often enough, create a script for nuking.
 
+# TODOs
+- Consider moving fields to edges in order to improve read query performances for certain access patterns
+- add `sys.exit(0)` to close processes
+
 # Acknowledgements
 For related works that help to provide ideas and inspiration for this project, see also:
 - https://viz.bible/remaking-influential-cross-reference-visualization/

@@ -6,6 +6,11 @@ const stringify = require('csv-stringify/lib/sync')
 const bcv_parser = require("bible-passage-reference-parser/js/en_bcv_parser").bcv_parser;
 const bcv = new bcv_parser;
 
+
+// TODO convert to python eventually...if ever want to edit this or make it more robust. Just make
+// python the convention
+
+
 /* convert ref to list of refs, e.g., ps 1:3-4;2:5 > osis standard refs Ps.1.3-Ps.1.4,Ps.2.5
   * - we'll convert to ; delimited below, when stringifying.
   * - can then easily split by "," then by "-"

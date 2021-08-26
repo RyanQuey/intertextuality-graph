@@ -11,7 +11,11 @@ NOTE: The verses given here follow MT and not LXX. According to NA 28 foreword:
 - Not going to post the raw data itself in Github, for copyright concerns. Instead, just manually ingest this csv separately.
 
 ## Use
+```
+python3 convert_na28_allegati_to_csv.py
+```
 
+That should be it.
 
 ## Steps to copy from the website and convert into CSV:
 1) copy chart into txt files, one per book. Accordance doesn't allow for larger, and this actually might make it simpler to perform basic transformations on each file later

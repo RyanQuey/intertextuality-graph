@@ -9,6 +9,8 @@ const bcv = new bcv_parser;
 
 // TODO convert to python eventually...if ever want to edit this or make it more robust. Just make
 // python the convention
+// NOTE this script is being called as a binary by the scala play api. Just awful. But I'm doing it, so
+// beware
 
 
 /* convert ref to list of refs, e.g., ps 1:3-4;2:5 > osis standard refs Ps.1.3-Ps.1.4,Ps.2.5

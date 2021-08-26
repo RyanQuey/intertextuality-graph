@@ -165,7 +165,7 @@ def main():
 
     # write header for csv
     with open(csv_filename, "w") as csv_file:
-        writer = csv.DictWriter(csv_file, delimiter="|", fieldnames=headers)
+        writer = csv.DictWriter(csv_file, delimiter=",", fieldnames=headers)
         writer.writeheader()
 
 
@@ -209,7 +209,7 @@ class ParseFileForBook():
         takes dict of data and appends to the csv file
         """
         with open(csv_filename, "a") as csv_file:
-            writer = csv.DictWriter(csv_file, delimiter="|", fieldnames=headers)
+            writer = csv.DictWriter(csv_file, delimiter=",", fieldnames=headers)
             dict_for_ref_base = dict(entry_row)
             del dict_for_ref_base["alluding-references"]
 

@@ -25,5 +25,9 @@ object ImportTreasuryOfScriptureKnowledge {
 
       dataFile.parseFile()
     }
+
+    println(s"\n\nFinished.")
+    // currently throws unhandled error TODO
+    // System.exit(0)
   }
 }

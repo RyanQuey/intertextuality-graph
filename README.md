@@ -10,6 +10,8 @@ cp scripts/config/.env.sample  scripts/config/.env
 ```
 
 For the first time this project is being ran on a box (in development)
+  - Note that this builds jars, installs jars to local mvn, and runs db migrations for you. 
+  - This can be done manually if script stops halfway as well, just checkout the bash script and do it manually
 
 ```
 ./scripts/setup.sh
@@ -20,12 +22,17 @@ For the first time this project is being ran on a box (in development)
 ./scripts/startup/start-every-compose.sh
 ```
 
+Then start gatsby and Play app 
+TODO add notes here...for now just go to those directories and follow their instructions
+
 ## Load seed data
 ```
 # load books, chs, and verses (vertices)
+# NOTE should be idempotent, so just run again if it messes up in the middle.
 ./etl-tools/scripts/import-theographic-data.sh
 
-# wait until complete.
+# wait until complete. The next script will need the books, chapters, and verses all loaded in before running.
+# HOWEVER script 
 
 # Then, when import-theographic-data.sh is finished, load some edges
 ./etl-tools/scripts/import-tsk-data.sh

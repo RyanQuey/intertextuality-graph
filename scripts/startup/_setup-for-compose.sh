@@ -42,5 +42,5 @@ if [ -f $FILE ]; then
   echo "File $FILE exists."
 else
   echo "File $FILE does not exist. Let's package our jars."
-  $INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/startup/_package-project.sh
+  $INTERTEXTUALITY_GRAPH_SCRIPTS_DIR/startup/_package-subprojects.sh
 fi 

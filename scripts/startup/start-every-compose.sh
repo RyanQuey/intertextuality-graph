@@ -6,6 +6,7 @@ if [ "$BASH" != "/bin/bash" ]; then
 fi
 
 # NOTE does not start gatsby
+# NOTE does not start play app either?
 
 #########################################
 # instructions: 

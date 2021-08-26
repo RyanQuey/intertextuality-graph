@@ -92,6 +92,14 @@ class UserCSVFile (filePath : String) {
         // ps.95.5-9,lev.1.1
         // ps 1.1
         val alludinOsisRange : String = csvRecord.get("alluding_text") 
+        // TODO might want better error handling...but if don't throw error here, will throw it later
+        if (alludinOsisRange == null) {
+          println(s"ERROR!!! This isn't going to persist, no alluding text osis range passed in")
+        }
+
+
+
+
         // might be empty string...
         val alludingTextId : String = csvRecord.get("alluding_text_id") 
         val alludingText = makeTextInstance(alludingTextId, alludinOsisRange, createdBy)

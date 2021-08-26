@@ -22,7 +22,7 @@ class DropCSV extends Component {
 
   handleError(e, a) {
     console.log(e, a);
-
+    // TODO want better error handling, in cases verses are just slightly off or something. 
   }
 
   onDrop (acceptedFiles, rejectedFiles) {

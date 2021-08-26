@@ -2,8 +2,12 @@ import re
 import os
 import csv
 
+# OLD headers, no longer used:
+# headers = ("source-starting-book", "source-starting-chapter", "source-starting-verse", "source-ending-book", "source-ending-chapter", "source-ending-verse", "alluding-starting-book", "alluding-starting-chapter", "alluding-starting-verse", "alluding-ending-book", "alluding-ending-chapter", "alluding-ending-verse", "confidence-level", "volume-level", "comments")
+
 # following the convention used in the my csv bulk uploader
-headers = ("source-starting-book", "source-starting-chapter", "source-starting-verse", "source-ending-book", "source-ending-chapter", "source-ending-verse", "alluding-starting-book", "alluding-starting-chapter", "alluding-starting-verse", "alluding-ending-book", "alluding-ending-chapter", "alluding-ending-verse", "confidence-level", "volume-level", "comments")
+# NOTE much of this file does way moer processing than it needed to, because I forgot we switched csv formats to use the following headers...
+headers = ("source_text_id", "source_texts", "alluding_text_id", "alluding_text", "confidence_level", "volume_level", "description", "comments", "connection_type", "source_version", "beale_categories")
 
 # http://adfontespress.com/matthewjbarron/books-of-the-bible-abbreviated-in-english-and-german/
 book_name_mapping = {
@@ -115,37 +119,58 @@ def crazy_alluding_refs_str_splitter(txt, seps):
     """
 
     - for splitting crazy alluding refs such as "Mt 22,44; 26,64 Mc 12,36; 14,62; 16,19 L 20,42; 22,69 Act 2,34 R 8,34 1K 15,25 E 1,20 H 1,3.13; 8,1; 10,12" into separate sections.
+        * e.g., result should look like: 
+            ["22,44; 26,64", "12,36; 14,62; 16,19", "20,42; 22,69" "2,34", "8,34", "15,25" "1,20", "1,3.13 8,1 10,12"]
     - Source: https://stackoverflow.com/a/4697047/6952495
     - one difference: always remove the first item, since we will always have a book name first, so the first item will be a blank string
 
     @param seps - list of separators to use
     @param txt  - the text to split
+    @return list
     """
-    default_sep = seps[0]
 
-    # we skip seps[0] because that's the default separator
-    for sep in seps[1:]:
-        txt = txt.replace(sep, default_sep)
 
-    split_items = [i.strip() for i in txt.split(default_sep)]
+    # what we will do is use each book once to split the string. That way, won't get any problems 
+    separated_items = []
+
+    # keep track of what's left to separate out
+    remaining = txt
+
+    # do first one separately since it just throws away first book namej
+    # e.g., "Mt"
+    first_sep = seps[0]
+
+    # e.g,. ["Mt", "22,44; 26,64 Mc 12,36; 14,62; 16,19 L 20,42; 22,69 Act 2,34 R 8,34 1K 15,25 E 1,20 H 1,3.13; 8,1; 10,12"]
+    split_items = remaining.split(first_sep + " ", 1)
+
+    # e.g,. "22,44; 26,64 Mc 12,36; 14,62; 16,19 L 20,42; 22,69 Act 2,34 R 8,34 1K 15,25 E 1,20 H 1,3.13; 8,1; 10,12"
+    remaining = split_items[1].strip()
+
+    # go through each other separator (ie each book string) and use once to pull off one item
+
+    if len(seps) > 1:
+        for sep in seps[1:]:
+            split_items = remaining.split(sep + " ", 1)
+            one_book_refs = split_items[0].strip()
+
+            separated_items.append(one_book_refs)
+
+            remaining = split_items[1].strip()
+
+    # then add the last item
+    # e.g., "1,3.13; 8,1; 10,12"
+    separated_items.append(remaining)
+
     # always remove the first item, since we will always have a book name first, so the first item will be a blank string
 
-    return split_items[1:]
+    return separated_items
 
-def verse_range_to_verse_list(verse_ranges):
+def verse_ranges_to_str(verse_ranges):
     """
-    takes a list of verse ranges (e.g., ["7", "8-9", "11-13"]) and returns list of individual numbers [7,8,9,11,12,13]
-    - "s" in verse numbers should be gone already by this point
+    takes a list of verse ranges (e.g., ["7", "8-9", "11-13"]) and returns single string ("7,8-9,11-13")
     """
-    final = []
-    for vrange in verse_ranges:
-        # https://stackoverflow.com/a/55851158/6952495
-        list_for_this_range = range(*[int(n) for n in vrange.split("-")])
 
-        # add to final list
-        final.extend(list_for_this_range)
-
-    return final
+    return ",".join(verse_ranges)
 
 csv_filename = "ot-use-in-nt.na-28.csv"
 current_dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -230,20 +255,11 @@ class ParseFileForBook():
 
         @return entry_data dict
             {
-                "source-starting-book": ,
-                "source-ending-book": ,
-                "source-starting-chapter": ,
-                "source-ending-chapter" 
-                "source-starting-verse": ,
-                "source-ending-verse" ,
+                "source_texts": "...",
+                "connection_type": "from-generic-list",
                 "alluding-references": [
                     {
-                        "alluding-starting-book": ,
-                        "alluding-ending-book": ,
-                        "alluding-starting-chapter": ,
-                        "alluding-ending-chapter" 
-                        "alluding-starting-verse": ,
-                        "alluding-ending-verse" ,
+                        "alluding_text": ,
                     },
                     ...
                 ]
@@ -254,13 +270,14 @@ class ParseFileForBook():
         print("entry_row", entry_row)
         split_row = entry_row.split("\t: ")
 
-        print("split_row", split_row)
+        #print("split_row", split_row)
         ot_ref = split_row[0]
+
+        # e.g,. "Mt 8,4 Mc 1,44 L 5,14"
         nt_refs_str = split_row[1]
 
         entry_data = {
-            "source-starting-book": self.book,
-            "source-ending-book": self.book,
+            "connection_type": "from-generic-list",
         }
 
         ot_ref_data = self.parse_single_ot_ref(ot_ref)
@@ -269,7 +286,7 @@ class ParseFileForBook():
         alluding_references = self.parse_nt_refs_for_entry(nt_refs_str)
 
         # merge in ot_ref_data and nt references
-        entry_data = {**entry_data, **ot_ref_data}
+        entry_data["source_texts"] = ot_ref_data["source_texts"]
         entry_data["alluding-references"] = alluding_references
 
         return entry_data
@@ -286,12 +303,10 @@ class ParseFileForBook():
         @return list alluding_references - looks like this
             [
                 {
-                    "alluding-starting-book": ,
-                    "alluding-ending-book": ,
-                    "alluding-starting-chapter": ,
-                    "alluding-ending-chapter" 
-                    "alluding-starting-verse": ,
-                    "alluding-ending-verse" ,
+                    "alluding_text": "Gen.1.1-3" ,
+                },
+                {
+                    "alluding_text": "Gen.1.1-9" ,
                 },
                 ...
             ]
@@ -306,9 +321,13 @@ class ParseFileForBook():
         # since this is difficult, I'm cheating. First get all the books
         books_of_nt_refs_by_book = re.findall(r'[0-9]?[A-Z][a-z]*', nt_refs_str)
         # now books_of_nt_refs_by_book is something like ['Mt', 'Mc', 'L', 'Act', 'R', '1K', 'E', 'H']. 
+        # this is list of books found in the nt refs.
+
+
 
         # take that and split all the refs with it
         nt_refs_for_book = crazy_alluding_refs_str_splitter(nt_refs_str, books_of_nt_refs_by_book)
+
         # nt_refs_for_book should be like: 
         #   ['22,44; 26,64', '12,36; 14,62; 16,19', '20,42; 22,69', '2,34', '8,34', '15,25', '1,20', '1,3.13; 8,1; 10,12']
 
@@ -331,13 +350,15 @@ class ParseFileForBook():
 
                 for verse_range in verse_ranges:
                     # iterate over these refs, and append each parsed ref to our main list
+                    # all alluding texts have verses, so this should work without having to check for verse existing like we did for source texts
+                    if self.book == "Isaiah":
+                        print("original book name:", book)
+                        print("nt_refs_for_book", nt_refs_for_book)
+                        print("chapter:", f"{chapter} and verse: {verse_range}")
+                    alluding_text_str = f"{book_name_mapping[book]}.{chapter}.{verse_range}"
+
                     entry = {
-                        "alluding-starting-book": book_name_mapping[book],
-                        "alluding-ending-book": book_name_mapping[book],
-                        "alluding-starting-chapter": chapter,
-                        "alluding-ending-chapter": chapter,
-                        "alluding-starting-verse": verse_range[0],
-                        "alluding-ending-verse": verse_range[-1],
+                        "alluding_text": alluding_text_str
                     }
 
                     # append each entry to final list
@@ -364,6 +385,7 @@ class ParseFileForBook():
         if "c." in ot_ref:
             new_chapter = ot_ref.replace("c.", "")
             # no verses needed
+            verse_ranges_str = None
 
         elif "," in ot_ref:
             parsed = parse_comma_separated_ref(ot_ref)
@@ -371,9 +393,7 @@ class ParseFileForBook():
             verse_ranges = parsed["verse-ranges"]
             # combine into single range for OT ref, since the way that NA 28 appendix is built means that this single OT ref is being referred to by one or more NT refs. This means that the OT refs are assumed to be a single passage. 
             # not assuming verses are still in order, just to be safe
-            all_verses_in_ranges = verse_range_to_verse_list(verse_ranges)
-            ref_data["source-starting-verse"] = min(all_verses_in_ranges)
-            ref_data["source-ending-verse"] = max(all_verses_in_ranges)
+            verse_ranges_str = verse_ranges_to_str(verse_ranges)
         else:
             # left side is just a verse string. Don't set the chapter, but do set the verse
             # in this case, the ot_ref is a verse_entry
@@ -381,9 +401,7 @@ class ParseFileForBook():
 
             # combine into single range for OT ref, since the way that NA 28 appendix is built means that this single OT ref is being referred to by one or more NT refs. This means that the OT refs are assumed to be a single passage. 
             # not assuming verses are still in order, just to be safe
-            all_verses_in_ranges = verse_range_to_verse_list(verse_ranges)
-            ref_data["source-starting-verse"] = min(all_verses_in_ranges)
-            ref_data["source-ending-verse"] = max(all_verses_in_ranges)
+            verse_ranges_str = verse_ranges_to_str(verse_ranges)
 
 
         ref_data["source-starting-chapter"] = new_chapter if new_chapter else self.current_source_chapter
@@ -391,6 +409,14 @@ class ParseFileForBook():
         # only does one chapter at a time
         ref_data["source-ending-chapter"] = ref_data["source-starting-chapter"]
         self.current_source_chapter = ref_data["source-starting-chapter"]
+
+        # finally, give the parsed string that we'll use for the csv
+        ref_data["source_texts"] = f"{self.book}.{ref_data['source-starting-chapter']}" 
+
+        # if there's verses, add the verses
+        if verse_ranges_str:
+            ref_data["source_texts"] = ref_data["source_texts"] + f".{verse_ranges_str}"
+
 
         return ref_data
 

@@ -29,4 +29,6 @@ That should be it.
 - Note that I ignore the "etc" instances, which are two in NA 28 (there were more in NA 27), and they are fairly insignificant, so just ignoring
 - Accordance has typo for Malachi 3:17, should be Eph 1:14 (as NA 27). 
 - same for Exod 26:31, should be Mt 27,51. I reported both errors as of Aug 2021
+- Psalm 145:17 has an extra character: </i>
+- Ezek 1:1 for Matt 3:21 is wrong... Matthew 3 only has 17 verses
 

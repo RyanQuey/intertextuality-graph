@@ -31,7 +31,8 @@ To build and run the project:
 
 ```
 cd ..
-docker-compose up -d
+# docker-compose up -d
+./scripts/run-dev-server.sh
 ```
 - After the message `Server started, ...` displays, enter the following URL in a browser: <http://localhost:9000>
 

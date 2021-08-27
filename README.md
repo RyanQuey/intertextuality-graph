@@ -32,10 +32,21 @@ TODO add notes here...for now just go to those directories and follow their inst
 ./etl-tools/scripts/import-theographic-data.sh
 
 # wait until complete. The next script will need the books, chapters, and verses all loaded in before running.
-# HOWEVER script 
+# HOWEVER script will not stop itself, it should give a "finished." message, but you'll need to Ctrl+c yourself. TODO fix that
 
+##############################
+# Option #1: Treasury of Scripture Knowledge Data
+##############################
 # Then, when import-theographic-data.sh is finished, load some edges
 ./etl-tools/scripts/import-tsk-data.sh
+
+##############################
+# Option #2: NA-28 Allusions and Quotations
+##############################
+# 1) make sure play api is up and running
+# 2) Make the CSV if haven't already (see instructions in https://github.com/RyanQuey/intertextuality-graph/tree/master/etl-tools/raw-data-files/nestle-aland/na-28-loci-citati-vel-allegati
+# 3) Then, send the csv over. 
+curl -XPOST http://localhost:9000/upload-csv
 ```
 
 ## DSE Studio
